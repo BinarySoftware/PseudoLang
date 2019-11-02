@@ -1,2 +1,44 @@
+###########
+## Scala ##
+###########
+
+target/
 *.class
 *.log
+
+############
+## System ##
+############
+
+# OSX
+.DS_Store
+
+############
+## Images ##
+############
+
+*.jpg
+*.jpeg
+*.png
+*.bmp
+*.psd
+
+######################
+## Tooling Specific ##
+######################
+
+.idea/
+*.swp
+.projections.json
+
+
+#######################
+## Benchmark Reports ##
+#######################
+bench-report.xml
+
+#########
+## IDE ##
+#########
+
+.editorconfig
