@@ -1,20 +1,99 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
 
 trigger:
   branches:
     include: [ "*" ]
+  paths:
+      exclude:
+        - .github/*
+        - .gitignore
+        - .scalafmt.conf
+        - README.md
 
-pool:
-  vmImage: 'ubuntu-latest'
+pr: none
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+variables:
+  sbtVersion: 1.3.3    # Please ensure this is in sync with project/build.properties
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+jobs:
+- job: Linux
+  timeoutInMinutes: 90
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+  - script: |
+      curl -fSL -o sbt.tgz https://piccolo.link/sbt-$(sbtVersion).tgz
+      tar -x -z -C ~ -f sbt.tgz
+      echo "##vso[task.setvariable variable=PATH]~/sbt/bin/:$PATH"
+    displayName: "Install sbt"
+  - script: |
+      sbt test
+    displayName: sbt test
+    continueOnError: true
+  # - script: |
+  #     sbt bench
+  #   displayName: sbt bench
+  #   continueOnError: true
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: '**/TEST-*.xml'
+  - script: |
+      echo "##vso[task.complete result=Failed;]DONE"
+    condition: eq(variables['Agent.JobStatus'], 'SucceededWithIssues')
+    displayName: "Fail if there were issues"
+- job: macOS
+  timeoutInMinutes: 90
+  pool:
+    vmImage: macOS-latest
+  steps:
+  - script: |
+      curl -fSL -o sbt.tgz https://piccolo.link/sbt-$(sbtVersion).tgz
+      tar -x -z -C ~ -f sbt.tgz
+      echo "##vso[task.setvariable variable=PATH]~/sbt/bin/:$PATH"
+    displayName: Install sbt
+  - script: |
+      sbt test
+    displayName: sbt test
+    continueOnError: true
+  # - script: |
+  #     sbt bench
+  #   displayName: sbt bench
+  #   continueOnError: true
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: '**/TEST-*.xml'
+  - script: |
+      echo "##vso[task.complete result=Failed;]DONE"
+    condition: eq(variables['Agent.JobStatus'], 'SucceededWithIssues')
+    displayName: "Fail if there were issues"
+- job: Windows
+  timeoutInMinutes: 90
+  pool:
+    vmImage: windows-2019
+  steps:
+  - script: |
+      curl -fSL -o sbt.tgz https://piccolo.link/sbt-$(sbtVersion).tgz
+      tar -x -z -C %USERPROFILE% -f sbt.tgz
+    displayName: "Install sbt"
+  - script: |
+      call refreshenv
+      echo ##vso[task.setvariable variable=PATH]%USERPROFILE%\sbt\bin\;%PATH%
+    displayName: "Adjust environment variables"
+  - script: |
+      sbt.bat test
+    continueOnError: true
+    displayName: "sbt test"
+  # - script: |
+  #     sbt bench
+  #   displayName: sbt bench
+  #   continueOnError: true
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: '**/TEST-*.xml'
+  - script: |
+      echo "##vso[task.complete result=Failed;]DONE"
+    condition: eq(variables['Agent.JobStatus'], 'SucceededWithIssues')
+    displayName: "Fail if there were issues"
