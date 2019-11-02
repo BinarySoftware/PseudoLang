@@ -38,5 +38,11 @@ class ParserTests extends FlatSpec with Matchers {
   //// Testing Environment /////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
 
-  "Funkcja ()" ?= AST(Function("Funkcja",None,None,Unit))
+  "" ?= AST()
+  "Foo" ?= AST(AST.Var("Foo"))
+  "Foo: Int" ?= AST(AST.Var("Foo", "Int"))
+  "//Comment" ?= AST(AST.Comment("Comment"))
+  "Funkcja()" ?= AST(AST.Func(AST.Var("Funkcja")))
+  "Funkcja(a)" ?= AST(AST.Func(AST.Var("Funkcja"),AST.Var("a")))
+  "Funkcja(a, b)" ?= AST(AST.Func(AST.Var("Funkcja"),AST.Var("a"),AST.Var("b")))
 }

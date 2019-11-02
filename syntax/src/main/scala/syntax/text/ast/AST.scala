@@ -18,6 +18,9 @@ final case class AST(elems: List[AST.Elem]) extends Symbol {
 }
 
 object AST {
+  def apply(): AST = new AST(List())
+  def apply(elem: AST.Elem): AST = new AST(List(elem))
+  def apply(elems: AST.Elem*): AST = new AST(elems.toList)
 
   sealed trait Elem extends Symbol
   object Elem {
@@ -75,5 +78,10 @@ object AST {
       val close = ')'
       R + nameRepr + argsRepr + close
     }
+  }
+  object Func {
+    def apply(name: Var): Func = new Func(name, List())
+    def apply(name: Var, arg: AST.Var): Func = new Func(name, List(arg))
+    def apply(name: Var, args: AST.Var*): Func = new Func(name, args.toList)
   }
 }
