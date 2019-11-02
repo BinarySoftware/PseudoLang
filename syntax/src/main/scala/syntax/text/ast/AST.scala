@@ -53,6 +53,7 @@ object AST {
   }
 
   case class Comment(str: String) extends Elem {
-    val repr: Repr.Builder = R + "//" + str
+    val marker: String = "//"
+    val repr: Repr.Builder = R + marker + str
   }
 }

@@ -57,7 +57,7 @@ object Main extends App {
   }
 
   val inp =
-    """Foo
+    """Foo// Bez typu
       |Bar: Int
       |Function()""".stripMargin
 
