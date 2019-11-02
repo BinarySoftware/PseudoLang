@@ -59,7 +59,8 @@ object Main extends App {
   val inp =
     """Foo// Bez typu
       |Bar: Int
-      |Function()""".stripMargin
+      |Function()
+      |Function(a,b)""".stripMargin
 
   /** Invoking the  Parser */
   println("===== PSEUDO PARSER =====")

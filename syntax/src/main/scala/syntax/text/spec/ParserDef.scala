@@ -92,6 +92,38 @@ case class ParserDef() extends Parser[AST] {
   ROOT || Var.varWithTp || reify { Var.onPushing(currentMatch) }
 
   //////////////////////////////////////////////////////////////////////////////
+  //// Functions ///////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  final object Func {
+    def onPushing(in: String): Unit = logger.trace {
+      val args = in.dropRight(1).substring(1)
+      result.pop()
+      result.current match {
+        case Some(v:AST.Var) => push(v, args)
+        case _ =>
+          result.push()
+          Undefined.push(in)
+      }
+    }
+
+    def push(name: AST.Var, args: String): Unit = logger.trace {
+      var argsList: List[AST.Var] = List()
+      if (args.length > 0) {
+        val al = args.split(',').toList
+        for (a <- al) {
+          argsList +:= AST.Var(a)
+        }
+      }
+      result.current = Some(AST.Func(name, argsList.reverse))
+      result.push()
+    }
+
+    val funcArgs = '(' >> not(')').many >> ')'
+  }
+
+  ROOT || Func.funcArgs || reify { Func.onPushing(currentMatch) }
+
+  //////////////////////////////////////////////////////////////////////////////
   //// Comments ////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
 
