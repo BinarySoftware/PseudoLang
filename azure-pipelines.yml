@@ -1,0 +1,44 @@
+# https://aka.ms/yaml
+
+trigger:
+  branches:
+    include: [ "*" ]
+  paths:
+      exclude:
+        - .github/*
+        - .gitignore
+        - .scalafmt.conf
+        - README.md
+
+pr: none
+
+variables:
+  sbtVersion: 1.3.3    # Please ensure this is in sync with project/build.properties
+
+jobs:
+- job: PseudoParser
+  timeoutInMinutes: 90
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+  - script: |
+      curl -fSL -o sbt.tgz https://piccolo.link/sbt-$(sbtVersion).tgz
+      tar -x -z -C ~ -f sbt.tgz
+      echo "##vso[task.setvariable variable=PATH]~/sbt/bin/:$PATH"
+    displayName: "Install sbt"
+  - script: |
+      sbt -no-colors test
+    displayName: sbt test
+    continueOnError: true
+  # - script: |
+  #     sbt -no-colors bench
+  #   displayName: sbt bench
+  #   continueOnError: true
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: '**/TEST-*.xml'
+  - script: |
+      echo "##vso[task.complete result=Failed;]DONE"
+    condition: eq(variables['Agent.JobStatus'], 'SucceededWithIssues')
+    displayName: "Fail if there were issues"
