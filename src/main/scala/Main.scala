@@ -64,9 +64,9 @@ object Main extends App {
 
   /** Invoking the  Parser */
   println("===== PSEUDO PARSER =====")
-  val parsed    = new Parser().runMatched(inp)
-  println(pretty(parser.toString))
+  val parsed    = new Parser().run(inp)
+  println(pretty(parsed.toString))
   println("------")
-  println(parser.show())
+//  println(parsed.show())
   println("=========================")
 }
