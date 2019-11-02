@@ -70,9 +70,15 @@ case class ParserDef() extends Parser[AST] {
       }
 
     def push(in: String): Unit = logger.trace {
+      result.current = Some(AST.Undefined(in))
+      result.push()
     }
   }
 
+  def onEOF(): Unit = {
+    result.ast = Some(AST(result.stack))
+  }
+
   ROOT || normalText || reify { text.onPushing(currentMatch) }
-  ROOT || eof || reify { result.ast = None }
+  ROOT || eof || reify { onEOF() }
 }
