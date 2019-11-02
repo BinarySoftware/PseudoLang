@@ -1,5 +1,6 @@
 package org.enso.syntax.text.ast
 
+import com.sun.xml.internal.bind.v2.model.core.NonElement
 import org.enso.data.ADT
 import org.enso.data.List1
 import org.enso.syntax.text.ast.Repr.R
@@ -27,41 +28,31 @@ object AST {
     }
   }
 
-  case class Undefined(str: String) extends Elem {
+  case class Undefined(str: String) extends Elem.Invalid {
     val repr: Repr.Builder = R + str
   }
   object Undefined {
   }
 
   //////////////////////////////////////////////////////////////////////////////
-  //// Operator ////////////////////////////////////////////////////////////////
-  //////////////////////////////////////////////////////////////////////////////
-  case class Oper(){
-
-  }
-  object Oper {
-
-  }
-
-  //////////////////////////////////////////////////////////////////////////////
   //// Variable ////////////////////////////////////////////////////////////////
-  //////////////////////////////////////////////////////////////////////////////
-  case class Var() {
-
+  ////////////////////////////////////////////w//////////////////////////////////
+  case class Var(name: String, tp: Option[String]) extends Elem {
+    val repr: Repr.Builder = {
+      val nameRepr = R + name
+      val tpRepr = tp match {
+        case Some(v) => R + ": " + tp
+        case None => R
+      }
+      R + nameRepr + tpRepr
+    }
   }
   object Var {
-
+    def apply(name: String, tp: String) = new Var(name, Some(tp))
+    def apply(name: String) = new Var(name, None)
   }
 
-  //////////////////////////////////////////////////////////////////////////////
-  //// Function ////////////////////////////////////////////////////////////////
-  //////////////////////////////////////////////////////////////////////////////
-  case class Func(name: String, args:List[AST], body: Option[AST]) {
-
+  case class Comment(str: String) extends Elem {
+    val repr: Repr.Builder = R + "//" + str
   }
-  object Func {
-
-  }
-
-
 }

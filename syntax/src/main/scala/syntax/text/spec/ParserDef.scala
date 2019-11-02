@@ -50,24 +50,80 @@ case class ParserDef() extends Parser[AST] {
   val lowerChar: Pattern  = range('a', 'z')
   val upperChar: Pattern  = range('A', 'Z')
   val digit: Pattern      = range('0', '9')
-  val whitespace: Pattern = ' '.many1
+
+  val spaces: Pattern = ' '.many
   val newline: Char       = '\n'
 
-  val char: Pattern = lowerChar | upperChar
-  val specialChars
-  : Pattern                = "," | "." | ":" | "/" | "’" | "=" | "'" | "|" | "+" | "-"
-  val possibleChars: Pattern = char | digit | whitespace | specialChars
-
-  val normalText: Pattern = possibleChars.many1
+  val varChars = lowerChar | upperChar | digit
+  val varName = varChars.many
+  val tpAnChar = ':'
 
   //////////////////////////////////////////////////////////////////////////////
-  //// Text ////////////////////////////////////////////////////////////////////
+  //// Variables ///////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
 
-  final object text {
+  final object Var {
     def onPushing(in: String): Unit = logger.trace {
-        push(in)
+      val inNoSpaces = in.replaceAll(" ", "")
+      if (inNoSpaces.contains(':')) {
+        val elem = inNoSpaces.split(':')
+        val varName = elem.head
+        val tp = elem.tail.head
+        pushWithType(varName, tp)
+      } else {
+        push(inNoSpaces)
       }
+    }
+
+    def push(in: String): Unit = logger.trace {
+      result.current = Some(AST.Var(in))
+      result.push()
+    }
+
+    def pushWithType(in: String, tp: String): Unit = logger.trace {
+      result.current = Some(AST.Var(in, tp))
+      result.push()
+    }
+
+    val varWithTp = varName >> spaces >> tpAnChar >> spaces >> varName
+  }
+
+  ROOT || varName || reify { Var.onPushing(currentMatch) }
+  ROOT || Var.varWithTp || reify { Var.onPushing(currentMatch) }
+
+  //////////////////////////////////////////////////////////////////////////////
+  //// Indentation Manager /////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+
+  final object IndentManager {
+    def pushNewLine(): Unit = logger.trace {
+      result.current = Some(AST.Elem.Newline)
+      result.push()
+    }
+  }
+
+  ROOT || newline || reify { IndentManager.pushNewLine() }
+
+  //////////////////////////////////////////////////////////////////////////////
+  //// End Of File /////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+
+  final object EOF {
+    def onEOF(): Unit = {
+      result.ast = Some(AST(result.stack.reverse))
+    }
+  }
+
+  ROOT || eof || reify { EOF.onEOF() }
+
+  //////////////////////////////////////////////////////////////////////////////
+  //// Undefined ///////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+
+  final object Undefined {
+    def onPushing(in: String): Unit = logger.trace {
+      push(in)
+    }
 
     def push(in: String): Unit = logger.trace {
       result.current = Some(AST.Undefined(in))
@@ -75,10 +131,5 @@ case class ParserDef() extends Parser[AST] {
     }
   }
 
-  def onEOF(): Unit = {
-    result.ast = Some(AST(result.stack))
-  }
-
-  ROOT || normalText || reify { text.onPushing(currentMatch) }
-  ROOT || eof || reify { onEOF() }
+  ROOT || any || reify { Undefined.onPushing(currentMatch) }
 }
