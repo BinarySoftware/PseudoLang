@@ -1,7 +1,7 @@
 # PseudoParser
 Pierwszy Parser pseudokodu.
 
-# Użyte biblioteki
+## Użyte biblioteki
 - org.enso.flexer - baza dla parsera
 - org.enso.logger - logging management
 - org.enso.unused 
