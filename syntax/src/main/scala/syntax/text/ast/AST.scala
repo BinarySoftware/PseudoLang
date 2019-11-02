@@ -64,6 +64,16 @@ object AST {
   //// Function ////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
   case class Func(name: Var, args: List[Var]) extends Elem {
-    val repr: Repr.Builder = R + name + '(' + args +  ')'
+    val repr: Repr.Builder = {
+      val nameRepr = R + name + '('
+      val argsRepr = { if (args.length > 0) {
+         R + args.head + args.tail.map(R + ", " + _.repr)
+       } else {
+         R
+       }
+      }
+      val close = ')'
+      R + nameRepr + argsRepr + close
+    }
   }
 }

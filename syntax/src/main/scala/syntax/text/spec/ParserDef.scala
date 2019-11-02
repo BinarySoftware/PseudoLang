@@ -111,7 +111,15 @@ case class ParserDef() extends Parser[AST] {
       if (args.length > 0) {
         val al = args.split(',').toList
         for (a <- al) {
-          argsList +:= AST.Var(a)
+          val aNoSpaces = a.replaceAll(" ", "")
+          if (aNoSpaces.contains(':')) {
+            val elem = aNoSpaces.split(':')
+            val varName = elem.head
+            val tp = elem.tail.head
+            argsList +:= AST.Var(varName, tp)
+          } else {
+            argsList +:= AST.Var(aNoSpaces)
+          }
         }
       }
       result.current = Some(AST.Func(name, argsList.reverse))
