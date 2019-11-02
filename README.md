@@ -1,2 +1,2 @@
 # PseudoParser
-Pseudocode Parser
+Pierwszy Parser pseudokodu.
