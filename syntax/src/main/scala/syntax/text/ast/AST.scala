@@ -1,5 +1,6 @@
 package org.enso.syntax.text.ast
 
+import com.sun.xml.internal.bind.v2.model.core.NonElement
 import org.enso.data.ADT
 import org.enso.data.List1
 import org.enso.syntax.text.ast.Repr.R
@@ -12,12 +13,11 @@ sealed trait Symbol extends Repr.Provider {
 //// AST ///////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-final case class AST(elems: Option[AST]) extends Symbol {
+final case class AST(elems: List[AST.Elem]) extends Symbol {
   val repr: Repr.Builder = R + elems
 }
 
 object AST {
-  def apply(): AST = AST(None)
 
   sealed trait Elem extends Symbol
   object Elem {
@@ -25,6 +25,55 @@ object AST {
 
     case object Newline extends Elem {
       val repr: Repr.Builder = R + "\n"
+    }
+  }
+
+  case class Undefined(str: String) extends Elem.Invalid {
+    val repr: Repr.Builder = R + str
+  }
+  object Undefined {
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+  //// Variable ////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  case class Var(name: String, tp: Option[String]) extends Elem {
+    val repr: Repr.Builder = {
+      val nameRepr = R + name
+      val tpRepr = tp match {
+        case Some(v) => R + ": " + tp
+        case None => R
+      }
+      R + nameRepr + tpRepr
+    }
+  }
+  object Var {
+    def apply(name: String, tp: String) = new Var(name, Some(tp))
+    def apply(name: String) = new Var(name, None)
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+  //// Comment /////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  case class Comment(str: String) extends Elem {
+    val marker: String = "//"
+    val repr: Repr.Builder = R + marker + str
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+  //// Function ////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  case class Func(name: Var, args: List[Var]) extends Elem {
+    val repr: Repr.Builder = {
+      val nameRepr = R + name + '('
+      val argsRepr = { if (args.length > 0) {
+         R + args.head + args.tail.map(R + ", " + _.repr)
+       } else {
+         R
+       }
+      }
+      val close = ')'
+      R + nameRepr + argsRepr + close
     }
   }
 }

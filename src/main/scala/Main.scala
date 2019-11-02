@@ -57,16 +57,16 @@ object Main extends App {
   }
 
   val inp =
-    """Funkcja ()
-      |  x <- 1
-      |  return x
-      |""".stripMargin
+    """Foo// Bez typu
+      |Bar: Int
+      |Function()
+      |Function(a,b)""".stripMargin
 
   /** Invoking the  Parser */
   println("===== PSEUDO PARSER =====")
-  val parsed    = new Parser().run(inp)
+  val parsed    = new Parser().runMatched(inp)
   println(pretty(parsed.toString))
   println("------")
-//  println(parsed.show())
+  println(parsed.show())
   println("=========================")
 }
