@@ -1,3 +1,5 @@
+[![Build Status](https://dev.azure.com/maciejmikolajek/maciejmikolajek/_apis/build/status/BinarySoftware.PseudoParser?branchName=master)](https://dev.azure.com/maciejmikolajek/maciejmikolajek/_build/latest?definitionId=1&branchName=master)
+
 # PseudoParser
 Pierwszy Parser pseudokodu.
 
