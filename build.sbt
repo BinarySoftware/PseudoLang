@@ -165,7 +165,5 @@ lazy val unused = (project in file("lib/unused"))
 lazy val syntax_definition = (project in file("syntax"))
   .dependsOn(logger, flexer)
   .settings(
-    libraryDependencies ++= monocle ++ cats ++ scala_compiler ++ Seq(
-      "com.lihaoyi" %% "scalatags" % "0.7.0"
-    )
+    libraryDependencies ++= monocle ++ cats ++ scala_compiler ++ Seq()
   )

@@ -2,11 +2,8 @@ package org.enso.syntax.text
 
 import org.enso.flexer
 import org.enso.flexer.Reader
-import org.enso.syntax.text.ast.Doc
-import org.enso.syntax.text.spec.DocParserDef
-import scalatags.Text.TypedTag
-import scalatags.Text.{all => HTML}
-import HTML._
+import org.enso.syntax.text.ast.AST
+import org.enso.syntax.text.spec.ParserDef
 import java.io.File
 import java.io.PrintWriter
 import flexer.Parser.{Result => res}
