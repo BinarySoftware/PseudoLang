@@ -1,5 +1,8 @@
 [![Build Status](https://dev.azure.com/maciejmikolajek/maciejmikolajek/_apis/build/status/BinarySoftware.PseudoParser?branchName=master)](https://dev.azure.com/maciejmikolajek/maciejmikolajek/_build/latest?definitionId=1&branchName=master)
 
+<p align="center">
+<img src="https://github.com/BinarySoftware/PseudoLang/blob/wip/mm/ast_3/PseudoLang.png" style="margin: 0 auto;">
+</p>
 <h1 align="center">PseudoLang</h1>
 Kiedy pseudokod przestaje być pseudo, wiesz że będzie ci łatwiej.
 
