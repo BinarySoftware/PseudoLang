@@ -1,9 +1,9 @@
-package org.enso.syntax.text.ast
+package org.BinarySoftware.PseudoLang.syntax.text.ast
 
-import com.sun.xml.internal.bind.v2.model.core.NonElement
 import org.enso.data.ADT
 import org.enso.data.List1
-import org.enso.syntax.text.ast.Repr.R
+import org.enso.syntax.text.ast.Repr
+import org.enso.syntax.text.ast.Repr._
 
 sealed trait Symbol extends Repr.Provider {
   def show() = repr.build()

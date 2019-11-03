@@ -1,13 +1,10 @@
-package org.enso.syntax.text
+package org.BinarySoftware.PseudoLang.syntax.text
 
 import org.enso.flexer
 import org.enso.flexer.Reader
-import org.enso.syntax.text.ast.AST
-import org.enso.syntax.text.spec.ParserDef
 import flexer.Parser.{Result => res}
-import org.enso.data.List1
-import javax.print.attribute.DocAttributeSet
-
+import org.BinarySoftware.PseudoLang.syntax.text.ast.AST
+import org.BinarySoftware.PseudoLang.syntax.text.spec.ParserDef
 ////////////////////////////////////////////////////////////////////////////////
 //// Parser ////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

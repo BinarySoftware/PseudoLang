@@ -1,6 +1,6 @@
-package org.enso.syntax.text
+package org.BinarySoftware.PseudoLang.syntax.text
 
-import org.enso.syntax.text.ast.AST
+import org.BinarySoftware.PseudoLang.syntax.text.ast.AST
 import org.enso.Logger
 import org.enso.flexer.Parser.Result
 import org.scalatest.FlatSpec

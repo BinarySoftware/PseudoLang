@@ -1,4 +1,4 @@
-package org.enso.syntax.text
+package org.BinarySoftware.PseudoLang.syntax.text
 
 import scala.annotation.tailrec
 
