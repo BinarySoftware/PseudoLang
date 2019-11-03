@@ -1,6 +1,6 @@
-package org.enso.syntax.text
+package org.PseudoLang.syntax.text
 
-import org.enso.syntax.text.ast.AST
+import org.PseudoLang.syntax.text.ast.AST
 import org.enso.Logger
 import org.enso.flexer.Parser.Result
 import org.scalatest.FlatSpec
@@ -14,6 +14,7 @@ class ParserTests extends FlatSpec with Matchers {
     val output = Parser.run(input)
     output match {
       case Result(_, Result.Success(value)) =>
+        pprint.pprintln(value)
         assert(value == result)
         assert(value.show() == input)
       case _ =>

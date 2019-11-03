@@ -71,7 +71,7 @@ lazy val Benchmark = config("bench") extend sbt.Test
 
 // Native Image Generation
 lazy val buildNativeImage =
-  taskKey[Unit]("Build native image for the Enso executable")
+  taskKey[Unit]("Build native image for executable")
 
 ////////////////////////
 //// Global Project ////
@@ -84,7 +84,7 @@ lazy val PseudoParser = (project in file("."))
   .configs(Test)
   .configs(Benchmark)
   .settings(
-    mainClass in (Compile, run) := Some("org.enso.syntax.text.Main"),
+    mainClass in (Compile, run) := Some("org.PseudoLang.Main"),
     version := "0.1",
     testFrameworks += new TestFramework("org.scalameter.ScalaMeterFramework"),
     logBuffered := false,

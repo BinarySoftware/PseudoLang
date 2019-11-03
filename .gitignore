@@ -13,16 +13,6 @@ target/
 # OSX
 .DS_Store
 
-############
-## Images ##
-############
-
-*.jpg
-*.jpeg
-*.png
-*.bmp
-*.psd
-
 ######################
 ## Tooling Specific ##
 ######################
@@ -30,7 +20,6 @@ target/
 .idea/
 *.swp
 .projections.json
-
 
 #######################
 ## Benchmark Reports ##

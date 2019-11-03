@@ -1,11 +1,11 @@
-package org.enso.syntax.text.spec
+package org.PseudoLang.syntax.text.spec
 
 import org.enso.flexer._
 import org.enso.flexer.automata.Pattern
 import org.enso.flexer.automata.Pattern._
 import org.enso.data.List1
-import org.enso.syntax.text.ast.AST._
-import org.enso.syntax.text.ast.AST
+import org.PseudoLang.syntax.text.ast.AST._
+import org.PseudoLang.syntax.text.ast.AST
 
 import scala.reflect.runtime.universe.reify
 
