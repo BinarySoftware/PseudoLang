@@ -1,5 +1,6 @@
-package org.PseudoLang.syntax.text
+package org.PseudoLang
 
+import org.PseudoLang.syntax.text.Parser
 import scala.annotation.tailrec
 
 //////////////
