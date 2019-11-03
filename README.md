@@ -1,4 +1,4 @@
-[![Build Status](https://dev.azure.com/maciejmikolajek/maciejmikolajek/_apis/build/status/BinarySoftware.PseudoParser?branchName=master)](https://dev.azure.com/maciejmikolajek/maciejmikolajek/_build/latest?definitionId=1&branchName=master)
+[![Build Status](https://dev.azure.com/maciejmikolajek/maciejmikolajek/_apis/build/status/BinarySoftware.PseudoLang?branchName=master)](https://dev.azure.com/maciejmikolajek/maciejmikolajek/_build/latest?definitionId=2&branchName=master)
 
 <p align="center">
 <img src="https://github.com/BinarySoftware/PseudoLang/blob/master/PseudoLang.png" style="margin: 0 auto;">
