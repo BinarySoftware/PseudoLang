@@ -81,7 +81,7 @@ object AST {
       val nameRepr = R + name + '('
       val argsRepr = {
         if (args.nonEmpty) {
-          R + args.head + args.tail.map(R + ", " + _.repr)
+          R + args.head + args.tail.map(R + ", " + _)
         } else {
           R
         }
@@ -94,5 +94,20 @@ object AST {
     def apply(name: Var):                 Func = new Func(name, List())
     def apply(name: Var, arg: AST.Var):   Func = new Func(name, List(arg))
     def apply(name: Var, args: AST.Var*): Func = new Func(name, args.toList)
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+  //// Block ///////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  case class Block(indent: Int, elems: List[Elem]) extends Elem {
+    val repr: Repr.Builder = R + elems.map(R + _)
+  }
+  object Block {
+    def apply(elem: AST.Elem):   Block = new Block(0, List(elem))
+    def apply(elems: AST.Elem*): Block = new Block(0, elems.toList)
+    def apply(indent: Int, elem: AST.Elem): Block =
+      new Block(indent, List(elem))
+    def apply(indent: Int, elems: AST.Elem*): Block =
+      new Block(indent, elems.toList)
   }
 }
