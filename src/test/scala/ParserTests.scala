@@ -89,4 +89,34 @@ class ParserTests extends FlatSpec with Matchers {
     ),
     AST.Var("Bo")
   )
+
+//  """Foo
+//    |  Bar
+//    |    Ba
+//    |    Be
+//    |Bo""".stripMargin ?= AST(
+//    AST.Var("Foo"),
+//    AST.Elem.Newline,
+//    AST.Block(
+//      2,
+//      AST.Var("Bar"),
+//      AST.Elem.Newline,
+//      AST.Block(4, AST.Var("Ba"), AST.Elem.Newline, AST.Var("Be"))
+//    ),
+//    AST.Var("Bo")
+//  )
+//
+//  """Foo
+//    |  Bar
+//    |    Ba
+//    |    Be""".stripMargin ?= AST(
+//    AST.Var("Foo"),
+//    AST.Elem.Newline,
+//    AST.Block(
+//      2,
+//      AST.Var("Bar"),
+//      AST.Elem.Newline,
+//      AST.Block(4, AST.Var("Ba"), AST.Elem.Newline, AST.Var("Be"))
+//    )
+//  )
 }
