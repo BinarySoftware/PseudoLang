@@ -1,5 +1,3 @@
-[![Build Status](https://dev.azure.com/maciejmikolajek/maciejmikolajek/_apis/build/status/BinarySoftware.PseudoLang?branchName=master)](https://dev.azure.com/maciejmikolajek/maciejmikolajek/_build/latest?definitionId=2&branchName=master)
-
 <p align="center">
 <img src="https://github.com/BinarySoftware/PseudoLang/blob/master/PseudoLang.png" style="margin: 0 auto;">
 </p>
@@ -30,8 +28,12 @@ Natomiast, dzięki użyciu szybkich jak piorun bibliotek które powstały dzięk
 - org.enso.data._ - funkcje ułatwiające pracę z danymi
 
 ### Funkcjonujące elementy AST
-- AST.Var - Zmienne , z deklaracją typów
+- AST.Elem - podstawowy element AST, szkielet najnizszego poziomu do dziedziczenia przez wyzsze elementy
+- AST.Empty - Pusty element AST, nic nie wnosi
+- AST.Var - Zmienne, z deklaracją typów
 - AST.Func - Funkcja, z deklaracją argumentów
 - AST.Comment - Komentarze w linii kodu
 - AST.Elem.Newline - Znacznik początku nowej linii
 - AST.Undefined - Cała reszra
+- AST.Spacing - odstępy między elementami
+- AST.Block - Fragment kodu z wcięciem od linii bazowej
