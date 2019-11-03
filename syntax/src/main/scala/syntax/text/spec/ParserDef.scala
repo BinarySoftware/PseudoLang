@@ -55,7 +55,7 @@ case class ParserDef() extends Parser[AST] {
   val upperChar: Pattern = range('A', 'Z')
   val digit: Pattern     = range('0', '9')
 
-  val spaces: Pattern = ' '.many
+  val spaces: Pattern = ' '.many1
   val newline: Char   = '\n'
 
   val varChars: Pattern = lowerChar | upperChar | digit
@@ -143,7 +143,63 @@ case class ParserDef() extends Parser[AST] {
   //// Indentation Manager /////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
 
-  final object IndentManager {
+  final object Indent {
+    var latest: Int  = 0
+    var current: Int = 0
+
+    def onIndent(): Unit = logger.trace {
+      current = currentMatch.length
+      val diff = current - latest
+      if (diff > 0) {
+        val b = AST.Block(current)
+        result.pushElem(b)
+      } else if (diff < 0) {
+        var elems: List[Elem] = Nil
+        result.pop()
+        while (result.stack.nonEmpty && !result.current
+                 .getOrElse(AST.Empty)
+                 .isInstanceOf[AST.Block]) {
+          result.pop()
+          result.current match {
+            case Some(value) => elems +:= value
+            case None        =>
+          }
+        }
+        elems = elems.tail // get rid of the block itself
+        result.current match {
+          case Some(b: AST.Block) =>
+            val block = AST.Block(b.indent, elems)
+            result.pushElem(block)
+          case _ =>
+            val block = AST.Block(current, elems)
+            result.pushElem(block)
+        }
+      }
+      latest = current
+    }
+
+    def onEmptyLine(): Unit = logger.trace {
+      Indent.onPushingNewLine()
+    }
+
+    def onIndentPattern(): Unit = logger.trace {
+      state.end()
+      if (result.stack.nonEmpty) {
+        Indent.onPushingNewLine()
+      }
+      Indent.onIndent()
+    }
+
+    def onEOFPattern(): Unit = logger.trace {
+      state.end()
+      Indent.onPushingNewLine()
+      EOF.onEOF()
+    }
+
+    val emptyLine: Pattern     = spaces.opt >> newline
+    val indentPattern: Pattern = spaces.opt.many
+    val EOFPattern: Pattern    = indentPattern >> eof
+
     def onPushingSpacing(str: String): Unit = logger.trace {
       val len = str.length
       val sp  = AST.Spacing(len)
@@ -156,8 +212,12 @@ case class ParserDef() extends Parser[AST] {
     }
   }
 
-  ROOT || spaces  || reify { IndentManager.onPushingSpacing(currentMatch) }
-  ROOT || newline || reify { IndentManager.onPushingNewLine()             }
+  val NEWLINE: State = state.define("Newline")
+
+  ROOT    || spaces               || reify { Indent.onPushingSpacing(currentMatch) }
+  ROOT    || newline              || reify { state.begin(NEWLINE)                  }
+  NEWLINE || Indent.EOFPattern    || reify { Indent.onEOFPattern()                 }
+  NEWLINE || Indent.indentPattern || reify { Indent.onIndentPattern()              }
 
   //////////////////////////////////////////////////////////////////////////////
   //// End Of File /////////////////////////////////////////////////////////////

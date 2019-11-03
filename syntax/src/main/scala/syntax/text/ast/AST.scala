@@ -1,7 +1,5 @@
 package org.PseudoLang.syntax.text.ast
 
-import org.enso.data.ADT
-import org.enso.data.List1
 import org.enso.syntax.text.ast.Repr
 import org.enso.syntax.text.ast.Repr._
 
@@ -18,8 +16,8 @@ final case class AST(elems: List[AST.Elem]) extends Symbol {
 }
 
 object AST {
-  def apply():                 AST = new AST(List())
-  def apply(elem: AST.Elem):   AST = new AST(List(elem))
+  def apply():                 AST = new AST(Nil)
+  def apply(elem: AST.Elem):   AST = new AST(elem :: Nil)
   def apply(elems: AST.Elem*): AST = new AST(elems.toList)
 
   sealed trait Elem extends Symbol
@@ -34,7 +32,9 @@ object AST {
   case class Undefined(str: String) extends Elem.Invalid {
     val repr: Repr.Builder = R + str
   }
-  object Undefined {}
+  object Empty extends Elem {
+    val repr: Repr.Builder = R
+  }
 
   //////////////////////////////////////////////////////////////////////////////
   //// Variable ////////////////////////////////////////////////////////////////
@@ -91,8 +91,8 @@ object AST {
     }
   }
   object Func {
-    def apply(name: Var):                 Func = new Func(name, List())
-    def apply(name: Var, arg: AST.Var):   Func = new Func(name, List(arg))
+    def apply(name: Var):                 Func = new Func(name, Nil)
+    def apply(name: Var, arg: AST.Var):   Func = new Func(name, arg :: Nil)
     def apply(name: Var, args: AST.Var*): Func = new Func(name, args.toList)
   }
 
@@ -100,13 +100,18 @@ object AST {
   //// Block ///////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
   case class Block(indent: Int, elems: List[Elem]) extends Elem {
-    val repr: Repr.Builder = R + elems.map(R + _)
+    val repr: Repr.Builder = R + indent + elems.map {
+        case elem @ Elem.Newline => R + elem + indent
+        case elem                => R + elem
+      } + Elem.Newline
   }
   object Block {
-    def apply(elem: AST.Elem):   Block = new Block(0, List(elem))
+    def apply():                 Block = new Block(0, Nil)
+    def apply(elem: AST.Elem):   Block = new Block(0, elem :: Nil)
     def apply(elems: AST.Elem*): Block = new Block(0, elems.toList)
+    def apply(indent: Int):      Block = new Block(indent, Nil)
     def apply(indent: Int, elem: AST.Elem): Block =
-      new Block(indent, List(elem))
+      new Block(indent, elem :: Nil)
     def apply(indent: Int, elems: AST.Elem*): Block =
       new Block(indent, elems.toList)
   }

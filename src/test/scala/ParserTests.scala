@@ -60,4 +60,33 @@ class ParserTests extends FlatSpec with Matchers {
 
   /* Bad function definition */
   "Funkcja ()" ?= AST(AST.Var("Funkcja"), AST.Spacing(), AST.Undefined("()"))
+
+  /* Indent tests */
+  """Foo
+    |  Bar
+    |  Baz
+    |Bo""".stripMargin ?= AST(
+    AST.Var("Foo"),
+    AST.Elem.Newline,
+    AST.Block(2, AST.Var("Bar"), AST.Elem.Newline, AST.Var("Baz")),
+    AST.Var("Bo")
+  )
+// FIXME Error in how block is being made
+//  """Foo
+//    |  Bar
+//    |    Ba
+//    |    Be
+//    |  Baz
+//    |Bo""".stripMargin ?= AST(
+//    AST.Var("Foo"),
+//    AST.Elem.Newline,
+//    AST.Block(
+//      2,
+//      AST.Var("Bar"),
+//      AST.Elem.Newline,
+//      AST.Block(2, AST.Var("Ba"), AST.Elem.Newline, AST.Var("Be")),
+//      AST.Var("Baz")
+//    ),
+//    AST.Var("Bo")
+//  )
 }
