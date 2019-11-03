@@ -1,7 +1,10 @@
 package org.PseudoLang
 
 import org.PseudoLang.syntax.text.Parser
-import org.PseudoLang.PrettyPrinter
+import java.io.File
+import java.io.PrintWriter
+
+import scala.io.Source
 
 //////////////
 //// Main ////
@@ -12,18 +15,32 @@ object Main extends App {
   //// PseudoLang interactive testing environmnet //////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
 
-  val inp =
-    """Foo  // Bez typu
-      |Bar: Int    //foo
-      |Function()
-      |Function(a,b)""".stripMargin
-
-  /** Invoking the  Parser */
   println("===== PSEUDO PARSER =====")
-  val parsed    = new Parser().runMatched(inp)
+  val code   = FileManager.readFileWithPseudo("", "Main")
+  val parsed = new Parser().runMatched(code)
   pprint.pprintln(parsed)
 //  println(PrettyPrinter.pretty(parsed.toString))
   println("------")
   println(parsed.show())
   println("=========================")
+}
+
+object FileManager {
+
+  def readFileWithPseudo(path: String, name: String): String = {
+    val bufferedSource = Source.fromFile(path + name + ".pseudo")
+    val code           = bufferedSource.getLines.mkString("\n")
+    bufferedSource.close
+    code
+  }
+
+  def saveScalaCodeToFile(
+    path: String,
+    name: String,
+    code: String
+  ): Unit = {
+    val writer = new PrintWriter(new File(path + name + ".scala"))
+    writer.write(code.toString)
+    writer.close()
+  }
 }

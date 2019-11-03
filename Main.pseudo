@@ -1,0 +1,13 @@
+Foo  // Bez typu
+Bar: Int    //foo
+Function()
+  Foo <- 2
+  Bar <- Foo*2 //4
+Function(a,b)
+
+Foo
+  Bar
+    Go
+    Go
+  Baz
+Bo
