@@ -15,6 +15,8 @@ object Main extends App {
     """Foo  // Bez typu
       |Bar: Int    //foo
       |Function()
+      |  Foo <- 2
+      |  Bar <- Foo*2 //4
       |Function(a,b)""".stripMargin
 
   /** Invoking the  Parser */
