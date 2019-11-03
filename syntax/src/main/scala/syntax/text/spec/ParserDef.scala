@@ -154,18 +154,7 @@ case class ParserDef() extends Parser[AST] {
         val b = AST.Block(current)
         result.pushElem(b)
       } else if (diff < 0) {
-        var elems: List[Elem] = Nil
-        result.pop()
-        while (result.stack.nonEmpty && !result.current
-                 .getOrElse(AST.Empty)
-                 .isInstanceOf[AST.Block]) {
-          result.pop()
-          result.current match {
-            case Some(value) => elems +:= value
-            case None        =>
-          }
-        }
-        elems = elems.tail // get rid of the block itself
+        val elems: List[Elem] = onFillingBlocks()
         result.current match {
           case Some(b: AST.Block) =>
             val block = AST.Block(b.indent, elems)
@@ -176,6 +165,25 @@ case class ParserDef() extends Parser[AST] {
         }
       }
       latest = current
+    }
+
+    def onFillingBlocks(): List[Elem] = logger.trace {
+      var elems: List[Elem] = Nil
+      result.pop()
+      while (result.stack.nonEmpty) {
+        result.pop()
+        result.current match {
+          case Some(b: AST.Block) =>
+            if (b.elems.isEmpty) {
+              return elems
+            } else {
+              elems +:= b
+            }
+          case Some(value) => elems +:= value
+          case None        =>
+        }
+      }
+      elems
     }
 
     def onEmptyLine(): Unit = logger.trace {

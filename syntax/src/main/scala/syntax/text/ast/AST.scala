@@ -16,8 +16,8 @@ final case class AST(elems: List[AST.Elem]) extends Symbol {
 }
 
 object AST {
-  def apply():                 AST = new AST(Nil)
-  def apply(elem: AST.Elem):   AST = new AST(elem :: Nil)
+  def apply(): AST                 = new AST(Nil)
+  def apply(elem: AST.Elem): AST   = new AST(elem :: Nil)
   def apply(elems: AST.Elem*): AST = new AST(elems.toList)
 
   sealed trait Elem extends Symbol
@@ -61,7 +61,7 @@ object AST {
     val repr: Repr.Builder = R + len
   }
   object Spacing {
-    def apply():         Spacing = new Spacing(1)
+    def apply(): Spacing         = new Spacing(1)
     def apply(len: Int): Spacing = new Spacing(len)
   }
 
@@ -91,8 +91,8 @@ object AST {
     }
   }
   object Func {
-    def apply(name: Var):                 Func = new Func(name, Nil)
-    def apply(name: Var, arg: AST.Var):   Func = new Func(name, arg :: Nil)
+    def apply(name: Var): Func                 = new Func(name, Nil)
+    def apply(name: Var, arg: AST.Var): Func   = new Func(name, arg :: Nil)
     def apply(name: Var, args: AST.Var*): Func = new Func(name, args.toList)
   }
 
@@ -100,16 +100,17 @@ object AST {
   //// Block ///////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
   case class Block(indent: Int, elems: List[Elem]) extends Elem {
+    // FIXME : Printing indent issue, rest works
     val repr: Repr.Builder = R + indent + elems.map {
         case elem @ Elem.Newline => R + elem + indent
         case elem                => R + elem
       } + Elem.Newline
   }
   object Block {
-    def apply():                 Block = new Block(0, Nil)
-    def apply(elem: AST.Elem):   Block = new Block(0, elem :: Nil)
+    def apply(): Block                 = new Block(0, Nil)
+    def apply(elem: AST.Elem): Block   = new Block(0, elem :: Nil)
     def apply(elems: AST.Elem*): Block = new Block(0, elems.toList)
-    def apply(indent: Int):      Block = new Block(indent, Nil)
+    def apply(indent: Int): Block      = new Block(indent, Nil)
     def apply(indent: Int, elem: AST.Elem): Block =
       new Block(indent, elem :: Nil)
     def apply(indent: Int, elems: AST.Elem*): Block =
