@@ -1,7 +1,7 @@
-package org.BinarySoftware.PseudoLang.syntax
+package org.PseudoLang.syntax
 
-import org.BinarySoftware.PseudoLang.syntax.text.Parser
-import org.BinarySoftware.PseudoLang.syntax.text.ast.AST
+import org.PseudoLang.syntax.text.Parser
+import org.PseudoLang.syntax.text.ast.AST
 import org.enso.flexer
 import org.enso.flexer.Reader
 import flexer.Parser.Result

@@ -1,4 +1,4 @@
-package org.BinarySoftware.PseudoLang.syntax.text
+package org.PseudoLang.syntax.text
 
 import scala.annotation.tailrec
 
@@ -7,7 +7,6 @@ import scala.annotation.tailrec
 //////////////
 
 object Main extends App {
-
   def pretty(str: String): String = {
 
     def checkClosing(in: List[Char]): Int = {

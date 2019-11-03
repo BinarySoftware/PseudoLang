@@ -1,10 +1,10 @@
-package org.BinarySoftware.PseudoLang.syntax.text
+package org.PseudoLang.syntax.text
 
 import org.enso.flexer
 import org.enso.flexer.Reader
 import flexer.Parser.{Result => res}
-import org.BinarySoftware.PseudoLang.syntax.text.ast.AST
-import org.BinarySoftware.PseudoLang.syntax.text.spec.ParserDef
+import org.PseudoLang.syntax.text.ast.AST
+import org.PseudoLang.syntax.text.spec.ParserDef
 ////////////////////////////////////////////////////////////////////////////////
 //// Parser ////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

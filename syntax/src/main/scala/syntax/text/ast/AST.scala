@@ -1,4 +1,4 @@
-package org.BinarySoftware.PseudoLang.syntax.text.ast
+package org.PseudoLang.syntax.text.ast
 
 import org.enso.data.ADT
 import org.enso.data.List1
