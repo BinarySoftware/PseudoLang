@@ -1,7 +1,6 @@
 package org.PseudoLang
 
 import org.PseudoLang.syntax.text.Parser
-import org.PseudoLang.PrettyPrinter
 
 //////////////
 //// Main ////
@@ -20,7 +19,7 @@ object Main extends App {
 
   /** Invoking the  Parser */
   println("===== PSEUDO PARSER =====")
-  val parsed    = new Parser().runMatched(inp)
+  val parsed = new Parser().runMatched(inp)
   pprint.pprintln(parsed)
 //  println(PrettyPrinter.pretty(parsed.toString))
   println("------")

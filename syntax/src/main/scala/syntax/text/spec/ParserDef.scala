@@ -3,7 +3,6 @@ package org.PseudoLang.syntax.text.spec
 import org.enso.flexer._
 import org.enso.flexer.automata.Pattern
 import org.enso.flexer.automata.Pattern._
-import org.enso.data.List1
 import org.PseudoLang.syntax.text.ast.AST._
 import org.PseudoLang.syntax.text.ast.AST
 
@@ -21,6 +20,11 @@ case class ParserDef() extends Parser[AST] {
     var current: Option[Elem] = None
     var ast: Option[AST]      = None
     var stack: List[Elem]     = Nil
+
+    def pushElem(elem: Elem): Unit = logger.trace {
+      current = Some(elem)
+      push()
+    }
 
     def push(): Unit = logger.trace {
       if (current.isDefined) {
@@ -47,89 +51,77 @@ case class ParserDef() extends Parser[AST] {
   //// Basic Char Classification ///////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
 
-  val lowerChar: Pattern  = range('a', 'z')
-  val upperChar: Pattern  = range('A', 'Z')
-  val digit: Pattern      = range('0', '9')
+  val lowerChar: Pattern = range('a', 'z')
+  val upperChar: Pattern = range('A', 'Z')
+  val digit: Pattern     = range('0', '9')
 
   val spaces: Pattern = ' '.many
-  val newline: Char       = '\n'
+  val newline: Char   = '\n'
 
-  val varChars = lowerChar | upperChar | digit
-  val varName = varChars.many
-  val tpAnChar = ':'
+  val varChars: Pattern = lowerChar | upperChar | digit
+  val varName: Pattern  = varChars.many
+
+  val tpAnnMarker  = ':'
+  val assignMarker = "<-"
 
   //////////////////////////////////////////////////////////////////////////////
   //// Variables ///////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
 
+  // TODO: Add type annotation support
   final object Var {
     def onPushing(in: String): Unit = logger.trace {
-      val inNoSpaces = in.replaceAll(" ", "")
-      if (inNoSpaces.contains(':')) {
-        val elem = inNoSpaces.split(':')
-        val varName = elem.head
-        val tp = elem.tail.head
-        pushWithType(varName, tp)
-      } else {
-        push(inNoSpaces)
-      }
+      val vr = AST.Var(in)
+      push(vr)
     }
 
-    def push(in: String): Unit = logger.trace {
-      result.current = Some(AST.Var(in))
+    def push(elem: AST.Elem): Unit = logger.trace {
+      result.current = Some(elem)
       result.push()
     }
-
-    def pushWithType(in: String, tp: String): Unit = logger.trace {
-      result.current = Some(AST.Var(in, tp))
-      result.push()
-    }
-
-    val varWithTp = varName >> spaces >> tpAnChar >> spaces >> varName
   }
 
   ROOT || varName || reify { Var.onPushing(currentMatch) }
-  ROOT || Var.varWithTp || reify { Var.onPushing(currentMatch) }
 
   //////////////////////////////////////////////////////////////////////////////
   //// Functions ///////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
   final object Func {
-    def onPushing(in: String): Unit = logger.trace {
+    def onPushingArgs(in: String): Unit = logger.trace {
       val args = in.dropRight(1).substring(1)
       result.pop()
       result.current match {
-        case Some(v:AST.Var) => push(v, args)
+        case Some(v: AST.Var) => onPushingFunc(v, args)
         case _ =>
           result.push()
-          Undefined.push(in)
+          Undefined.onPushing(in)
       }
     }
 
-    def push(name: AST.Var, args: String): Unit = logger.trace {
+    def onPushingFunc(name: AST.Var, args: String): Unit = logger.trace {
       var argsList: List[AST.Var] = List()
       if (args.length > 0) {
         val al = args.split(',').toList
         for (a <- al) {
           val aNoSpaces = a.replaceAll(" ", "")
           if (aNoSpaces.contains(':')) {
-            val elem = aNoSpaces.split(':')
+            val elem    = aNoSpaces.split(':')
             val varName = elem.head
-            val tp = elem.tail.head
+            val tp      = elem.tail.head
             argsList +:= AST.Var(varName, tp)
           } else {
             argsList +:= AST.Var(aNoSpaces)
           }
         }
       }
-      result.current = Some(AST.Func(name, argsList.reverse))
-      result.push()
+      val fun = AST.Func(name, argsList.reverse)
+      result.pushElem(fun)
     }
 
-    val funcArgs = '(' >> not(')').many >> ')'
+    val funcArgs: Pattern = '(' >> not(')').many >> ')'
   }
 
-  ROOT || Func.funcArgs || reify { Func.onPushing(currentMatch) }
+  ROOT || Func.funcArgs || reify { Func.onPushingArgs(currentMatch) }
 
   //////////////////////////////////////////////////////////////////////////////
   //// Comments ////////////////////////////////////////////////////////////////
@@ -137,12 +129,8 @@ case class ParserDef() extends Parser[AST] {
 
   final object Comment {
     def onPushing(in: String): Unit = logger.trace {
-      push(in.substring(2))
-    }
-
-    def push(in: String): Unit = logger.trace {
-      result.current = Some(AST.Comment(in))
-      result.push()
+      val com = AST.Comment(in.substring(2))
+      result.pushElem(com)
     }
 
     val pattern: Pattern = "//" >> not(newline).many
@@ -156,13 +144,20 @@ case class ParserDef() extends Parser[AST] {
   //////////////////////////////////////////////////////////////////////////////
 
   final object IndentManager {
-    def pushNewLine(): Unit = logger.trace {
-      result.current = Some(AST.Elem.Newline)
-      result.push()
+    def onPushingSpacing(str: String): Unit = logger.trace {
+      val len = str.length
+      val sp  = AST.Spacing(len)
+      result.pushElem(sp)
+    }
+
+    def onPushingNewLine(): Unit = logger.trace {
+      val nl = AST.Elem.Newline
+      result.pushElem(nl)
     }
   }
 
-  ROOT || newline || reify { IndentManager.pushNewLine() }
+  ROOT || spaces  || reify { IndentManager.onPushingSpacing(currentMatch) }
+  ROOT || newline || reify { IndentManager.onPushingNewLine()             }
 
   //////////////////////////////////////////////////////////////////////////////
   //// End Of File /////////////////////////////////////////////////////////////
@@ -182,12 +177,8 @@ case class ParserDef() extends Parser[AST] {
 
   final object Undefined {
     def onPushing(in: String): Unit = logger.trace {
-      push(in)
-    }
-
-    def push(in: String): Unit = logger.trace {
-      result.current = Some(AST.Undefined(in))
-      result.push()
+      val und = AST.Undefined(in)
+      result.pushElem(und)
     }
   }
 

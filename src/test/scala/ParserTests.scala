@@ -40,10 +40,24 @@ class ParserTests extends FlatSpec with Matchers {
   //////////////////////////////////////////////////////////////////////////////
 
   "" ?= AST()
-  "Foo" ?= AST(AST.Var("Foo"))
-  "Foo: Int" ?= AST(AST.Var("Foo", "Int"))
-  "//Comment" ?= AST(AST.Comment("Comment"))
-  "Funkcja()" ?= AST(AST.Func(AST.Var("Funkcja")))
-  "Funkcja(a)" ?= AST(AST.Func(AST.Var("Funkcja"),AST.Var("a")))
-  "Funkcja(a, b)" ?= AST(AST.Func(AST.Var("Funkcja"),AST.Var("a"),AST.Var("b")))
+
+  /* Variables */
+  "Foo"   ?= AST(AST.Var("Foo"))
+  "Foo  " ?= AST(AST.Var("Foo"), AST.Spacing(2))
+  // FIXME - Type Annotation : "Foo: Int" ?= AST(AST.Var("Foo", "Int"))
+
+  /* Comments */
+  "//Com"      ?= AST(AST.Comment("Com"))
+  "Foo//Com"   ?= AST(AST.Var("Foo"), AST.Comment("Com"))
+  "Foo  //Com" ?= AST(AST.Var("Foo"), AST.Spacing(2), AST.Comment("Com"))
+
+  /* Functions */
+  "Funkcja()"  ?= AST(AST.Func(AST.Var("Funkcja")))
+  "Funkcja(a)" ?= AST(AST.Func(AST.Var("Funkcja"), AST.Var("a")))
+  "Funkcja(a, b)" ?= AST(
+    AST.Func(AST.Var("Funkcja"), AST.Var("a"), AST.Var("b"))
+  )
+
+  /* Bad function definition */
+  "Funkcja ()" ?= AST(AST.Var("Funkcja"), AST.Spacing(), AST.Undefined("()"))
 }
