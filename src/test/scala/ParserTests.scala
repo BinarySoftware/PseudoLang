@@ -14,6 +14,7 @@ class ParserTests extends FlatSpec with Matchers {
     val output = Parser.run(input)
     output match {
       case Result(_, Result.Success(value)) =>
+        pprint.pprintln(value)
         assert(value == result)
         assert(value.show() == input)
       case _ =>
