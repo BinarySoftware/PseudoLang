@@ -9,12 +9,12 @@ import org.PseudoLang.PrettyPrinter
 
 object Main extends App {
   //////////////////////////////////////////////////////////////////////////////
-  //// PseudoLang interactive testing environmnet///////////////////////////////
+  //// PseudoLang interactive testing environmnet //////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
 
   val inp =
-    """Foo// Bez typu
-      |Bar: Int
+    """Foo  // Bez typu
+      |Bar: Int    //foo
       |Function()
       |Function(a,b)""".stripMargin
 

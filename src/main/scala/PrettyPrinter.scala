@@ -2,6 +2,11 @@ package org.PseudoLang
 
 import scala.annotation.tailrec
 
+/**
+ * PrettyPrinter
+ *
+ * A blazing-fast tail-recursive AST printer
+ */
 object PrettyPrinter {
   def pretty(str: String): String = {
 
