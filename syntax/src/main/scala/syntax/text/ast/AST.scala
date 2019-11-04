@@ -23,10 +23,10 @@ object AST {
   sealed trait Elem extends Symbol
   object Elem {
     sealed trait Invalid extends Elem
+  }
 
-    case object Newline extends Elem {
-      val repr: Repr.Builder = R + "\n"
-    }
+  case class Newline() extends Elem {
+    val repr: Repr.Builder = R + "\n"
   }
 
   case class Undefined(str: String) extends Elem.Invalid {
@@ -43,7 +43,7 @@ object AST {
     val repr: Repr.Builder = {
       val nameRepr = R + name
       val tpRepr = tp match {
-        case Some(v) => R + ": " + tp
+        case Some(v) => R + ": " + v
         case None    => R
       }
       R + nameRepr + tpRepr
@@ -100,11 +100,11 @@ object AST {
   //// Block ///////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
   case class Block(indent: Int, elems: List[Elem]) extends Elem {
-    // FIXME : Printing indent issue, rest works
-    val repr: Repr.Builder = R + indent + elems.map {
-        case elem @ Elem.Newline => R + elem + indent
-        case elem                => R + elem
-      } + Elem.Newline
+    val repr: Repr.Builder = R + Newline() + indent + elems.map {
+        case elem: Newline => R + elem + indent
+        case b: AST.Block  => R + b.repr + indent
+        case elem          => R + elem
+      } + Newline()
   }
   object Block {
     def apply(): Block                 = new Block(0, Nil)

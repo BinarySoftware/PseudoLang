@@ -151,6 +151,7 @@ case class ParserDef() extends Parser[AST] {
       current = currentMatch.length
       val diff = current - latest
       if (diff > 0) {
+        result.pop()
         val b = AST.Block(current)
         result.pushElem(b)
       } else if (diff < 0) {
@@ -215,7 +216,7 @@ case class ParserDef() extends Parser[AST] {
     }
 
     def onPushingNewLine(): Unit = logger.trace {
-      val nl = AST.Elem.Newline
+      val nl = AST.Newline()
       result.pushElem(nl)
     }
   }

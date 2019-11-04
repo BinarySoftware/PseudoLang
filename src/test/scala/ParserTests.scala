@@ -1,5 +1,6 @@
 package org.PseudoLang.syntax.text
 
+import org.PseudoLang.PrettyPrinter
 import org.PseudoLang.syntax.text.ast.AST
 import org.enso.Logger
 import org.enso.flexer.Parser.Result
@@ -14,18 +15,18 @@ class ParserTests extends FlatSpec with Matchers {
     val output = Parser.run(input)
     output match {
       case Result(_, Result.Success(value)) =>
-        pprint.pprintln(value)
+        println(PrettyPrinter.pretty(value.toString))
         assert(value == result)
-//        assert(value.show() == input)
+        assert(value.show() == input)
       case _ =>
-        fail(s"Parsing documentation failed, consumed ${output.offset} chars")
+        fail(s"Parsing failed, consumed ${output.offset} chars")
     }
   }
 
   implicit class TestString(input: String) {
     def parse(str: String): String = {
       val escape = (str: String) => str.replace("\n", "\\n")
-      s"parse `${escape(str)}`"
+      s"parse code: `${escape(str)}`"
     }
 
     private val testBase = it should parse(input)
@@ -67,8 +68,7 @@ class ParserTests extends FlatSpec with Matchers {
     |  Baz
     |Bo""".stripMargin ?= AST(
     AST.Var("Foo"),
-    AST.Elem.Newline,
-    AST.Block(2, AST.Var("Bar"), AST.Elem.Newline, AST.Var("Baz")),
+    AST.Block(2, AST.Var("Bar"), AST.Newline(), AST.Var("Baz")),
     AST.Var("Bo")
   )
 
@@ -79,12 +79,10 @@ class ParserTests extends FlatSpec with Matchers {
     |  Baz
     |Bo""".stripMargin ?= AST(
     AST.Var("Foo"),
-    AST.Elem.Newline,
     AST.Block(
       2,
       AST.Var("Bar"),
-      AST.Elem.Newline,
-      AST.Block(4, AST.Var("Ba"), AST.Elem.Newline, AST.Var("Be")),
+      AST.Block(4, AST.Var("Ba"), AST.Newline(), AST.Var("Be")),
       AST.Var("Baz")
     ),
     AST.Var("Bo")
@@ -96,12 +94,12 @@ class ParserTests extends FlatSpec with Matchers {
 //    |    Be
 //    |Bo""".stripMargin ?= AST(
 //    AST.Var("Foo"),
-//    AST.Elem.Newline,
+//    AST.Newline(),
 //    AST.Block(
 //      2,
 //      AST.Var("Bar"),
-//      AST.Elem.Newline,
-//      AST.Block(4, AST.Var("Ba"), AST.Elem.Newline, AST.Var("Be"))
+//      AST.Newline(),
+//      AST.Block(4, AST.Var("Ba"), AST.Newline(), AST.Var("Be"))
 //    ),
 //    AST.Var("Bo")
 //  )
@@ -111,12 +109,12 @@ class ParserTests extends FlatSpec with Matchers {
 //    |    Ba
 //    |    Be""".stripMargin ?= AST(
 //    AST.Var("Foo"),
-//    AST.Elem.Newline,
+//    AST.Newline(),
 //    AST.Block(
 //      2,
 //      AST.Var("Bar"),
-//      AST.Elem.Newline,
-//      AST.Block(4, AST.Var("Ba"), AST.Elem.Newline, AST.Var("Be"))
+//      AST.Newline(),
+//      AST.Block(4, AST.Var("Ba"), AST.Newline(), AST.Var("Be"))
 //    )
 //  )
 }
