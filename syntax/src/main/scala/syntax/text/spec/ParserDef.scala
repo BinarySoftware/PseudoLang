@@ -3,6 +3,7 @@ package org.PseudoLang.syntax.text.spec
 import org.enso.flexer._
 import org.enso.flexer.automata.Pattern
 import org.enso.flexer.automata.Pattern._
+import org.PseudoLang.syntax.text.ast.AST.Opr
 import org.PseudoLang.syntax.text.ast.AST._
 import org.PseudoLang.syntax.text.ast.AST
 
@@ -61,8 +62,49 @@ case class ParserDef() extends Parser[AST] {
   val varChars: Pattern = lowerChar | upperChar | digit
   val varName: Pattern  = varChars.many
 
-  val tpAnnMarker  = ':'
-  val assignMarker = "<-"
+  //////////////////////////////////////////////////////////////////////////////
+  //// Operators ///////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  final object Opr {
+    def onPushing(opr: AST.Opr.Marker): Unit = logger.trace {
+      var op = AST.Opr(opr)
+      result.pop()
+      result.current match {
+        case Some(v) =>
+          v match {
+            case e: Var => op = AST.Opr(opr, e)
+            case _: Spacing =>
+              result.stack.head match {
+                case e: Var =>
+                  result.pop()
+                  op = AST.Opr(opr, e)
+                case e: Func =>
+                  result.pop()
+                  op = AST.Opr(opr, e)
+                case _ => result.push()
+              }
+            case e: Func => op = AST.Opr(opr, e)
+            case _       => result.push()
+          }
+        case None =>
+      }
+      result.pushElem(op)
+    }
+  }
+
+  ROOT || AST.Opr.Add.m      || reify { Opr.onPushing(AST.Opr.Add)      }
+  ROOT || AST.Opr.Sub.m      || reify { Opr.onPushing(AST.Opr.Sub)      }
+  ROOT || AST.Opr.Mul.m      || reify { Opr.onPushing(AST.Opr.Mul)      }
+  ROOT || AST.Opr.Div.m      || reify { Opr.onPushing(AST.Opr.Div)      }
+  ROOT || AST.Opr.Mod.m      || reify { Opr.onPushing(AST.Opr.Mod)      }
+  ROOT || AST.Opr.Pow.m      || reify { Opr.onPushing(AST.Opr.Pow)      }
+  ROOT || AST.Opr.Assign.m   || reify { Opr.onPushing(AST.Opr.Assign)   }
+  ROOT || AST.Opr.TpAnn.m    || reify { Opr.onPushing(AST.Opr.TpAnn)    }
+  ROOT || AST.Opr.isEq.m     || reify { Opr.onPushing(AST.Opr.isEq)     }
+  ROOT || AST.Opr.isGr.m     || reify { Opr.onPushing(AST.Opr.isGr)     }
+  ROOT || AST.Opr.isLe.m     || reify { Opr.onPushing(AST.Opr.isLe)     }
+  ROOT || AST.Opr.isGrOrEq.m || reify { Opr.onPushing(AST.Opr.isGrOrEq) }
+  ROOT || AST.Opr.isLeOrEq.m || reify { Opr.onPushing(AST.Opr.isLeOrEq) }
 
   //////////////////////////////////////////////////////////////////////////////
   //// Variables ///////////////////////////////////////////////////////////////
@@ -72,12 +114,7 @@ case class ParserDef() extends Parser[AST] {
   final object Var {
     def onPushing(in: String): Unit = logger.trace {
       val vr = AST.Var(in)
-      push(vr)
-    }
-
-    def push(elem: AST.Elem): Unit = logger.trace {
-      result.current = Some(elem)
-      result.push()
+      result.pushElem(vr)
     }
   }
 

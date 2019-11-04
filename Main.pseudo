@@ -11,3 +11,5 @@ Foo
     Go
   Baz
 Bo
+
+Foo <- Bar + Baz mod Bo

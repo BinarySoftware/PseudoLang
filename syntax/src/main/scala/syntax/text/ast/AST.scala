@@ -32,7 +32,7 @@ object AST {
   case class Undefined(str: String) extends Elem.Invalid {
     val repr: Repr.Builder = R + str
   }
-  object Empty extends Elem {
+  case class Empty() extends Elem {
     val repr: Repr.Builder = R
   }
 
@@ -52,6 +52,38 @@ object AST {
   object Var {
     def apply(name: String, tp: String) = new Var(name, Some(tp))
     def apply(name: String)             = new Var(name, None)
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+  //// Operator ////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  case class Opr(marker: Opr.Marker, Le: Elem, Re: Elem) extends Elem {
+    val repr: Repr.Builder = R + Le + " " + marker + " " + Re
+  }
+  object Opr {
+    def apply(m: Opr.Marker)                          = new Opr(m, Empty(), Empty())
+    def apply(m: Opr.Marker, e: Elem)                 = new Opr(m, e, Empty())
+    def apply(m: Opr.Marker, Le: Elem, Re: Elem): Opr = new Opr(m, Le, Re)
+
+    abstract class Marker(val m: String) extends Elem {
+      val repr: Repr.Builder = R + m
+    }
+
+    /* Arithmetic operators */
+    case object Add extends Marker("+")
+    case object Sub extends Marker("-")
+    case object Mul extends Marker("*")
+    case object Div extends Marker("/")
+    case object Mod extends Marker("mod")
+    case object Pow extends Marker("^")
+
+    case object Assign   extends Marker("<-")
+    case object TpAnn    extends Marker(":")
+    case object isEq     extends Marker("=")
+    case object isGr     extends Marker(">")
+    case object isLe     extends Marker("<")
+    case object isGrOrEq extends Marker(">=")
+    case object isLeOrEq extends Marker("<=")
   }
 
   //////////////////////////////////////////////////////////////////////////////
