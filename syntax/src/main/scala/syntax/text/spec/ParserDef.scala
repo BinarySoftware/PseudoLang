@@ -10,6 +10,20 @@ import scala.reflect.runtime.universe.reify
 
 case class ParserDef() extends Parser[AST] {
 
+  // FIXME
+  //  - Get rid of AST.Spacing - bad idea
+  //  - Tailrec method for adding R to operator, nesting operators etc
+  //  - Push block on EOF, on large indent diff, close many blocks at once
+
+  // TODO
+  //  - Add Scala code generator
+  //  - Add conditional functions
+  //  - Add Array Support with []
+  //  - Add AST.Args with ()
+  //  - Add Return
+  //  - Add While, for and do while loops
+  //  - Add AST.Function.Call to call func
+
   //////////////////////////////////////////////////////////////////////////////
   //// Result //////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
@@ -61,23 +75,58 @@ case class ParserDef() extends Parser[AST] {
   val varChars: Pattern = lowerChar | upperChar | digit
   val varName: Pattern  = varChars.many
 
-  val tpAnnMarker  = ':'
-  val assignMarker = "<-"
+  //////////////////////////////////////////////////////////////////////////////
+  //// Operators ///////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  final object Opr {
+    def onPushing(opr: AST.Opr.Marker): Unit = logger.trace {
+      var op = AST.Opr(opr)
+      result.pop()
+      result.current match {
+        case Some(v) =>
+          v match {
+            case e: Var => op = AST.Opr(opr, e)
+            case _: Spacing =>
+              result.stack.head match {
+                case e: Var =>
+                  result.pop()
+                  op = AST.Opr(opr, e)
+                case e: Func =>
+                  result.pop()
+                  op = AST.Opr(opr, e)
+                case _ => result.push()
+              }
+            case e: Func => op = AST.Opr(opr, e)
+            case _       => result.push()
+          }
+        case None =>
+      }
+      result.pushElem(op)
+    }
+  }
+
+  ROOT || AST.Opr.Add.m      || reify { Opr.onPushing(AST.Opr.Add)      }
+  ROOT || AST.Opr.Sub.m      || reify { Opr.onPushing(AST.Opr.Sub)      }
+  ROOT || AST.Opr.Mul.m      || reify { Opr.onPushing(AST.Opr.Mul)      }
+  ROOT || AST.Opr.Div.m      || reify { Opr.onPushing(AST.Opr.Div)      }
+  ROOT || AST.Opr.Mod.m      || reify { Opr.onPushing(AST.Opr.Mod)      }
+  ROOT || AST.Opr.Pow.m      || reify { Opr.onPushing(AST.Opr.Pow)      }
+  ROOT || AST.Opr.Assign.m   || reify { Opr.onPushing(AST.Opr.Assign)   }
+  ROOT || AST.Opr.TpAnn.m    || reify { Opr.onPushing(AST.Opr.TpAnn)    }
+  ROOT || AST.Opr.isEq.m     || reify { Opr.onPushing(AST.Opr.isEq)     }
+  ROOT || AST.Opr.isGr.m     || reify { Opr.onPushing(AST.Opr.isGr)     }
+  ROOT || AST.Opr.isLe.m     || reify { Opr.onPushing(AST.Opr.isLe)     }
+  ROOT || AST.Opr.isGrOrEq.m || reify { Opr.onPushing(AST.Opr.isGrOrEq) }
+  ROOT || AST.Opr.isLeOrEq.m || reify { Opr.onPushing(AST.Opr.isLeOrEq) }
 
   //////////////////////////////////////////////////////////////////////////////
   //// Variables ///////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
 
-  // TODO: Add type annotation support
   final object Var {
     def onPushing(in: String): Unit = logger.trace {
       val vr = AST.Var(in)
-      push(vr)
-    }
-
-    def push(elem: AST.Elem): Unit = logger.trace {
-      result.current = Some(elem)
-      result.push()
+      result.pushElem(vr)
     }
   }
 
@@ -104,14 +153,7 @@ case class ParserDef() extends Parser[AST] {
         val al = args.split(',').toList
         for (a <- al) {
           val aNoSpaces = a.replaceAll(" ", "")
-          if (aNoSpaces.contains(':')) {
-            val elem    = aNoSpaces.split(':')
-            val varName = elem.head
-            val tp      = elem.tail.head
-            argsList +:= AST.Var(varName, tp)
-          } else {
-            argsList +:= AST.Var(aNoSpaces)
-          }
+          argsList +:= AST.Var(aNoSpaces)
         }
       }
       val fun = AST.Func(name, argsList.reverse)
@@ -136,7 +178,6 @@ case class ParserDef() extends Parser[AST] {
     val pattern: Pattern = "//" >> not(newline).many
   }
 
-  // FIXME Something is wrong with comment pattern
   ROOT || Comment.pattern || reify { Comment.onPushing(currentMatch) }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -151,20 +192,25 @@ case class ParserDef() extends Parser[AST] {
       current = currentMatch.length
       val diff = current - latest
       if (diff > 0) {
+        result.pop()
         val b = AST.Block(current)
         result.pushElem(b)
       } else if (diff < 0) {
-        val elems: List[Elem] = onFillingBlocks()
-        result.current match {
-          case Some(b: AST.Block) =>
-            val block = AST.Block(b.indent, elems)
-            result.pushElem(block)
-          case _ =>
-            val block = AST.Block(current, elems)
-            result.pushElem(block)
-        }
+        onPushingBlock()
       }
       latest = current
+    }
+
+    private def onPushingBlock(): Unit = {
+      val elems: List[Elem] = onFillingBlocks()
+      result.current match {
+        case Some(b: Block) =>
+          val block = AST.Block(b.indent, elems)
+          result.pushElem(block)
+        case _ =>
+          val block = AST.Block(current, elems)
+          result.pushElem(block)
+      }
     }
 
     def onFillingBlocks(): List[Elem] = logger.trace {
@@ -208,24 +254,24 @@ case class ParserDef() extends Parser[AST] {
     val indentPattern: Pattern = spaces.opt.many
     val EOFPattern: Pattern    = indentPattern >> eof
 
-    def onPushingSpacing(str: String): Unit = logger.trace {
+    def onSpacing(str: String): Unit = logger.trace {
       val len = str.length
       val sp  = AST.Spacing(len)
       result.pushElem(sp)
     }
 
     def onPushingNewLine(): Unit = logger.trace {
-      val nl = AST.Elem.Newline
+      val nl = AST.Newline()
       result.pushElem(nl)
     }
   }
 
   val NEWLINE: State = state.define("Newline")
 
-  ROOT    || spaces               || reify { Indent.onPushingSpacing(currentMatch) }
-  ROOT    || newline              || reify { state.begin(NEWLINE)                  }
-  NEWLINE || Indent.EOFPattern    || reify { Indent.onEOFPattern()                 }
-  NEWLINE || Indent.indentPattern || reify { Indent.onIndentPattern()              }
+  ROOT    || spaces               || reify { Indent.onSpacing(currentMatch) }
+  ROOT    || newline              || reify { state.begin(NEWLINE)           }
+  NEWLINE || Indent.EOFPattern    || reify { Indent.onEOFPattern()          }
+  NEWLINE || Indent.indentPattern || reify { Indent.onIndentPattern()       }
 
   //////////////////////////////////////////////////////////////////////////////
   //// End Of File /////////////////////////////////////////////////////////////

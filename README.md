@@ -28,12 +28,14 @@ Natomiast, dzięki użyciu szybkich jak piorun bibliotek które powstały dzięk
 - org.enso.data._ - funkcje ułatwiające pracę z danymi
 
 ### Funkcjonujące elementy AST
+- AST - AST tworzone po zakończeniu parsowania tekstu
 - AST.Elem - podstawowy element AST, szkielet najnizszego poziomu do dziedziczenia przez wyzsze elementy
 - AST.Empty - Pusty element AST, nic nie wnosi
 - AST.Var - Zmienne, z deklaracją typów
 - AST.Func - Funkcja, z deklaracją argumentów
 - AST.Comment - Komentarze w linii kodu
-- AST.Elem.Newline - Znacznik początku nowej linii
+- AST.Newline - Znacznik początku nowej linii
 - AST.Undefined - Cała reszra
-- AST.Spacing - odstępy między elementami
+- ~AST.Spacing - odstępy między elementami - do usunięcia~
 - AST.Block - Fragment kodu z wcięciem od linii bazowej
+- AST.Opr - Operatory arytmetyczne, logiczne, przypisywania, typowania

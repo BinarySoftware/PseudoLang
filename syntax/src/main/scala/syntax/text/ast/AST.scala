@@ -23,35 +23,59 @@ object AST {
   sealed trait Elem extends Symbol
   object Elem {
     sealed trait Invalid extends Elem
+  }
 
-    case object Newline extends Elem {
-      val repr: Repr.Builder = R + "\n"
-    }
+  case class Newline() extends Elem {
+    val repr: Repr.Builder = R + "\n"
   }
 
   case class Undefined(str: String) extends Elem.Invalid {
     val repr: Repr.Builder = R + str
   }
-  object Empty extends Elem {
+  case class Empty() extends Elem {
     val repr: Repr.Builder = R
   }
 
   //////////////////////////////////////////////////////////////////////////////
   //// Variable ////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
-  case class Var(name: String, tp: Option[String]) extends Elem {
-    val repr: Repr.Builder = {
-      val nameRepr = R + name
-      val tpRepr = tp match {
-        case Some(v) => R + ": " + tp
-        case None    => R
-      }
-      R + nameRepr + tpRepr
-    }
+  case class Var(name: String) extends Elem {
+    val repr: Repr.Builder = R + name
   }
   object Var {
-    def apply(name: String, tp: String) = new Var(name, Some(tp))
-    def apply(name: String)             = new Var(name, None)
+    def apply(name: String) = new Var(name)
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+  //// Operator ////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  case class Opr(marker: Opr.Marker, Le: Elem, Re: Elem) extends Elem {
+    val repr: Repr.Builder = R + Le + " " + marker + " " + Re
+  }
+  object Opr {
+    def apply(m: Opr.Marker)                          = new Opr(m, Empty(), Empty())
+    def apply(m: Opr.Marker, e: Elem)                 = new Opr(m, e, Empty())
+    def apply(m: Opr.Marker, Le: Elem, Re: Elem): Opr = new Opr(m, Le, Re)
+
+    abstract class Marker(val m: String) extends Elem {
+      val repr: Repr.Builder = R + m
+    }
+
+    /* Arithmetic operators */
+    case object Add extends Marker("+")
+    case object Sub extends Marker("-")
+    case object Mul extends Marker("*")
+    case object Div extends Marker("/")
+    case object Mod extends Marker("mod")
+    case object Pow extends Marker("^")
+
+    case object Assign   extends Marker("<-")
+    case object TpAnn    extends Marker(":")
+    case object isEq     extends Marker("=")
+    case object isGr     extends Marker(">")
+    case object isLe     extends Marker("<")
+    case object isGrOrEq extends Marker(">=")
+    case object isLeOrEq extends Marker("<=")
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -100,11 +124,11 @@ object AST {
   //// Block ///////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
   case class Block(indent: Int, elems: List[Elem]) extends Elem {
-    // FIXME : Printing indent issue, rest works
-    val repr: Repr.Builder = R + indent + elems.map {
-        case elem @ Elem.Newline => R + elem + indent
-        case elem                => R + elem
-      } + Elem.Newline
+    val repr: Repr.Builder = R + Newline() + indent + elems.map {
+        case elem: Newline => R + elem + indent
+        case b: AST.Block  => R + b.repr + indent
+        case elem          => R + elem
+      } + Newline()
   }
   object Block {
     def apply(): Block                 = new Block(0, Nil)
