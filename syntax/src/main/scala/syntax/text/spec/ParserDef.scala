@@ -10,6 +10,20 @@ import scala.reflect.runtime.universe.reify
 
 case class ParserDef() extends Parser[AST] {
 
+  // FIXME
+  //  - Get rid of AST.Spacing - bad idea
+  //  - Tailrec method for adding R to operator, nesting operators etc
+  //  - Push block on EOF, on large indent diff, close many blocks at once
+
+  // TODO
+  //  - Add Scala code generator
+  //  - Add conditional functions
+  //  - Add Array Support with []
+  //  - Add AST.Args with ()
+  //  - Add Return
+  //  - Add While, for and do while loops
+  //  - Add AST.Function.Call to call func
+
   //////////////////////////////////////////////////////////////////////////////
   //// Result //////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
