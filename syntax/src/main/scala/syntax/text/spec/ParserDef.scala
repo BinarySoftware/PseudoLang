@@ -3,7 +3,6 @@ package org.PseudoLang.syntax.text.spec
 import org.enso.flexer._
 import org.enso.flexer.automata.Pattern
 import org.enso.flexer.automata.Pattern._
-import org.PseudoLang.syntax.text.ast.AST.Opr
 import org.PseudoLang.syntax.text.ast.AST._
 import org.PseudoLang.syntax.text.ast.AST
 
@@ -110,7 +109,6 @@ case class ParserDef() extends Parser[AST] {
   //// Variables ///////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
 
-  // TODO: Add type annotation support
   final object Var {
     def onPushing(in: String): Unit = logger.trace {
       val vr = AST.Var(in)
@@ -141,14 +139,7 @@ case class ParserDef() extends Parser[AST] {
         val al = args.split(',').toList
         for (a <- al) {
           val aNoSpaces = a.replaceAll(" ", "")
-          if (aNoSpaces.contains(':')) {
-            val elem    = aNoSpaces.split(':')
-            val varName = elem.head
-            val tp      = elem.tail.head
-            argsList +:= AST.Var(varName, tp)
-          } else {
-            argsList +:= AST.Var(aNoSpaces)
-          }
+          argsList +:= AST.Var(aNoSpaces)
         }
       }
       val fun = AST.Func(name, argsList.reverse)
@@ -173,7 +164,6 @@ case class ParserDef() extends Parser[AST] {
     val pattern: Pattern = "//" >> not(newline).many
   }
 
-  // FIXME Something is wrong with comment pattern
   ROOT || Comment.pattern || reify { Comment.onPushing(currentMatch) }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -192,17 +182,21 @@ case class ParserDef() extends Parser[AST] {
         val b = AST.Block(current)
         result.pushElem(b)
       } else if (diff < 0) {
-        val elems: List[Elem] = onFillingBlocks()
-        result.current match {
-          case Some(b: AST.Block) =>
-            val block = AST.Block(b.indent, elems)
-            result.pushElem(block)
-          case _ =>
-            val block = AST.Block(current, elems)
-            result.pushElem(block)
-        }
+        onPushingBlock()
       }
       latest = current
+    }
+
+    private def onPushingBlock(): Unit = {
+      val elems: List[Elem] = onFillingBlocks()
+      result.current match {
+        case Some(b: Block) =>
+          val block = AST.Block(b.indent, elems)
+          result.pushElem(block)
+        case _ =>
+          val block = AST.Block(current, elems)
+          result.pushElem(block)
+      }
     }
 
     def onFillingBlocks(): List[Elem] = logger.trace {
@@ -246,7 +240,7 @@ case class ParserDef() extends Parser[AST] {
     val indentPattern: Pattern = spaces.opt.many
     val EOFPattern: Pattern    = indentPattern >> eof
 
-    def onPushingSpacing(str: String): Unit = logger.trace {
+    def onSpacing(str: String): Unit = logger.trace {
       val len = str.length
       val sp  = AST.Spacing(len)
       result.pushElem(sp)
@@ -260,10 +254,10 @@ case class ParserDef() extends Parser[AST] {
 
   val NEWLINE: State = state.define("Newline")
 
-  ROOT    || spaces               || reify { Indent.onPushingSpacing(currentMatch) }
-  ROOT    || newline              || reify { state.begin(NEWLINE)                  }
-  NEWLINE || Indent.EOFPattern    || reify { Indent.onEOFPattern()                 }
-  NEWLINE || Indent.indentPattern || reify { Indent.onIndentPattern()              }
+  ROOT    || spaces               || reify { Indent.onSpacing(currentMatch) }
+  ROOT    || newline              || reify { state.begin(NEWLINE)           }
+  NEWLINE || Indent.EOFPattern    || reify { Indent.onEOFPattern()          }
+  NEWLINE || Indent.indentPattern || reify { Indent.onIndentPattern()       }
 
   //////////////////////////////////////////////////////////////////////////////
   //// End Of File /////////////////////////////////////////////////////////////

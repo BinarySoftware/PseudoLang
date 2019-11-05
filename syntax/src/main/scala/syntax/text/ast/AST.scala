@@ -39,19 +39,11 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   //// Variable ////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
-  case class Var(name: String, tp: Option[String]) extends Elem {
-    val repr: Repr.Builder = {
-      val nameRepr = R + name
-      val tpRepr = tp match {
-        case Some(v) => R + ": " + v
-        case None    => R
-      }
-      R + nameRepr + tpRepr
-    }
+  case class Var(name: String) extends Elem {
+    val repr: Repr.Builder = R + name
   }
   object Var {
-    def apply(name: String, tp: String) = new Var(name, Some(tp))
-    def apply(name: String)             = new Var(name, None)
+    def apply(name: String) = new Var(name)
   }
 
   //////////////////////////////////////////////////////////////////////////////
