@@ -1,17 +1,9 @@
 Foo <-- 0
 Bar <-- 1
 Function(a,b)
-  Foo <- a
-  Bar <- 2*a //4
+  if(a < b)
+    then a * 2
+    else b mod 4
 
 
-Function(1,2) // function call
-
-// Foo
-//  Bar
-//    Go
-//    Go
-//  Baz
-// Bo
-
-// Foo <- Bar + Baz mod Bo
+// Function(1,2) // function call

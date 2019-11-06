@@ -48,9 +48,6 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   //// Variable ////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
-  // FIXME: There will be problem with defining element in scope, as on first
-  //        Assignation we want it to be defined, but on every other, we want it
-  //        to be just changed
   case class Var(name: String) extends Elem {
     val repr: Repr.Builder      = R + name
     val scalaRepr: Repr.Builder = R + name
@@ -181,7 +178,7 @@ object AST {
         case n: Newline   => R + n + indent
         case b: AST.Block => R + b.scalaRepr + indent
         case elem         => R + elem.scalaRepr
-      } + Newline() + "}" + Newline()
+      } + Newline() + indent + "}"
   }
   object Block {
     def apply(): Block                 = new Block(0, Nil)
