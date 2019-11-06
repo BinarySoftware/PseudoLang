@@ -105,12 +105,15 @@ case class ParserDef() extends Parser[AST] {
     }
   }
 
-  ROOT || AST.Opr.Add.m      || reify { Opr.onPushing(AST.Opr.Add)      }
-  ROOT || AST.Opr.Sub.m      || reify { Opr.onPushing(AST.Opr.Sub)      }
-  ROOT || AST.Opr.Mul.m      || reify { Opr.onPushing(AST.Opr.Mul)      }
-  ROOT || AST.Opr.Div.m      || reify { Opr.onPushing(AST.Opr.Div)      }
-  ROOT || AST.Opr.Mod.m      || reify { Opr.onPushing(AST.Opr.Mod)      }
-  ROOT || AST.Opr.Pow.m      || reify { Opr.onPushing(AST.Opr.Pow)      }
+  ROOT || AST.Opr.Add.m || reify { Opr.onPushing(AST.Opr.Add) }
+  ROOT || AST.Opr.Sub.m || reify { Opr.onPushing(AST.Opr.Sub) }
+  ROOT || AST.Opr.Mul.m || reify { Opr.onPushing(AST.Opr.Mul) }
+  ROOT || AST.Opr.Div.m || reify { Opr.onPushing(AST.Opr.Div) }
+  ROOT || AST.Opr.Mod.m || reify { Opr.onPushing(AST.Opr.Mod) }
+  ROOT || AST.Opr.Pow.m || reify { Opr.onPushing(AST.Opr.Pow) }
+  ROOT || AST.Opr.DefAndAssign.m || reify {
+    Opr.onPushing(AST.Opr.DefAndAssign)
+  }
   ROOT || AST.Opr.Assign.m   || reify { Opr.onPushing(AST.Opr.Assign)   }
   ROOT || AST.Opr.TpAnn.m    || reify { Opr.onPushing(AST.Opr.TpAnn)    }
   ROOT || AST.Opr.isEq.m     || reify { Opr.onPushing(AST.Opr.isEq)     }
