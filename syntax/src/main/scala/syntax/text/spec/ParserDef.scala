@@ -9,9 +9,6 @@ import scala.reflect.runtime.universe.reify
 
 case class ParserDef() extends Parser[AST] {
 
-  // FIXME
-  //  - Push block on EOF, on large indent diff, close many blocks at once
-
   // TODO
   //  - Add Scala code generator
   //  - Add conditional functions
@@ -24,7 +21,6 @@ case class ParserDef() extends Parser[AST] {
   //////////////////////////////////////////////////////////////////////////////
   //// Result //////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
-
   override def getResult(): Option[AST] = result.ast
 
   final object result {
@@ -98,39 +94,46 @@ case class ParserDef() extends Parser[AST] {
       result.pushElem(op)
     }
 
-    def traverseLineWithOpr(s: List[AST.Elem]): List[AST.Elem] = logger.trace {
-      s match {
-        case elem1 :: rest =>
-          result.pop()
-          elem1 match {
-            case s: AST.Spacing =>
-              s :: traverseLineWithOpr(rest)
-            case c: AST.Comment =>
-              c :: traverseLineWithOpr(rest)
-            case v: AST.Var =>
-              rest match {
-                case (_: AST.Spacing) :: (o: AST.Opr) :: restTail =>
-                  val opr = AST.Opr(o.marker, o.Le, v)
-                  traverseLineWithOpr(opr :: restTail)
-                case (o: AST.Opr) :: restTail =>
-                  val opr = AST.Opr(o.marker, o.Le, v)
-                  traverseLineWithOpr(opr :: restTail)
-                case _ => v :: rest
-              }
-            case or: AST.Opr =>
-              rest match {
-                case (_: AST.Spacing) :: (o: AST.Opr) :: restTail =>
-                  val opr = AST.Opr(o.marker, o.Le, or)
-                  traverseLineWithOpr(opr :: restTail)
-                case (o: AST.Opr) :: restTail =>
-                  val opr = AST.Opr(o.marker, o.Le, or)
-                  traverseLineWithOpr(opr :: restTail)
-                case _ => or :: rest
-              }
-            case _ => elem1 :: rest
-          }
-        case rest => rest
-        case Nil  => Nil
+    def traverseLineWithOpr(stack: List[AST.Elem]): List[AST.Elem] =
+      logger.trace {
+        stack match {
+          case elem1 :: rest =>
+            result.pop()
+            onFirstElementWhileTraversingThroughLine(elem1, rest)
+          case rest => rest
+          case Nil  => Nil
+        }
+      }
+
+    private def onFirstElementWhileTraversingThroughLine(
+      elem1: Elem,
+      rest: List[Elem]
+    ): List[Elem] = {
+      elem1 match {
+        case s: Spacing =>
+          s :: traverseLineWithOpr(rest)
+        case c: Comment =>
+          c :: traverseLineWithOpr(rest)
+        case v: Var =>
+          onSecondElementWhileTraversingThroughLine(rest, v)
+        case o: Opr =>
+          onSecondElementWhileTraversingThroughLine(rest, o)
+        case _ => elem1 :: rest
+      }
+    }
+
+    private def onSecondElementWhileTraversingThroughLine(
+      rest: List[Elem],
+      prev: AST.Elem
+    ): List[Elem] = {
+      rest match {
+        case (_: Spacing) :: (o: Opr) :: restTail =>
+          val opr = AST.Opr(o.marker, o.Le, prev)
+          traverseLineWithOpr(opr :: restTail)
+        case (o: Opr) :: restTail =>
+          val opr = AST.Opr(o.marker, o.Le, prev)
+          traverseLineWithOpr(opr :: restTail)
+        case _ => prev :: rest
       }
     }
 
@@ -157,7 +160,6 @@ case class ParserDef() extends Parser[AST] {
   //////////////////////////////////////////////////////////////////////////////
   //// Variables ///////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
-
   final object Var {
     def onPushing(in: String): Unit = logger.trace {
       val vr = AST.Var(in)
@@ -221,25 +223,44 @@ case class ParserDef() extends Parser[AST] {
   //////////////////////////////////////////////////////////////////////////////
   //// Indentation Manager /////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
-
   final object Indent {
-    var latest: Int  = 0
-    var current: Int = 0
+    var latest: Int      = 0
+    var current: Int     = 0
+    var stack: List[Int] = Nil
 
     def onIndent(): Unit = logger.trace {
       current = currentMatch.length
       val diff = current - latest
       if (diff > 0) {
-        result.pop()
-        val b = AST.Block(current)
-        result.pushElem(b)
+        pushNewEmptyBlock()
       } else if (diff < 0) {
-        onPushingBlock()
+        pushFilledBlock()
       }
       latest = current
     }
 
-    private def onPushingBlock(): Unit = {
+    private def pushFilledBlock(): Unit = logger.trace {
+      result.pop()
+      checkIfThereIsBlockInStack()
+      onPushingNewLine()
+    }
+
+    private def pushNewEmptyBlock(): Unit = logger.trace {
+      stack +:= current
+      result.pop()
+      val b = AST.Block(current)
+      result.pushElem(b)
+    }
+
+    def checkIfThereIsBlockInStack(): Unit = logger.trace {
+      while (stack.nonEmpty && current < stack.head) {
+        println(stack)
+        stack = stack.tail
+        onPushingBlock()
+      }
+    }
+
+    private def onPushingBlock(): Unit = logger.trace {
       val elems: List[Elem] = onFillingBlocks()
       result.current match {
         case Some(b: Block) =>
@@ -253,7 +274,6 @@ case class ParserDef() extends Parser[AST] {
 
     def onFillingBlocks(): List[Elem] = logger.trace {
       var elems: List[Elem] = Nil
-      result.pop()
       while (result.stack.nonEmpty) {
         result.pop()
         result.current match {
@@ -294,23 +314,6 @@ case class ParserDef() extends Parser[AST] {
       result.pushElem(sp)
     }
 
-//    def pushFullBlock(s: List[AST.Elem], ci: Int): List[AST.Elem] =
-//      logger.trace {
-//        s match {
-//          case (b: AST.Block) :: rest =>
-//            if (b.elems.nonEmpty) {
-//              // wszystkie elementy dotychczas do bloku
-//              if (b.indent > ci) {
-//                bl :: pushFullBlock(rest, ci)
-//              } else {
-//                bl :: rest
-//              }
-//            }
-//          case e :: rest => e :: pushFullBlock(rest, ci)
-//          case Nil       => Nil
-//        }
-//      }
-
     def onPushingNewLine(): Unit = logger.trace {
       Opr.onTraversingLineForOprs()
       val nl = AST.Newline()
@@ -332,10 +335,17 @@ case class ParserDef() extends Parser[AST] {
   //////////////////////////////////////////////////////////////////////////////
   //// End Of File /////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
-
   final object EOF {
-    def onEOF(): Unit = {
+    def fillBlocksBeforeEOF(): Unit = logger.trace {
+      if (Indent.stack.nonEmpty) {
+        Indent.current = 0
+        Indent.checkIfThereIsBlockInStack()
+      }
+    }
+
+    def onEOF(): Unit = logger.trace {
       Opr.onTraversingLineForOprs()
+      fillBlocksBeforeEOF()
       result.ast = Some(AST(result.stack.reverse))
     }
   }
@@ -345,7 +355,6 @@ case class ParserDef() extends Parser[AST] {
   //////////////////////////////////////////////////////////////////////////////
   //// Undefined ///////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
-
   final object Undefined {
     def onPushing(in: String): Unit = logger.trace {
       val und = AST.Undefined(in)

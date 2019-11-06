@@ -76,32 +76,6 @@ class ParserTests extends FlatSpec with Matchers {
   /* Bad function definition */
   "Funkcja ()" ?= AST(AST.Var("Funkcja"), AST.Spacing(), AST.Undefined("()"))
 
-  /* Indent tests */
-  """Foo
-    |  Bar
-    |  Baz
-    |Bo""".stripMargin ?= AST(
-    AST.Var("Foo"),
-    AST.Block(2, AST.Var("Bar"), AST.Newline(), AST.Var("Baz")),
-    AST.Var("Bo")
-  )
-
-  """Foo
-    |  Bar
-    |    Ba
-    |    Be
-    |  Baz
-    |Bo""".stripMargin ?= AST(
-    AST.Var("Foo"),
-    AST.Block(
-      2,
-      AST.Var("Bar"),
-      AST.Block(4, AST.Var("Ba"), AST.Newline(), AST.Var("Be")),
-      AST.Var("Baz")
-    ),
-    AST.Var("Bo")
-  )
-
   /* Operator tests */
   "Bar<-Foo+Bo*Fo/Mo" ?== AST(
     AST.Opr(
@@ -165,33 +139,90 @@ class ParserTests extends FlatSpec with Matchers {
     AST.Newline()
   )
 
-//  """Foo
-//    |  Bar
-//    |    Ba
-//    |    Be
-//    |Bo""".stripMargin ?= AST(
-//    AST.Var("Foo"),
-//    AST.Newline(),
-//    AST.Block(
-//      2,
-//      AST.Var("Bar"),
-//      AST.Newline(),
-//      AST.Block(4, AST.Var("Ba"), AST.Newline(), AST.Var("Be"))
-//    ),
-//    AST.Var("Bo")
-//  )
-//
-//  """Foo
-//    |  Bar
-//    |    Ba
-//    |    Be""".stripMargin ?= AST(
-//    AST.Var("Foo"),
-//    AST.Newline(),
-//    AST.Block(
-//      2,
-//      AST.Var("Bar"),
-//      AST.Newline(),
-//      AST.Block(4, AST.Var("Ba"), AST.Newline(), AST.Var("Be"))
-//    )
-//  )
+  /* Indent tests */
+  """Foo
+    |  Bar
+    |  Baz
+    |Bo""".stripMargin ?== AST(
+    AST.Var("Foo"),
+    AST.Block(2, AST.Var("Bar"), AST.Newline(), AST.Var("Baz")),
+    AST.Newline(),
+    AST.Var("Bo")
+  )
+
+  """Foo
+    |  Bar
+    |    Ba
+    |    Be
+    |  Baz
+    |Bo""".stripMargin ?== AST(
+    AST.Var("Foo"),
+    AST.Block(
+      2,
+      AST.Var("Bar"),
+      AST.Block(4, AST.Var("Ba"), AST.Newline(), AST.Var("Be")),
+      AST.Newline(),
+      AST.Var("Baz")
+    ),
+    AST.Newline(),
+    AST.Var("Bo")
+  )
+
+  """Foo
+    |  Bar
+    |    Ba
+    |    Be
+    |Bo""".stripMargin ?== AST(
+    AST.Var("Foo"),
+    AST.Block(
+      2,
+      AST.Var("Bar"),
+      AST.Block(4, AST.Var("Ba"), AST.Newline(), AST.Var("Be"))
+    ),
+    AST.Newline(),
+    AST.Var("Bo")
+  )
+
+  """Foo
+    |  Bar
+    |    Ba
+    |    Be""".stripMargin ?== AST(
+    AST.Var("Foo"),
+    AST.Block(
+      2,
+      AST.Var("Bar"),
+      AST.Block(4, AST.Var("Ba"), AST.Newline(), AST.Var("Be"))
+    )
+  )
+
+  """Foo
+    |  Bar
+    |    Ba
+    |    Be
+    |
+    |""".stripMargin ?== AST(
+    AST.Var("Foo"),
+    AST.Block(
+      2,
+      AST.Var("Bar"),
+      AST.Block(4, AST.Var("Ba"), AST.Newline(), AST.Var("Be"))
+    ),
+    AST.Newline(),
+    AST.Newline()
+  )
+
+  """Swap(a,b)
+    |  c <- a
+    |  a <- b
+    |  b <- c""".stripMargin ?== AST(
+    AST.Func(AST.Var("Swap"), AST.Var("a"), AST.Var("b")),
+    AST.Block(
+      2,
+      AST.Opr(AST.Opr.Assign, AST.Var("c"), AST.Var("a")),
+      AST.Newline(),
+      AST.Opr(AST.Opr.Assign, AST.Var("a"), AST.Var("b")),
+      AST.Newline(),
+      AST.Opr(AST.Opr.Assign, AST.Var("b"), AST.Var("c"))
+    )
+  )
 }
