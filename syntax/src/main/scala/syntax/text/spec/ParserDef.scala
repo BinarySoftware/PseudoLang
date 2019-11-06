@@ -280,19 +280,35 @@ case class ParserDef() extends Parser[AST] {
 
     def pushLineWithOpr(s: List[AST.Elem]): List[AST.Elem] = logger.trace {
       s match {
-        case (c: AST.Comment) :: rest =>
+        case elem1 :: rest =>
           result.pop()
-          c :: pushLineWithOpr(rest)
-        case (v: AST.Var) :: (o: AST.Opr) :: rest =>
-          result.pop()
-          result.pop()
-          val opr = AST.Opr(o.marker, o.Le, v)
-          pushLineWithOpr(opr :: rest)
-        case (or: AST.Opr) :: (ol: AST.Opr) :: rest =>
-          result.pop()
-          result.pop()
-          val opr = AST.Opr(ol.marker, ol.Le, or)
-          pushLineWithOpr(opr :: rest)
+          elem1 match {
+            case s: AST.Spacing =>
+              s :: pushLineWithOpr(rest)
+            case c: AST.Comment =>
+              c :: pushLineWithOpr(rest)
+            case v: AST.Var =>
+              rest match {
+                case (_: AST.Spacing) :: (o: AST.Opr) :: restTail =>
+                  val opr = AST.Opr(o.marker, o.Le, v)
+                  pushLineWithOpr(opr :: restTail)
+                case (o: AST.Opr) :: restTail =>
+                  val opr = AST.Opr(o.marker, o.Le, v)
+                  pushLineWithOpr(opr :: restTail)
+                case _ => v :: rest
+              }
+            case or: AST.Opr =>
+              rest match {
+                case (_: AST.Spacing) :: (o: AST.Opr) :: restTail =>
+                  val opr = AST.Opr(o.marker, o.Le, or)
+                  pushLineWithOpr(opr :: restTail)
+                case (o: AST.Opr) :: restTail =>
+                  val opr = AST.Opr(o.marker, o.Le, or)
+                  pushLineWithOpr(opr :: restTail)
+                case _ => or :: rest
+              }
+            case _ => elem1 :: rest
+          }
         case rest => rest
         case Nil  => Nil
       }
