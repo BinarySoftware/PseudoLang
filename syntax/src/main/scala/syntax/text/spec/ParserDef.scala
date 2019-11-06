@@ -23,6 +23,39 @@ case class ParserDef() extends Parser[AST] {
   //  - Add Return
   //  - Add While, for and do while loops
   //  - Add AST.Function.Call to call func
+  
+  /* tail recursive functions for block creation and operator nesting
+  @tailrec def pushLine(s: List[AST.Elem]) : List[AST.Elem] = logger.trace {
+	s match {
+		case c: AST.Comment :: rest => 
+			c :: pushLine(rest)
+		case v: AST.Var :: o: AST.Opr :: rest => 
+			val opr = AST.Opr(o.marker, o.Le, v)
+			opr :: pushLine(rest)
+		case or: AST.Opr :: ol: AST.Opr :: rest => 
+			val opr = AST.Opr(ol.marker, ol.Le, or)
+			opr :: pushLine(rest)
+		case rest => rest
+		case Nil => Nil
+	}
+}
+
+@tailrec def pushFullBlock(s: List[AST.Elem], ci: Int) : s = logger.trace {
+	s match {
+		case b: AST.Block :: rest =>
+			if(b.elems.nonEmpty) {
+				// wszystkie elementy dotychczas do bloku
+				if(b.indent > ci) {
+					bl :: pushFullBlock(rest, ci)
+				} else {
+					bl :: rest
+				}
+		 	}
+		case e :: rest => e :: pushFullBlock(rest)
+		case Nil => Nil
+	}
+} 
+  */
 
   //////////////////////////////////////////////////////////////////////////////
   //// Result //////////////////////////////////////////////////////////////////
