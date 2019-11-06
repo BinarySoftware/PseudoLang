@@ -102,6 +102,7 @@ class ParserTests extends FlatSpec with Matchers {
     AST.Var("Bo")
   )
 
+  /* Operator tests */
   "Bar<-Foo+Bo*Fo/Mo" ?== AST(
     AST.Opr(
       AST.Opr.Assign,
@@ -134,6 +135,36 @@ class ParserTests extends FlatSpec with Matchers {
     ),
     AST.Spacing(3)
   )
+
+  """Bar <- Foo + Bo * Fo / Mo
+    |Bar <- Foo + Bo
+    |""".stripMargin ?= AST(
+    AST.Opr(
+      AST.Opr.Assign,
+      AST.Var("Bar"),
+      AST.Opr(
+        AST.Opr.Add,
+        AST.Var("Foo"),
+        AST.Opr(
+          AST.Opr.Mul,
+          AST.Var("Bo"),
+          AST.Opr(AST.Opr.Div, AST.Var("Fo"), AST.Var("Mo"))
+        )
+      )
+    ),
+    AST.Newline(),
+    AST.Opr(
+      AST.Opr.Assign,
+      AST.Var("Bar"),
+      AST.Opr(
+        AST.Opr.Add,
+        AST.Var("Foo"),
+        AST.Var("Bo")
+      )
+    ),
+    AST.Newline()
+  )
+
 //  """Foo
 //    |  Bar
 //    |    Ba
