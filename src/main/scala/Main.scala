@@ -15,14 +15,18 @@ object Main extends App {
   //// PseudoLang interactive testing environmnet //////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
 
-  println("===== PSEUDO PARSER =====")
+  println("======================= PSEUDO LANG ========================")
   val code   = FileManager.readFileWithPseudo("", "Main")
   val parsed = new Parser().runMatched(code)
 //  pprint.pprintln(parsed)
   println(PrettyPrinter.pretty(parsed.toString))
-  println("------")
+  println("========================== CODE ============================")
   println(parsed.show())
-  println("=========================")
+  println("======================= SCALA CODE =========================")
+  val scalaCode = parsed.generateScala()
+  println(scalaCode)
+  FileManager.saveScalaCodeToFile("", "Generated", scalaCode)
+  println("============================================================")
 }
 
 object FileManager {

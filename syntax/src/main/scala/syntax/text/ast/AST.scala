@@ -5,6 +5,9 @@ import org.enso.syntax.text.ast.Repr._
 
 sealed trait Symbol extends Repr.Provider {
   def show(): String = repr.build()
+
+  val scalaRepr: Repr.Builder
+  def generateScala(): String = scalaRepr.build()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -13,6 +16,9 @@ sealed trait Symbol extends Repr.Provider {
 
 final case class AST(elems: List[AST.Elem]) extends Symbol {
   val repr: Repr.Builder = R + elems
+  val scalaRepr: Repr.Builder = R + "object Main extends App {" + AST
+      .Newline() + elems.map(_.scalaRepr) + AST
+      .Newline() + "}"
 }
 
 object AST {
@@ -26,21 +32,25 @@ object AST {
   }
 
   case class Newline() extends Elem {
-    val repr: Repr.Builder = R + "\n"
+    val repr: Repr.Builder      = R + "\n"
+    val scalaRepr: Repr.Builder = R + "\n"
   }
 
   case class Undefined(str: String) extends Elem.Invalid {
-    val repr: Repr.Builder = R + str
+    val repr: Repr.Builder      = R + str
+    val scalaRepr: Repr.Builder = R + str
   }
   case class Empty() extends Elem {
-    val repr: Repr.Builder = R
+    val repr: Repr.Builder      = R
+    val scalaRepr: Repr.Builder = R
   }
 
   //////////////////////////////////////////////////////////////////////////////
   //// Variable ////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
   case class Var(name: String) extends Elem {
-    val repr: Repr.Builder = R + name
+    val repr: Repr.Builder      = R + name
+    val scalaRepr: Repr.Builder = R + name
   }
   object Var {
     def apply(name: String) = new Var(name)
@@ -51,6 +61,13 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   case class Opr(marker: Opr.Marker, Le: Elem, Re: Elem) extends Elem {
     val repr: Repr.Builder = R + Le + " " + marker + " " + Re
+    val scalaRepr: Repr.Builder = {
+      val beginning: Builder = marker match {
+        case Opr.DefAndAssign => R + "var "
+        case _                => R
+      }
+      R + beginning + Le.scalaRepr + " " + marker.scalaRepr + " " + Re.scalaRepr
+    }
   }
   object Opr {
     def apply(m: Opr.Marker)                          = new Opr(m, Empty(), Empty())
@@ -58,7 +75,8 @@ object AST {
     def apply(m: Opr.Marker, Le: Elem, Re: Elem): Opr = new Opr(m, Le, Re)
 
     abstract class Marker(val m: String) extends Elem {
-      val repr: Repr.Builder = R + m
+      val repr: Repr.Builder      = R + m
+      val scalaRepr: Repr.Builder = R + m
     }
 
     /* Arithmetic operators */
@@ -66,12 +84,21 @@ object AST {
     case object Sub extends Marker("-")
     case object Mul extends Marker("*")
     case object Div extends Marker("/")
-    case object Mod extends Marker("mod")
+    case object Mod extends Marker("mod") {
+      override val scalaRepr: Builder = R + "%"
+    }
     case object Pow extends Marker("^")
 
-    case object Assign   extends Marker("<-")
-    case object TpAnn    extends Marker(":")
-    case object isEq     extends Marker("=")
+    case object DefAndAssign extends Marker("<--") {
+      override val scalaRepr: Builder = R + "="
+    }
+    case object Assign extends Marker("<-") {
+      override val scalaRepr: Builder = R + "="
+    }
+    case object TpAnn extends Marker(":")
+    case object isEq extends Marker("=") {
+      override val scalaRepr: Builder = R + "=="
+    }
     case object isGr     extends Marker(">")
     case object isLe     extends Marker("<")
     case object isGrOrEq extends Marker(">=")
@@ -82,7 +109,8 @@ object AST {
   //// Spacing /////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
   case class Spacing(len: Int) extends Elem {
-    val repr: Repr.Builder = R + len
+    val repr: Repr.Builder      = R + len
+    val scalaRepr: Repr.Builder = R + len
   }
   object Spacing {
     def apply(): Spacing         = new Spacing(1)
@@ -93,8 +121,9 @@ object AST {
   //// Comment /////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
   case class Comment(str: String) extends Elem {
-    val marker: String     = "//"
-    val repr: Repr.Builder = R + marker + str
+    val marker: String          = "//"
+    val repr: Repr.Builder      = R + marker + str
+    val scalaRepr: Repr.Builder = R + marker + str
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -113,6 +142,21 @@ object AST {
       val close = ')'
       R + nameRepr + argsRepr + close
     }
+
+    val scalaRepr: Repr.Builder = {
+      val nameRepr = R + "def " + name.scalaRepr + "[T]("
+      val argsRepr = {
+        if (args.nonEmpty) {
+          R + args.head.scalaRepr + ": T" + args.tail.map(
+            R + ", " + _.scalaRepr + ": T"
+          )
+        } else {
+          R
+        }
+      }
+      val close = "): Unit = "
+      R + nameRepr + argsRepr + close
+    }
   }
   object Func {
     def apply(name: Var): Func                 = new Func(name, Nil)
@@ -126,9 +170,15 @@ object AST {
   case class Block(indent: Int, elems: List[Elem]) extends Elem {
     val repr: Repr.Builder = R + Newline() + indent + elems.map {
         case elem: Newline => R + elem + indent
-        case b: AST.Block  => R + b.repr + indent
+        case b: AST.Block  => R + b + indent
         case elem          => R + elem
       } + Newline()
+
+    val scalaRepr: Repr.Builder = R + "{" + Newline() + indent + elems.map {
+        case n: Newline   => R + n + indent
+        case b: AST.Block => R + b.scalaRepr + indent
+        case elem         => R + elem.scalaRepr
+      } + Newline() + indent + "}"
   }
   object Block {
     def apply(): Block                 = new Block(0, Nil)

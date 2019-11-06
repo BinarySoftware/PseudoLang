@@ -1,15 +1,9 @@
-Foo  // Bez typu
-Bar: Int    //foo
-Function()
-  Foo <- 2
-  Bar <- Foo*2 //4
+Foo <-- 0
+Bar <-- 1
 Function(a,b)
+  if(a < b)
+    then a * 2
+    else b mod 4
 
-Foo
-  Bar
-    Go
-    Go
-  Baz
-Bo
 
-Foo<-Bar+Baz*Bo
+// Function(1,2) // function call
