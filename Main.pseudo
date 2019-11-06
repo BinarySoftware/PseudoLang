@@ -12,4 +12,4 @@ Foo
   Baz
 Bo
 
-Foo <- Bar + Baz mod Bo
+Foo<-Bar+Baz*Bo

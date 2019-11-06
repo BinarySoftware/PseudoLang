@@ -36,6 +36,6 @@ Natomiast, dzięki użyciu szybkich jak piorun bibliotek które powstały dzięk
 - AST.Comment - Komentarze w linii kodu
 - AST.Newline - Znacznik początku nowej linii
 - AST.Undefined - Cała reszra
-- ~AST.Spacing - odstępy między elementami - do usunięcia~
+- AST.Spacing - odstępy między elementami
 - AST.Block - Fragment kodu z wcięciem od linii bazowej
 - AST.Opr - Operatory arytmetyczne, logiczne, przypisywania, typowania
