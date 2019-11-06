@@ -23,6 +23,17 @@ class ParserTests extends FlatSpec with Matchers {
     }
   }
 
+  def assertExprNoPrinting(input: String, result: AST): Assertion = {
+    val output = Parser.run(input)
+    output match {
+      case Result(_, Result.Success(value)) =>
+        println(PrettyPrinter.pretty(value.toString))
+        assert(value == result)
+      case _ =>
+        fail(s"Parsing failed, consumed ${output.offset} chars")
+    }
+  }
+
   implicit class TestString(input: String) {
     def parse(str: String): String = {
       val escape = (str: String) => str.replace("\n", "\\n")
@@ -33,6 +44,9 @@ class ParserTests extends FlatSpec with Matchers {
 
     def ?=(out: AST): Unit = testBase in {
       assertExpr(input, out)
+    }
+    def ?==(out: AST): Unit = testBase in {
+      assertExprNoPrinting(input, out)
     }
   }
 
@@ -86,6 +100,69 @@ class ParserTests extends FlatSpec with Matchers {
       AST.Var("Baz")
     ),
     AST.Var("Bo")
+  )
+
+  /* Operator tests */
+  "Bar<-Foo+Bo*Fo/Mo" ?== AST(
+    AST.Opr(
+      AST.Opr.Assign,
+      AST.Var("Bar"),
+      AST.Opr(
+        AST.Opr.Add,
+        AST.Var("Foo"),
+        AST.Opr(
+          AST.Opr.Mul,
+          AST.Var("Bo"),
+          AST.Opr(AST.Opr.Div, AST.Var("Fo"), AST.Var("Mo"))
+        )
+      )
+    )
+  )
+
+  "Bar <- Foo + Bo * Fo / Mo   " ?= AST(
+    AST.Opr(
+      AST.Opr.Assign,
+      AST.Var("Bar"),
+      AST.Opr(
+        AST.Opr.Add,
+        AST.Var("Foo"),
+        AST.Opr(
+          AST.Opr.Mul,
+          AST.Var("Bo"),
+          AST.Opr(AST.Opr.Div, AST.Var("Fo"), AST.Var("Mo"))
+        )
+      )
+    ),
+    AST.Spacing(3)
+  )
+
+  """Bar <- Foo + Bo * Fo / Mo
+    |Bar <- Foo + Bo
+    |""".stripMargin ?= AST(
+    AST.Opr(
+      AST.Opr.Assign,
+      AST.Var("Bar"),
+      AST.Opr(
+        AST.Opr.Add,
+        AST.Var("Foo"),
+        AST.Opr(
+          AST.Opr.Mul,
+          AST.Var("Bo"),
+          AST.Opr(AST.Opr.Div, AST.Var("Fo"), AST.Var("Mo"))
+        )
+      )
+    ),
+    AST.Newline(),
+    AST.Opr(
+      AST.Opr.Assign,
+      AST.Var("Bar"),
+      AST.Opr(
+        AST.Opr.Add,
+        AST.Var("Foo"),
+        AST.Var("Bo")
+      )
+    ),
+    AST.Newline()
   )
 
 //  """Foo
