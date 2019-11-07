@@ -72,9 +72,7 @@ class ParserTests extends FlatSpec with Matchers {
   "Funkcja(a, b)" ?= AST(
     AST.Func(AST.Var("Funkcja"), AST.Var("a"), AST.Var("b"))
   )
-
-  /* Bad function definition */
-  "Funkcja ()" ?= AST(AST.Var("Funkcja"), AST.Spacing(), AST.Undefined("()"))
+  "Funkcja ()" ?== AST(AST.Func(AST.Var("Funkcja")))
 
   /* Operator tests */
   "Bar<-Foo+Bo*Fo/Mo" ?== AST(
