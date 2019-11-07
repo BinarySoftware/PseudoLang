@@ -34,10 +34,10 @@ jobs:
       sbt run
     displayName: sbt run
     continueOnError: true
- # - script: |
- #      sbt bench
- #    displayName: sbt bench
- #    continueOnError: true
+  - script: |
+      sbt bench
+    displayName: sbt bench
+    continueOnError: true
   - task: PublishTestResults@2
     inputs:
       testResultsFormat: 'JUnit'
