@@ -152,8 +152,14 @@ case class ParserDef() extends Parser[AST] {
   //////////////////////////////////////////////////////////////////////////////
   final object Var {
     def onPushing(in: String): Unit = logger.trace {
-      val vr = AST.Var(in)
-      result.pushElem(vr)
+      if (in.toLowerCase == "then") {
+        result.pushElem(AST.If.ThenCase())
+      } else if (in.toLowerCase == "else") {
+        result.pushElem(AST.If.ElseCase())
+      } else {
+        val vr = AST.Var(in)
+        result.pushElem(vr)
+      }
     }
 
     val varChars: Pattern = lowerChar | upperChar | digit
