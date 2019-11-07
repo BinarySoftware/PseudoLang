@@ -25,7 +25,7 @@ object Main extends App {
   println("======================= SCALA CODE =========================")
   val scalaCode = parsed.generateScala()
   println(scalaCode)
-  FileManager.saveScalaCodeToFile("", "Generated", scalaCode)
+  // FileManager.saveScalaCodeToFile("", "Generated", scalaCode)
   println("============================================================")
 }
 
