@@ -152,8 +152,14 @@ case class ParserDef() extends Parser[AST] {
   //////////////////////////////////////////////////////////////////////////////
   final object Var {
     def onPushing(in: String): Unit = logger.trace {
-      val vr = AST.Var(in)
-      result.pushElem(vr)
+      in.toLowerCase match {
+        case "then"   => result.pushElem(AST.If.ThenCase())
+        case "else"   => result.pushElem(AST.If.ElseCase())
+        case "do"     => Func.onPushingDo()
+        case "repeat" => Func.onPushingRepeat()
+        case "return" => result.pushElem(AST.Func.Return())
+        case _        => result.pushElem(AST.Var(in))
+      }
     }
 
     val varChars: Pattern = lowerChar | upperChar | digit
@@ -170,11 +176,34 @@ case class ParserDef() extends Parser[AST] {
       val args = in.dropRight(1).substring(1)
       result.pop()
       result.current match {
-        case Some(v: AST.Var) => onPushingFunc(v, args)
-        case _ =>
-          result.push()
-          Undefined.onPushing(in)
+        case Some(v: AST.Var) =>
+          result.pop()
+          matchPreviousVar(args, v)
+        case Some(_: AST.Spacing) =>
+          result.pop()
+          result.current match {
+            case Some(v: AST.Var) =>
+              result.pop()
+              matchPreviousVar(args, v)
+            case _ => unmatchedPush(in)
+          }
+        case _ => unmatchedPush(in)
       }
+    }
+
+    private def matchPreviousVar(args: String, v: Var): Unit = {
+      v.name.toLowerCase match {
+        case "if"    => onPushingIf(args)
+        case "while" => onPushingWhile(args)
+        case "for"   => onPushingFor(args)
+        case "until" => onPushingWhile(args)
+        case _       => onPushingFunc(v, args)
+      }
+    }
+
+    private def unmatchedPush(in: String) = {
+      result.push()
+      Undefined.onPushing(in)
     }
 
     def onPushingFunc(name: AST.Var, args: String): Unit = logger.trace {
@@ -187,6 +216,30 @@ case class ParserDef() extends Parser[AST] {
         }
       }
       val fun = AST.Func(name, argsList.reverse)
+      result.pushElem(fun)
+    }
+
+    def onPushingIf(cond: String): Unit = logger.trace {
+      val fun = AST.If(cond)
+      result.pushElem(fun)
+    }
+
+    def onPushingFor(cond: String): Unit = logger.trace {
+      val fun = AST.For(cond)
+      result.pushElem(fun)
+    }
+
+    def onPushingWhile(cond: String): Unit = logger.trace {
+      val fun = AST.While(cond)
+      result.pushElem(fun)
+    }
+
+    def onPushingDo(): Unit = logger.trace {
+      val fun = AST.DoWhile()
+      result.pushElem(fun)
+    }
+    def onPushingRepeat(): Unit = logger.trace {
+      val fun = AST.RepeatUntil()
       result.pushElem(fun)
     }
 

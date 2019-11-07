@@ -78,7 +78,7 @@ lazy val buildNativeImage =
 //// Global Project ////
 ////////////////////////
 
-lazy val PseudoParser = (project in file("."))
+lazy val PseudoLang = (project in file("."))
   .settings(version := "0.1")
   .settings(Global / concurrentRestrictions += Tags.exclusive(Exclusive))
   .dependsOn(logger, flexer, syntax_definition)

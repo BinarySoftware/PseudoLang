@@ -1,6 +1,6 @@
 package org.PseudoLang.syntax.text
 
-import org.enso.PrettyPrinter._
+import org.enso.debug._
 import org.PseudoLang.syntax.text.ast.AST
 import org.enso.Logger
 import org.enso.flexer.Parser.Result
@@ -72,9 +72,16 @@ class ParserTests extends FlatSpec with Matchers {
   "Funkcja(a, b)" ?= AST(
     AST.Func(AST.Var("Funkcja"), AST.Var("a"), AST.Var("b"))
   )
+  "Funkcja ()" ?== AST(AST.Func(AST.Var("Funkcja")))
+  """Funkcja ()
+    |  return a""".stripMargin ?== AST(
+    AST.Func(AST.Var("Funkcja")),
+    AST.Block(2, AST.Func.Return(), AST.Spacing(), AST.Var("a"))
+  )
 
-  /* Bad function definition */
-  "Funkcja ()" ?= AST(AST.Var("Funkcja"), AST.Spacing(), AST.Undefined("()"))
+  /* Control Flow tests */
+
+  /* Loops tests */
 
   /* Operator tests */
   "Bar<-Foo+Bo*Fo/Mo" ?== AST(

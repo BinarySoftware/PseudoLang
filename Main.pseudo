@@ -1,9 +1,26 @@
-Foo <-- 0
-Bar <-- 1
-Function(a,b)
-  if(a < b)
-    then a * 2
-    else b mod 4
+if (a < b)
+  then a * 2
+  else b mod 4
 
+if (a < b)
+    then a
+    else if (a > b)
+      then b
+      else return Null
 
-// Function(1,2) // function call
+while (a < 5)
+    b <- b + a
+    a <- a + 1
+
+do
+    b <- b + a
+    a <- a + 1
+while (a < 5)
+
+repeat
+    b <- b + a
+    a <- a + 1
+until (a > 5)
+
+for (i in 0..5)
+    b <- b + i

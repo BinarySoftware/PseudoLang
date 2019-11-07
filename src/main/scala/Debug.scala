@@ -1,4 +1,4 @@
-package org.enso.PrettyPrinter
+package org.enso.debug
 
 import scala.annotation.tailrec
 
