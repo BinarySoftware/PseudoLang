@@ -3,7 +3,7 @@ package org.PseudoLang
 import org.PseudoLang.syntax.text.Parser
 import java.io.File
 import java.io.PrintWriter
-import org.enso.PrettyPrinter._
+import org.enso.debug._
 
 import scala.io.Source
 

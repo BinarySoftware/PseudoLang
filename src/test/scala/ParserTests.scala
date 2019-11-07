@@ -1,6 +1,6 @@
 package org.PseudoLang.syntax.text
 
-import org.enso.PrettyPrinter._
+import org.enso.debug._
 import org.PseudoLang.syntax.text.ast.AST
 import org.enso.Logger
 import org.enso.flexer.Parser.Result
