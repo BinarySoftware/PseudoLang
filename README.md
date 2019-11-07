@@ -20,22 +20,35 @@ Postanowiłem pomóc takim delikwentom poprzez napisanie parsera dla naszego ucz
 W ten sposób użytkownik, nie znając syntaxu scali tworzy kod zrozumiały dla kompilatora scali i z nim operuje.
 Powyższy schemat dla osób które mają rozeznanie w programowaniu może stawiać wiele pytań, między innymi, czy aby podwójne parsowanie kodu nie jest bardzo niewydajne? Otóż fakt, nie będzie to tak wydajne jak naturalny kod Scalowski, ale równie dobrze można powiedzieć, że najlepiej pisać kod bezpośrednio w assemblerze. 
 **Good luck, have fun.**
-Natomiast, dzięki użyciu szybkich jak piorun bibliotek które powstały dzięki pracy genialnego zespołu języka [luna/enso](https://github.com/luna/enso), parser będzie należał do jednego z najszybszych na rynku - celem jest uzyskanie co najmniej 7 mln znaków/sekundę
+Natomiast, dzięki użyciu szybkich jak piorun bibliotek które powstały dzięki pracy genialnego zespołu języka [luna/enso](https://github.com/luna/enso), parser będzie należał do jednego z najszybszych na rynku - celem jest uzyskanie średniej co najmniej 2 mln znaków/sekundę
 
 ### Użyte biblioteki
-- org.enso.flexer - baza dla parsera
-- org.enso.logger - logging management
-- org.enso.data._ - funkcje ułatwiające pracę z danymi
+| Biblioteka | Opis |
+| ---------- | ---- |
+| org.enso.flexer | Podstawowa biblioteka, baza dla parsera, wylicza NFA i DFA, kontroluje stany |
+| org.enso.logger | Logger z funkcją tracingu |
+| org.enso.data._ | Funkcje ułatwiające pracę z danymi |
 
 ### Funkcjonujące elementy AST
-- AST - AST tworzone po zakończeniu parsowania tekstu
-- AST.Elem - podstawowy element AST, szkielet najnizszego poziomu do dziedziczenia przez wyzsze elementy
-- AST.Empty - Pusty element AST, nic nie wnosi
-- AST.Var - Zmienne, z deklaracją typów
-- AST.Func - Funkcja, z deklaracją argumentów
-- AST.Comment - Komentarze w linii kodu
-- AST.Newline - Znacznik początku nowej linii
-- AST.Undefined - Cała reszra
-- AST.Spacing - odstępy między elementami
-- AST.Block - Fragment kodu z wcięciem od linii bazowej
-- AST.Opr - Operatory arytmetyczne, logiczne, przypisywania, typowania
+| Element | Opis |
+| ---------- | ---- |
+| AST           | Służy do przechowania AST tworzonego po zakończeniu parsowania tekstu |
+| AST.Elem      | podstawowy element AST, szkielet najnizszego poziomu do dziedziczenia przez wyzsze elementy |
+| AST.Empty     | Pusty element AST, nic nie wnosi, tylko do użytku w czasie parsowania, by nie tworzyc Option[] |
+| AST.Var       | Zmienne, z deklaracją typów |
+| AST.Func      | Funkcja, z deklaracją argumentów |
+| AST.Comment   | Komentarze w linii kodu |
+| AST.Newline   | Znacznik początku nowej linii |
+| AST.Spacing   | odstępy między elementami |
+| AST.Block     | Fragment kodu z wcięciem od linii bazowej |
+| AST.Opr       | Operatory arytmetyczne, logiczne, przypisywania, typowania |
+| AST.Undefined | Cała reszra elementów, które nie mogły zostać sparsowane na poprawne elementy AST |
+
+### Wyniki benchmarków Parsera
+| Typ | Wynik - Znaki/S |
+| --- | --------------- |
+|Zmienne   | 4'879'420  |
+|Funkcje   | 3'060'727  |
+|Operatory | 910'222    |
+|Bloki     |  1'575'384 |
+| **Średnia** | 2'606'438 |

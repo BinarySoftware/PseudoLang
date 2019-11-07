@@ -23,7 +23,10 @@ object ParserBench extends Bench.OfflineRegressionReport {
     for { i <- range } yield f(i)
 
   val tests = List(
-    "funtions" -> gen(exp(14), i => "function()\n" * i)
+    "variables" -> gen(exp(14), i => "aaaaaaaaaa\n" * i),
+    "functions" -> gen(exp(14), i => "function()\n" * i),
+    "operators" -> gen(exp(14), i => "a<-b+c*d/e\n" * i),
+    "blocks" -> gen(exp(14), i => "fo\n  b\n c" * i)
   )
 
   def run(str: String): Result[AST] = Parser.run(str)

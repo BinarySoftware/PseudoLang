@@ -3,6 +3,7 @@ package org.PseudoLang
 import org.PseudoLang.syntax.text.Parser
 import java.io.File
 import java.io.PrintWriter
+import org.enso.PrettyPrinter._
 
 import scala.io.Source
 
@@ -19,18 +20,17 @@ object Main extends App {
   val code   = FileManager.readFileWithPseudo("", "Main")
   val parsed = new Parser().runMatched(code)
 //  pprint.pprintln(parsed)
-  println(PrettyPrinter.pretty(parsed.toString))
+  println(Debug.pretty(parsed.toString))
   println("========================== CODE ============================")
   println(parsed.show())
   println("======================= SCALA CODE =========================")
   val scalaCode = parsed.generateScala()
   println(scalaCode)
-  FileManager.saveScalaCodeToFile("", "Generated", scalaCode)
+  // FileManager.saveScalaCodeToFile("", "Generated", scalaCode)
   println("============================================================")
 }
 
 object FileManager {
-
   def readFileWithPseudo(path: String, name: String): String = {
     val bufferedSource = Source.fromFile(path + name + ".pseudo")
     val code           = bufferedSource.getLines.mkString("\n")
