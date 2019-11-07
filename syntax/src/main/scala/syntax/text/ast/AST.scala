@@ -167,21 +167,70 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   //// Control Flow ////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
-  case class If(condition: String, thenCase: AST.Elem, elseCase: AST.Elem)
-      extends Elem {
-    val repr
-      : Repr.Builder = R + "If" + "(" + condition + ")" + thenCase + elseCase
+  case class If(condition: String, block: AST.Elem) extends Elem {
+    val repr: Repr.Builder = R + "If" + "(" + condition + ")" + block.repr
     val scalaRepr
-      : Repr.Builder = R + "if" + "(" + condition + ")" + thenCase + elseCase
+      : Repr.Builder = R + "if" + "(" + condition + ")" + block.scalaRepr
   }
   object If {
-    def apply(condition: String): If =
-      new If(condition, AST.Empty(), AST.Empty())
-    def apply(condition: String, thenCase: AST.Elem): If =
-      new If(condition, thenCase, AST.Empty())
-    def apply(condition: String, thenCase: AST.Elem, elseCase: AST.Elem): If =
-      new If(condition, thenCase, elseCase)
+    def apply(condition: String): If                  = new If(condition, AST.Empty())
+    def apply(condition: String, block: AST.Elem): If = new If(condition, block)
+
+    case class ElseCase(block: AST.Elem) extends Elem {
+      val repr: Repr.Builder      = R + "Else " + block.repr
+      val scalaRepr: Repr.Builder = R + "else " + block.scalaRepr
+    }
+    object ElseCase {
+      def apply(): ElseCase                = new ElseCase(AST.Empty())
+      def apply(block: AST.Elem): ElseCase = new ElseCase(block)
+    }
+
+    case class ThenCase(block: AST.Elem) extends Elem {
+      val repr: Repr.Builder      = R + "Then " + block.repr
+      val scalaRepr: Repr.Builder = R + "then " + block.scalaRepr
+    }
+    object ThenCase {
+      def apply(): ThenCase                = new ThenCase(AST.Empty())
+      def apply(block: AST.Elem): ThenCase = new ThenCase(block)
+    }
   }
+
+  //////////////////////////////////////////////////////////////////////////////
+  //// Loops ///////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  case class While(condition: String, block: AST.Elem) extends Elem {
+    val repr: Repr.Builder = R + "While" + "(" + condition + ")" + block.repr
+    val scalaRepr
+      : Repr.Builder = R + "while" + "(" + condition + ")" + block.scalaRepr
+  }
+  object While {
+    def apply(condition: String): While = new While(condition, AST.Empty())
+    def apply(condition: String, block: AST.Elem): While =
+      new While(condition, block)
+  }
+
+  case class DoWhile(condition: String, block: AST.Elem) extends Elem {
+    val repr: Repr.Builder = R + "Do" + block.repr + "While (" + condition + ")"
+    val scalaRepr
+      : Repr.Builder = R + "do" + block.scalaRepr + "while (" + condition + ")"
+  }
+  object DoWhile {
+    def apply(condition: String): DoWhile = new DoWhile(condition, AST.Empty())
+    def apply(condition: String, block: AST.Elem): DoWhile =
+      new DoWhile(condition, block)
+  }
+
+  case class For(condition: String, block: AST.Elem) extends Elem {
+    val repr: Repr.Builder = R + "For" + "(" + condition + ")" + block.repr
+    val scalaRepr
+      : Repr.Builder = R + "for" + "(" + condition + ")" + block.scalaRepr
+  }
+  object For {
+    def apply(condition: String): For = new For(condition, AST.Empty())
+    def apply(condition: String, block: AST.Elem): For =
+      new For(condition, block)
+  }
+
   //////////////////////////////////////////////////////////////////////////////
   //// Block ///////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
