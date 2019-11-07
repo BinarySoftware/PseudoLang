@@ -5,7 +5,6 @@ import org.enso.flexer.automata.Pattern
 import org.enso.flexer.automata.Pattern._
 import org.PseudoLang.syntax.text.ast.AST._
 import org.PseudoLang.syntax.text.ast.AST
-import scala.reflect.runtime.universe.reify
 
 case class ParserDef() extends Parser[AST] {
 
@@ -133,22 +132,20 @@ case class ParserDef() extends Parser[AST] {
     }
   }
 
-  ROOT || AST.Opr.Add.m || reify { Opr.onPushing(AST.Opr.Add) }
-  ROOT || AST.Opr.Sub.m || reify { Opr.onPushing(AST.Opr.Sub) }
-  ROOT || AST.Opr.Mul.m || reify { Opr.onPushing(AST.Opr.Mul) }
-  ROOT || AST.Opr.Div.m || reify { Opr.onPushing(AST.Opr.Div) }
-  ROOT || AST.Opr.Mod.m || reify { Opr.onPushing(AST.Opr.Mod) }
-  ROOT || AST.Opr.Pow.m || reify { Opr.onPushing(AST.Opr.Pow) }
-  ROOT || AST.Opr.DefAndAssign.m || reify {
-    Opr.onPushing(AST.Opr.DefAndAssign)
-  }
-  ROOT || AST.Opr.Assign.m   || reify { Opr.onPushing(AST.Opr.Assign)   }
-  ROOT || AST.Opr.TpAnn.m    || reify { Opr.onPushing(AST.Opr.TpAnn)    }
-  ROOT || AST.Opr.isEq.m     || reify { Opr.onPushing(AST.Opr.isEq)     }
-  ROOT || AST.Opr.isGr.m     || reify { Opr.onPushing(AST.Opr.isGr)     }
-  ROOT || AST.Opr.isLe.m     || reify { Opr.onPushing(AST.Opr.isLe)     }
-  ROOT || AST.Opr.isGrOrEq.m || reify { Opr.onPushing(AST.Opr.isGrOrEq) }
-  ROOT || AST.Opr.isLeOrEq.m || reify { Opr.onPushing(AST.Opr.isLeOrEq) }
+  ROOT || AST.Opr.Add.m          || Opr.onPushing(AST.Opr.Add)
+  ROOT || AST.Opr.Sub.m          || Opr.onPushing(AST.Opr.Sub)
+  ROOT || AST.Opr.Mul.m          || Opr.onPushing(AST.Opr.Mul)
+  ROOT || AST.Opr.Div.m          || Opr.onPushing(AST.Opr.Div)
+  ROOT || AST.Opr.Mod.m          || Opr.onPushing(AST.Opr.Mod)
+  ROOT || AST.Opr.Pow.m          || Opr.onPushing(AST.Opr.Pow)
+  ROOT || AST.Opr.DefAndAssign.m || Opr.onPushing(AST.Opr.DefAndAssign)
+  ROOT || AST.Opr.Assign.m       || Opr.onPushing(AST.Opr.Assign)
+  ROOT || AST.Opr.TpAnn.m        || Opr.onPushing(AST.Opr.TpAnn)
+  ROOT || AST.Opr.isEq.m         || Opr.onPushing(AST.Opr.isEq)
+  ROOT || AST.Opr.isGr.m         || Opr.onPushing(AST.Opr.isGr)
+  ROOT || AST.Opr.isLe.m         || Opr.onPushing(AST.Opr.isLe)
+  ROOT || AST.Opr.isGrOrEq.m     || Opr.onPushing(AST.Opr.isGrOrEq)
+  ROOT || AST.Opr.isLeOrEq.m     || Opr.onPushing(AST.Opr.isLeOrEq)
 
   //////////////////////////////////////////////////////////////////////////////
   //// Variables ///////////////////////////////////////////////////////////////
@@ -163,7 +160,7 @@ case class ParserDef() extends Parser[AST] {
     val varName: Pattern  = varChars.many
   }
 
-  ROOT || Var.varName || reify { Var.onPushing(currentMatch) }
+  ROOT || Var.varName || Var.onPushing(currentMatch)
 
   //////////////////////////////////////////////////////////////////////////////
   //// Functions ///////////////////////////////////////////////////////////////
@@ -196,7 +193,7 @@ case class ParserDef() extends Parser[AST] {
     val funcArgs: Pattern = '(' >> not(')').many >> ')'
   }
 
-  ROOT || Func.funcArgs || reify { Func.onPushingArgs(currentMatch) }
+  ROOT || Func.funcArgs || Func.onPushingArgs(currentMatch)
 
   //////////////////////////////////////////////////////////////////////////////
   //// Comments ////////////////////////////////////////////////////////////////
@@ -211,7 +208,7 @@ case class ParserDef() extends Parser[AST] {
     val pattern: Pattern = "//" >> not(newline).many
   }
 
-  ROOT || Comment.pattern || reify { Comment.onPushing(currentMatch) }
+  ROOT || Comment.pattern || Comment.onPushing(currentMatch)
 
   //////////////////////////////////////////////////////////////////////////////
   //// Indentation Manager /////////////////////////////////////////////////////
@@ -319,10 +316,10 @@ case class ParserDef() extends Parser[AST] {
 
   val NEWLINE: State = state.define("Newline")
 
-  ROOT    || spaces               || reify { Indent.onSpacing(currentMatch) }
-  ROOT    || newline              || reify { state.begin(NEWLINE)           }
-  NEWLINE || Indent.EOFPattern    || reify { Indent.onEOFPattern()          }
-  NEWLINE || Indent.indentPattern || reify { Indent.onIndentPattern()       }
+  ROOT    || spaces               || Indent.onSpacing(currentMatch)
+  ROOT    || newline              || state.begin(NEWLINE)
+  NEWLINE || Indent.EOFPattern    || Indent.onEOFPattern()
+  NEWLINE || Indent.indentPattern || Indent.onIndentPattern()
 
   //////////////////////////////////////////////////////////////////////////////
   //// End Of File /////////////////////////////////////////////////////////////
@@ -342,7 +339,7 @@ case class ParserDef() extends Parser[AST] {
     }
   }
 
-  ROOT || eof || reify { EOF.onEOF() }
+  ROOT || eof || EOF.onEOF()
 
   //////////////////////////////////////////////////////////////////////////////
   //// Undefined ///////////////////////////////////////////////////////////////
@@ -354,5 +351,5 @@ case class ParserDef() extends Parser[AST] {
     }
   }
 
-  ROOT || any || reify { Undefined.onPushing(currentMatch) }
+  ROOT || any || Undefined.onPushing(currentMatch)
 }
