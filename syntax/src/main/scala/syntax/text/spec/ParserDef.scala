@@ -247,7 +247,6 @@ case class ParserDef() extends Parser[AST] {
 
     def checkIfThereIsBlockInStack(): Unit = logger.trace {
       while (stack.nonEmpty && current < stack.head) {
-        println(stack)
         stack = stack.tail
         onPushingBlock()
       }
