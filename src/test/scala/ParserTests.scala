@@ -15,7 +15,7 @@ class ParserTests extends FlatSpec with Matchers {
     val output = Parser.run(input)
     output match {
       case Result(_, Result.Success(value)) =>
-        println(PrettyPrinter.pretty(value.toString))
+        println(Debug.pretty(value.toString))
         assert(value == result)
         assert(value.show() == input)
       case _ =>
@@ -27,7 +27,7 @@ class ParserTests extends FlatSpec with Matchers {
     val output = Parser.run(input)
     output match {
       case Result(_, Result.Success(value)) =>
-        println(PrettyPrinter.pretty(value.toString))
+        println(Debug.pretty(value.toString))
         assert(value == result)
       case _ =>
         fail(s"Parsing failed, consumed ${output.offset} chars")

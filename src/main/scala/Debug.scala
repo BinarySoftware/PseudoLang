@@ -3,11 +3,17 @@ package org.enso.PrettyPrinter
 import scala.annotation.tailrec
 
 /**
-  * PrettyPrinter
-  *
-  * A blazing-fast tail-recursive AST printer
+  * Useful debugging tool for the parser AST.
   */
-object PrettyPrinter {
+object Debug {
+
+  /**
+    * Pretty prints the parser AST string representation in a more readable
+    * format.
+    *
+    * @param str the string representation of the parser AST
+    * @return the pretty-printed version of `str`
+    */
   def pretty(str: String): String = {
 
     def checkClosing(in: List[Char]): Int = {

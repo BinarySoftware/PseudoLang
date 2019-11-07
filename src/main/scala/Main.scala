@@ -20,7 +20,7 @@ object Main extends App {
   val code   = FileManager.readFileWithPseudo("", "Main")
   val parsed = new Parser().runMatched(code)
 //  pprint.pprintln(parsed)
-  println(PrettyPrinter.pretty(parsed.toString))
+  println(Debug.pretty(parsed.toString))
   println("========================== CODE ============================")
   println(parsed.show())
   println("======================= SCALA CODE =========================")
@@ -31,7 +31,6 @@ object Main extends App {
 }
 
 object FileManager {
-
   def readFileWithPseudo(path: String, name: String): String = {
     val bufferedSource = Source.fromFile(path + name + ".pseudo")
     val code           = bufferedSource.getLines.mkString("\n")
