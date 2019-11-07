@@ -9,15 +9,6 @@ import scala.reflect.runtime.universe.reify
 
 case class ParserDef() extends Parser[AST] {
 
-  // TODO
-  //  - Add Scala code generator
-  //  - Add conditional functions
-  //  - Add Array Support with []
-  //  - Add AST.Args with ()
-  //  - Add Return
-  //  - Add While, for and do while loops
-  //  - Add AST.Function.Call to call func
-
   //////////////////////////////////////////////////////////////////////////////
   //// Result //////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
@@ -100,8 +91,7 @@ case class ParserDef() extends Parser[AST] {
           case elem1 :: rest =>
             result.pop()
             onFirstElementWhileTraversingThroughLine(elem1, rest)
-          case rest => rest
-          case Nil  => Nil
+          case Nil => Nil
         }
       }
 
@@ -192,7 +182,7 @@ case class ParserDef() extends Parser[AST] {
 
     def onPushingFunc(name: AST.Var, args: String): Unit = logger.trace {
       var argsList: List[AST.Var] = List()
-      if (args.length > 0) {
+      if (args.nonEmpty) {
         val al = args.split(',').toList
         for (a <- al) {
           val aNoSpaces = a.replaceAll(" ", "")
