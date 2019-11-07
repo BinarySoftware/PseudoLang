@@ -231,6 +231,19 @@ object AST {
       new For(condition, block)
   }
 
+  case class RepeatUntil(condition: String, block: AST.Elem) extends Elem {
+    val repr
+      : Repr.Builder = R + "Repeat" + block.repr + "Until (" + condition + ")"
+    val scalaRepr
+      : Repr.Builder = R + "do" + block.scalaRepr + "while !(" + condition + ")"
+  }
+  object RepeatUntil {
+    def apply(condition: String): RepeatUntil =
+      new RepeatUntil(condition, AST.Empty())
+    def apply(condition: String, block: AST.Elem): RepeatUntil =
+      new RepeatUntil(condition, block)
+  }
+
   //////////////////////////////////////////////////////////////////////////////
   //// Block ///////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
