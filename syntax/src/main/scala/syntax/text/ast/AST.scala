@@ -178,7 +178,7 @@ object AST {
         case n: Newline   => R + n + indent
         case b: AST.Block => R + b.scalaRepr + indent
         case elem         => R + elem.scalaRepr
-      } + Newline() + indent + "}"
+      } + Newline() + (indent - 2) + "}"
   }
   object Block {
     def apply(): Block                 = new Block(0, Nil)
