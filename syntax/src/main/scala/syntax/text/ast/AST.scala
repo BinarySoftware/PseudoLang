@@ -3,11 +3,6 @@ package org.PseudoLang.syntax.text.ast
 import org.enso.syntax.text.ast.Repr
 import org.enso.syntax.text.ast.Repr._
 
-/**
-  * This is the PseudoLang Parser AST
-  *
-  *
-  */
 sealed trait Symbol extends Repr.Provider {
   def show(): String = repr.build()
 

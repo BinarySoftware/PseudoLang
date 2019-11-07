@@ -10,11 +10,6 @@ import org.PseudoLang.syntax.text.spec.ParserDef
 //// PseudoLang Parser /////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-/**
-  * This is the main PseudoLang Parser
-  *
-  *
-  */
 class Parser {
   import Parser._
   private val engine = newEngine()
