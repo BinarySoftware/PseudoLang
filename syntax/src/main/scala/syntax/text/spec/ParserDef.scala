@@ -152,13 +152,13 @@ case class ParserDef() extends Parser[AST] {
   //////////////////////////////////////////////////////////////////////////////
   final object Var {
     def onPushing(in: String): Unit = logger.trace {
-      if (in.toLowerCase == "then") {
-        result.pushElem(AST.If.ThenCase())
-      } else if (in.toLowerCase == "else") {
-        result.pushElem(AST.If.ElseCase())
-      } else {
-        val vr = AST.Var(in)
-        result.pushElem(vr)
+      in.toLowerCase match {
+        case "then"   => result.pushElem(AST.If.ThenCase())
+        case "else"   => result.pushElem(AST.If.ElseCase())
+        case "do"     => Func.onPushingDo()
+        case "repeat" => Func.onPushingRepeat()
+//        case "return" => result.pushElem(AST.Return())
+        case _ => result.pushElem(AST.Var(in))
       }
     }
 
@@ -177,30 +177,33 @@ case class ParserDef() extends Parser[AST] {
       result.pop()
       result.current match {
         case Some(v: AST.Var) =>
-          if (v.name.toLowerCase == "if") {
-            result.pop()
-            onPushingIf(args)
-          } else {
-            onPushingFunc(v, args)
-          }
+          result.pop()
+          matchPreviousVar(args, v)
         case Some(_: AST.Spacing) =>
           result.pop()
           result.current match {
             case Some(v: AST.Var) =>
-              if (v.name.toLowerCase == "if") {
-                result.pop()
-                onPushingIf(args)
-              } else {
-                onPushingFunc(v, args)
-              }
-            case _ =>
-              result.push()
-              Undefined.onPushing(in)
+              result.pop()
+              matchPreviousVar(args, v)
+            case _ => unmatchedPush(in)
           }
-        case _ =>
-          result.push()
-          Undefined.onPushing(in)
+        case _ => unmatchedPush(in)
       }
+    }
+
+    private def matchPreviousVar(args: String, v: Var): Unit = {
+      v.name.toLowerCase match {
+        case "if"    => onPushingIf(args)
+        case "while" => onPushingWhile(args)
+        case "for"   => onPushingFor(args)
+        case "until" => onPushingWhile(args)
+        case _       => onPushingFunc(v, args)
+      }
+    }
+
+    private def unmatchedPush(in: String) = {
+      result.push()
+      Undefined.onPushing(in)
     }
 
     def onPushingFunc(name: AST.Var, args: String): Unit = logger.trace {
@@ -218,6 +221,25 @@ case class ParserDef() extends Parser[AST] {
 
     def onPushingIf(cond: String): Unit = logger.trace {
       val fun = AST.If(cond)
+      result.pushElem(fun)
+    }
+
+    def onPushingFor(cond: String): Unit = logger.trace {
+      val fun = AST.For(cond)
+      result.pushElem(fun)
+    }
+
+    def onPushingWhile(cond: String): Unit = logger.trace {
+      val fun = AST.While(cond)
+      result.pushElem(fun)
+    }
+
+    def onPushingDo(): Unit = logger.trace {
+      val fun = AST.DoWhile()
+      result.pushElem(fun)
+    }
+    def onPushingRepeat(): Unit = logger.trace {
+      val fun = AST.RepeatUntil()
       result.pushElem(fun)
     }
 

@@ -215,6 +215,7 @@ object AST {
       : Repr.Builder = R + "do" + block.scalaRepr + "while (" + condition + ")"
   }
   object DoWhile {
+    def apply(): DoWhile                  = new DoWhile("", AST.Empty())
     def apply(condition: String): DoWhile = new DoWhile(condition, AST.Empty())
     def apply(condition: String, block: AST.Elem): DoWhile =
       new DoWhile(condition, block)
@@ -238,6 +239,7 @@ object AST {
       : Repr.Builder = R + "do" + block.scalaRepr + "while !(" + condition + ")"
   }
   object RepeatUntil {
+    def apply(): RepeatUntil = new RepeatUntil("", AST.Empty())
     def apply(condition: String): RepeatUntil =
       new RepeatUntil(condition, AST.Empty())
     def apply(condition: String, block: AST.Elem): RepeatUntil =
