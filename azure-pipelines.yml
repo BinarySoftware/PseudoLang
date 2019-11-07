@@ -16,27 +16,35 @@ variables:
   sbtVersion: 1.3.3    # Please ensure this is in sync with project/build.properties
 
 jobs:
-- job: PseudoParser
+- job: PseudoLang
   timeoutInMinutes: 90
   pool:
-    vmImage: 'ubuntu-latest'
+    vmImage: macOS-10.13
   steps:
+  - script: |
+      curl -fSL -o graal.tar.gz https://github.com/oracle/graal/releases/download/vm-$(graalVersion)/graalvm-ce-darwin-amd64-$(graalVersion).tar.gz
+      tar -x -z -C ~ -f graal.tar.gz
+      ls ~/graalvm-ce-$(graalVersion)
+      sudo mv ~/graalvm-ce-$(graalVersion) /Library/Java/JavaVirtualMachines
+      echo "##vso[task.setvariable variable=JAVA_HOME]/Library/Java/JavaVirtualMachines/graalvm-ce-$(graalVersion)/Contents/Home"
+      echo "##vso[task.setvariable variable=PATH]/Library/Java/JavaVirtualMachines/graalvm-ce-$(graalVersion)/Contents/Home/bin:$PATH"
+    displayName: Install GraalVM
   - script: |
       curl -fSL -o sbt.tgz https://piccolo.link/sbt-$(sbtVersion).tgz
       tar -x -z -C ~ -f sbt.tgz
       echo "##vso[task.setvariable variable=PATH]~/sbt/bin/:$PATH"
-    displayName: "Install sbt"
+    displayName: Install sbt
   - script: |
-      sbt test
+      sbt -no-colors test
     displayName: sbt test
+    continueOnError: true
+  - script: |
+      sbt -no-colors bench
+    displayName: sbt bench
     continueOnError: true
   - script: |
       sbt run
     displayName: sbt run
-    continueOnError: true
-  - script: |
-      sbt bench
-    displayName: sbt bench
     continueOnError: true
   - task: PublishTestResults@2
     inputs:
