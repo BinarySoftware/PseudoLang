@@ -170,7 +170,27 @@ case class ParserDef() extends Parser[AST] {
       val args = in.dropRight(1).substring(1)
       result.pop()
       result.current match {
-        case Some(v: AST.Var) => onPushingFunc(v, args)
+        case Some(v: AST.Var) =>
+          if (v.name.toLowerCase == "if") {
+            result.pop()
+            onPushingIf(args)
+          } else {
+            onPushingFunc(v, args)
+          }
+        case Some(_: AST.Spacing) =>
+          result.pop()
+          result.current match {
+            case Some(v: AST.Var) =>
+              if (v.name.toLowerCase == "if") {
+                result.pop()
+                onPushingIf(args)
+              } else {
+                onPushingFunc(v, args)
+              }
+            case _ =>
+              result.push()
+              Undefined.onPushing(in)
+          }
         case _ =>
           result.push()
           Undefined.onPushing(in)
@@ -187,6 +207,11 @@ case class ParserDef() extends Parser[AST] {
         }
       }
       val fun = AST.Func(name, argsList.reverse)
+      result.pushElem(fun)
+    }
+
+    def onPushingIf(cond: String): Unit = logger.trace {
+      val fun = AST.If(cond)
       result.pushElem(fun)
     }
 

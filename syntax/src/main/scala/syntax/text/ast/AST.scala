@@ -167,7 +167,7 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   //// Control Flow ////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
-  case class If(condition: AST.Opr, thenCase: AST.Elem, elseCase: AST.Elem)
+  case class If(condition: String, thenCase: AST.Elem, elseCase: AST.Elem)
       extends Elem {
     val repr
       : Repr.Builder = R + "If" + "(" + condition + ")" + thenCase + elseCase
@@ -175,10 +175,11 @@ object AST {
       : Repr.Builder = R + "if" + "(" + condition + ")" + thenCase + elseCase
   }
   object If {
-    def apply(condition: Opr): If = new If(condition, AST.Empty(), AST.Empty())
-    def apply(condition: Opr, thenCase: AST.Elem): If =
+    def apply(condition: String): If =
+      new If(condition, AST.Empty(), AST.Empty())
+    def apply(condition: String, thenCase: AST.Elem): If =
       new If(condition, thenCase, AST.Empty())
-    def apply(condition: Opr, thenCase: AST.Elem, elseCase: AST.Elem): If =
+    def apply(condition: String, thenCase: AST.Elem, elseCase: AST.Elem): If =
       new If(condition, thenCase, elseCase)
   }
   //////////////////////////////////////////////////////////////////////////////

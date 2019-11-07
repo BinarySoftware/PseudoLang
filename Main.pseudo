@@ -1,9 +1,9 @@
-Foo <-- 0
-Bar <-- 1
-Function(a,b)
-  if(a < b)
-    then a * 2
-    else b mod 4
+if (a < b)
+  then a * 2
+  else b mod 4
 
-
-// Function(1,2) // function call
+if (a < b)
+    then
+      a * 2
+    else
+      b mod 4
