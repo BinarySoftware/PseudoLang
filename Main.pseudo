@@ -6,7 +6,7 @@ if (a < b)
     then a
     else if (a > b)
       then b
-      else Null
+      else return Null
 
 while (a < 5)
     b <- b + a

@@ -157,8 +157,8 @@ case class ParserDef() extends Parser[AST] {
         case "else"   => result.pushElem(AST.If.ElseCase())
         case "do"     => Func.onPushingDo()
         case "repeat" => Func.onPushingRepeat()
-//        case "return" => result.pushElem(AST.Return())
-        case _ => result.pushElem(AST.Var(in))
+        case "return" => result.pushElem(AST.Func.Return())
+        case _        => result.pushElem(AST.Var(in))
       }
     }
 

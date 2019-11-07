@@ -162,6 +162,15 @@ object AST {
     def apply(name: Var): Func                 = new Func(name, Nil)
     def apply(name: Var, arg: AST.Var): Func   = new Func(name, arg :: Nil)
     def apply(name: Var, args: AST.Var*): Func = new Func(name, args.toList)
+
+    case class Return(value: AST.Elem) extends Elem {
+      val repr: Repr.Builder      = R + "Return " + value
+      val scalaRepr: Repr.Builder = R + "return " + value
+    }
+    case object Return {
+      def apply(): Return                = new Return(AST.Empty())
+      def apply(value: AST.Elem): Return = new Return(value)
+    }
   }
 
   //////////////////////////////////////////////////////////////////////////////
