@@ -261,7 +261,8 @@ case class ParserDef() extends Parser[AST] {
 
     def onPushingArray(str: String): Unit = logger.trace {
       val elems = str.dropRight(1).substring(1)
-      val arr   = AST.Array(AST.Empty(), elems)
+      val paren = AST.Parens(bracketOpen, bracketClose, elems)
+      val arr   = AST.Array(AST.Empty(), paren)
       result.pushElem(arr)
     }
 

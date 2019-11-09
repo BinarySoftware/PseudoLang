@@ -392,8 +392,8 @@ class ParserTests extends FlatSpec with Matchers {
 
   """a[1,2,3,4,5]
     |a[1]""".stripMargin ?== AST(
-    AST.Array(AST.Var("a"), "1,2,3,4,5"),
+    AST.Array(AST.Var("a"), AST.Parens('[', ']', "1,2,3,4,5")),
     AST.Newline(),
-    AST.Array(AST.Var("a"), "1")
+    AST.Array(AST.Var("a"), AST.Parens('[', ']', "1"))
   )
 }
