@@ -23,11 +23,11 @@ object Main extends App {
   println(Debug.pretty(parsed.toString))
   println("========================== CODE ============================")
   println(parsed.show())
-  println("======================= SCALA CODE =========================")
-  val scalaCode = parsed.generateScala()
-  println(scalaCode)
-  // FileManager.saveScalaCodeToFile("", "Generated", scalaCode)
-  println("============================================================")
+//  println("======================= SCALA CODE =========================")
+//  val scalaCode = parsed.generateScala()
+//  println(scalaCode)
+//  FileManager.saveScalaCodeToFile("", "Generated", scalaCode)
+//  println("============================================================")
 }
 
 object FileManager {

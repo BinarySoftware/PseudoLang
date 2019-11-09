@@ -16,6 +16,7 @@ class ParserTests extends FlatSpec with Matchers {
     output match {
       case Result(_, Result.Success(value)) =>
         println(Debug.pretty(value.toString))
+        println(value.show())
         assert(value == result)
         assert(value.show() == input)
       case _ =>
@@ -28,6 +29,7 @@ class ParserTests extends FlatSpec with Matchers {
     output match {
       case Result(_, Result.Success(value)) =>
         println(Debug.pretty(value.toString))
+        println(value.show())
         assert(value == result)
       case _ =>
         fail(s"Parsing failed, consumed ${output.offset} chars")
@@ -75,13 +77,11 @@ class ParserTests extends FlatSpec with Matchers {
   "Funkcja ()" ?== AST(AST.Func(AST.Var("Funkcja")))
   """Funkcja ()
     |  return a""".stripMargin ?== AST(
-    AST.Func(AST.Var("Funkcja")),
-    AST.Block(2, AST.Func.Return(), AST.Spacing(), AST.Var("a"))
+    AST.Func(
+      AST.Var("Funkcja"),
+      AST.Block(2, AST.Func.Return(AST.Spacing(), AST.Var("a")))
+    )
   )
-
-  /* Control Flow tests */
-
-  /* Loops tests */
 
   /* Operator tests */
   "Bar<-Foo+Bo*Fo/Mo" ?== AST(
@@ -222,14 +222,171 @@ class ParserTests extends FlatSpec with Matchers {
     |  c <- a
     |  a <- b
     |  b <- c""".stripMargin ?== AST(
-    AST.Func(AST.Var("Swap"), AST.Var("a"), AST.Var("b")),
-    AST.Block(
-      2,
-      AST.Opr(AST.Opr.Assign, AST.Var("c"), AST.Var("a")),
-      AST.Newline(),
-      AST.Opr(AST.Opr.Assign, AST.Var("a"), AST.Var("b")),
-      AST.Newline(),
-      AST.Opr(AST.Opr.Assign, AST.Var("b"), AST.Var("c"))
+    AST.Func(
+      AST.Var("Swap"),
+      AST.Block(
+        2,
+        AST.Opr(AST.Opr.Assign, AST.Var("c"), AST.Var("a")),
+        AST.Newline(),
+        AST.Opr(AST.Opr.Assign, AST.Var("a"), AST.Var("b")),
+        AST.Newline(),
+        AST.Opr(AST.Opr.Assign, AST.Var("b"), AST.Var("c"))
+      ),
+      AST.Var("a"),
+      AST.Var("b")
+    )
+  )
+
+  """|Fu(a,b)
+     |  c <- a
+     |b""".stripMargin ?== AST(
+    AST.Func(
+      AST.Var("Fu"),
+      AST.Block(
+        2,
+        AST.Opr(AST.Opr.Assign, AST.Var("c"), AST.Var("a"))
+      ),
+      AST.Var("a"),
+      AST.Var("b")
+    ),
+    AST.Newline(),
+    AST.Var("b")
+  )
+
+  /* Control Flow tests */
+  """|If(a<b)
+     |  then a
+     |  else b""".stripMargin ?== AST(
+    AST.If(
+      "a<b",
+      AST.Block(
+        2,
+        AST.If
+          .ThenCase(
+            AST.Spacing(),
+            AST.Var("a"),
+            AST.Newline(),
+            AST.If.ElseCase(AST.Spacing(), AST.Var("b"))
+          )
+      )
+    )
+  )
+
+  """|If(a<b)
+     |  then a
+     |  else If(a=b)
+     |    then 2
+     |    else b""".stripMargin ?== AST(
+    AST.If(
+      "a<b",
+      AST.Block(
+        2,
+        AST.If
+          .ThenCase(
+            AST.Spacing(),
+            AST.Var("a"),
+            AST.Newline(),
+            AST.If.ElseCase(
+              AST.If(
+                "a=b",
+                AST.Block(
+                  4,
+                  AST.If
+                    .ThenCase(
+                      AST.Spacing(),
+                      AST.Var("2"),
+                      AST.Newline(),
+                      AST.If.ElseCase(AST.Spacing(), AST.Var("b"))
+                    )
+                )
+              )
+            )
+          )
+      )
+    )
+  )
+
+  /* Loops tests */
+  """do
+    |  b <- b + a
+    |  a <- a + 1
+    |while (a < 5)""".stripMargin ?== AST(
+    AST.DoWhile(
+      "a < 5",
+      AST.Block(
+        2,
+        AST.Opr(
+          AST.Opr.Assign,
+          AST.Var("b"),
+          AST.Opr(AST.Opr.Add, AST.Var("b"), AST.Var("a"))
+        ),
+        AST.Newline(),
+        AST.Opr(
+          AST.Opr.Assign,
+          AST.Var("a"),
+          AST.Opr(AST.Opr.Add, AST.Var("a"), AST.Var("1"))
+        )
+      )
+    )
+  )
+
+  """while (a < 5)
+    |  b <- b + a
+    |  a <- a + 1""".stripMargin ?== AST(
+    AST.While(
+      "a < 5",
+      AST.Block(
+        2,
+        AST.Opr(
+          AST.Opr.Assign,
+          AST.Var("b"),
+          AST.Opr(AST.Opr.Add, AST.Var("b"), AST.Var("a"))
+        ),
+        AST.Newline(),
+        AST.Opr(
+          AST.Opr.Assign,
+          AST.Var("a"),
+          AST.Opr(AST.Opr.Add, AST.Var("a"), AST.Var("1"))
+        )
+      )
+    )
+  )
+
+  """repeat
+    |  b <- b + a
+    |  a <- a + 1
+    |until (a > 5)""".stripMargin ?== AST(
+    AST.RepeatUntil(
+      "a > 5",
+      AST.Block(
+        2,
+        AST.Opr(
+          AST.Opr.Assign,
+          AST.Var("b"),
+          AST.Opr(AST.Opr.Add, AST.Var("b"), AST.Var("a"))
+        ),
+        AST.Newline(),
+        AST.Opr(
+          AST.Opr.Assign,
+          AST.Var("a"),
+          AST.Opr(AST.Opr.Add, AST.Var("a"), AST.Var("1"))
+        )
+      )
+    )
+  )
+
+  """for (i in 0..9)
+    |  b <- b + i""".stripMargin ?== AST(
+    AST.For(
+      "i in 0..9",
+      AST.Block(
+        2,
+        AST.Opr(
+          AST.Opr.Assign,
+          AST.Var("b"),
+          AST.Opr(AST.Opr.Add, AST.Var("b"), AST.Var("i"))
+        )
+      )
     )
   )
 }

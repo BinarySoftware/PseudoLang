@@ -55,6 +55,22 @@ case class ParserDef() extends Parser[AST] {
   val spaces: Pattern = ' '.many1
   val newline: Char   = '\n'
 
+  /* Keywords */
+  val _then_   = "then"
+  val _else_   = "else"
+  val _do_     = "do"
+  val _repeat_ = "repeat"
+  val _return_ = "return"
+  val _if_     = "if"
+  val _while_  = "while"
+  val _for_    = "for"
+  val _until_  = "until"
+
+  val parenOpen    = '('
+  val parenClose   = ')'
+  val bracketOpen  = '['
+  val bracketClose = ']'
+
   //////////////////////////////////////////////////////////////////////////////
   //// Operators ///////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
@@ -153,12 +169,12 @@ case class ParserDef() extends Parser[AST] {
   final object Var {
     def onPushing(in: String): Unit = logger.trace {
       in.toLowerCase match {
-        case "then"   => result.pushElem(AST.If.ThenCase())
-        case "else"   => result.pushElem(AST.If.ElseCase())
-        case "do"     => Func.onPushingDo()
-        case "repeat" => Func.onPushingRepeat()
-        case "return" => result.pushElem(AST.Func.Return())
-        case _        => result.pushElem(AST.Var(in))
+        case `_then_`   => result.pushElem(AST.If.ThenCase())
+        case `_else_`   => result.pushElem(AST.If.ElseCase())
+        case `_do_`     => Func.onPushingDo()
+        case `_repeat_` => Func.onPushingRepeat()
+        case `_return_` => result.pushElem(AST.Func.Return())
+        case _          => result.pushElem(AST.Var(in))
       }
     }
 
@@ -193,11 +209,11 @@ case class ParserDef() extends Parser[AST] {
 
     private def matchPreviousVar(args: String, v: Var): Unit = {
       v.name.toLowerCase match {
-        case "if"    => onPushingIf(args)
-        case "while" => onPushingWhile(args)
-        case "for"   => onPushingFor(args)
-        case "until" => onPushingWhile(args)
-        case _       => onPushingFunc(v, args)
+        case `_if_`    => onPushingIf(args)
+        case `_while_` => onPushingWhile(args)
+        case `_for_`   => onPushingFor(args)
+        case `_until_` => onPushingWhile(args)
+        case _         => onPushingFunc(v, args)
       }
     }
 
@@ -215,7 +231,7 @@ case class ParserDef() extends Parser[AST] {
           argsList +:= AST.Var(aNoSpaces)
         }
       }
-      val fun = AST.Func(name, argsList.reverse)
+      val fun = AST.Func(name, AST.Empty(), argsList.reverse)
       result.pushElem(fun)
     }
 
@@ -243,7 +259,7 @@ case class ParserDef() extends Parser[AST] {
       result.pushElem(fun)
     }
 
-    val funcArgs: Pattern = '(' >> not(')').many >> ')'
+    val funcArgs: Pattern = parenOpen >> not(parenClose).many >> parenClose
   }
 
   ROOT || Func.funcArgs || Func.onPushingArgs(currentMatch)
@@ -251,14 +267,13 @@ case class ParserDef() extends Parser[AST] {
   //////////////////////////////////////////////////////////////////////////////
   //// Comments ////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
-
   final object Comment {
     def onPushing(in: String): Unit = logger.trace {
       val com = AST.Comment(in.substring(2))
       result.pushElem(com)
     }
 
-    val pattern: Pattern = "//" >> not(newline).many
+    val pattern: Pattern = AST.Comment.marker >> not(newline).many
   }
 
   ROOT || Comment.pattern || Comment.onPushing(currentMatch)
@@ -385,10 +400,63 @@ case class ParserDef() extends Parser[AST] {
       }
     }
 
+    def connectBlocksToAppropriateMethods(s: List[AST.Elem]): List[AST.Elem] = {
+      s match {
+        case (f: AST.Func) :: (b: AST.Block) :: rest =>
+          val bl =
+            AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
+          AST.Func(f.name, bl, f.args) :: connectBlocksToAppropriateMethods(
+            rest
+          )
+        case (i: AST.If) :: (b: AST.Block) :: rest =>
+          val bl =
+            AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
+          AST.If(i.condition, bl) :: connectBlocksToAppropriateMethods(rest)
+        case (_: AST.If.ThenCase) :: rest =>
+          AST.If.ThenCase(connectBlocksToAppropriateMethods(rest)) :: Nil
+        case (_: AST.If.ElseCase) :: rest =>
+          AST.If.ElseCase(connectBlocksToAppropriateMethods(rest)) :: Nil
+        case (_: AST.DoWhile) :: (b: AST.Block) :: (w: AST.While) :: rest =>
+          val bl =
+            AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
+          AST.DoWhile(w.condition, bl) :: connectBlocksToAppropriateMethods(
+            rest
+          )
+        case (_: AST.RepeatUntil) :: (b: AST.Block) :: (w: AST.While) :: rest =>
+          val bl =
+            AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
+          AST.RepeatUntil(w.condition, bl) :: connectBlocksToAppropriateMethods(
+            rest
+          )
+        case (w: AST.While) :: (b: AST.Block) :: rest =>
+          val bl =
+            AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
+          AST.While(w.condition, bl) :: connectBlocksToAppropriateMethods(
+            rest
+          )
+        case (f: AST.For) :: (b: AST.Block) :: rest =>
+          val bl =
+            AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
+          AST.For(f.condition, bl) :: connectBlocksToAppropriateMethods(
+            rest
+          )
+        case (_: AST.Func.Return) :: rest =>
+          AST.Func.Return(
+            connectBlocksToAppropriateMethods(
+              rest
+            )
+          ) :: Nil
+        case v :: rest => v :: connectBlocksToAppropriateMethods(rest)
+        case v :: Nil  => v :: Nil
+        case Nil       => Nil
+      }
+    }
+
     def onEOF(): Unit = logger.trace {
       Opr.onTraversingLineForOprs()
       fillBlocksBeforeEOF()
-      result.ast = Some(AST(result.stack.reverse))
+      val stack = connectBlocksToAppropriateMethods(result.stack.reverse)
+      result.ast = Some(AST(stack))
     }
   }
 
