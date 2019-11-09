@@ -209,14 +209,15 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   //// Control Flow ////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
-  case class If(condition: String, block: AST.Elem) extends Elem {
+  case class If(condition: AST.Parens, block: AST.Elem) extends Elem {
     val repr: Repr.Builder = R + "If" + "(" + condition + ")" + block.repr
 //    val scalaRepr
 //      : Repr.Builder = R + "if" + "(" + condition + ")" + block.scalaRepr
   }
   object If {
-    def apply(condition: String): If                  = new If(condition, AST.Empty())
-    def apply(condition: String, block: AST.Elem): If = new If(condition, block)
+    def apply(condition: AST.Parens): If = new If(condition, AST.Empty())
+    def apply(condition: AST.Parens, block: AST.Elem): If =
+      new If(condition, block)
 
     case class ElseCase(e: List[AST.Elem]) extends Elem {
       val repr: Repr.Builder = R + "Else " + e
@@ -242,51 +243,53 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   //// Loops ///////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
-  case class While(condition: String, block: AST.Elem) extends Elem {
+  case class While(condition: AST.Parens, block: AST.Elem) extends Elem {
     val repr: Repr.Builder = R + "While" + "(" + condition + ")" + block.repr
 //    val scalaRepr
 //      : Repr.Builder = R + "while" + "(" + condition + ")" + block.scalaRepr
   }
   object While {
-    def apply(condition: String): While = new While(condition, AST.Empty())
-    def apply(condition: String, block: AST.Elem): While =
+    def apply(condition: AST.Parens): While = new While(condition, AST.Empty())
+    def apply(condition: AST.Parens, block: AST.Elem): While =
       new While(condition, block)
   }
 
-  case class DoWhile(condition: String, block: AST.Elem) extends Elem {
+  case class DoWhile(condition: AST.Parens, block: AST.Elem) extends Elem {
     val repr: Repr.Builder = R + "Do" + block.repr + "While (" + condition + ")"
 //    val scalaRepr
 //      : Repr.Builder = R + "do" + block.scalaRepr + "while (" + condition + ")"
   }
   object DoWhile {
-    def apply(): DoWhile                  = new DoWhile("", AST.Empty())
-    def apply(condition: String): DoWhile = new DoWhile(condition, AST.Empty())
-    def apply(condition: String, block: AST.Elem): DoWhile =
+    def apply(): DoWhile = new DoWhile(AST.Parens('(', ')', ""), AST.Empty())
+    def apply(condition: AST.Parens): DoWhile =
+      new DoWhile(condition, AST.Empty())
+    def apply(condition: AST.Parens, block: AST.Elem): DoWhile =
       new DoWhile(condition, block)
   }
 
-  case class For(condition: String, block: AST.Elem) extends Elem {
+  case class For(condition: AST.Parens, block: AST.Elem) extends Elem {
     val repr: Repr.Builder = R + "For" + "(" + condition + ")" + block.repr
 //    val scalaRepr
 //      : Repr.Builder = R + "for" + "(" + condition + ")" + block.scalaRepr
   }
   object For {
-    def apply(condition: String): For = new For(condition, AST.Empty())
-    def apply(condition: String, block: AST.Elem): For =
+    def apply(condition: AST.Parens): For = new For(condition, AST.Empty())
+    def apply(condition: AST.Parens, block: AST.Elem): For =
       new For(condition, block)
   }
 
-  case class RepeatUntil(condition: String, block: AST.Elem) extends Elem {
+  case class RepeatUntil(condition: AST.Parens, block: AST.Elem) extends Elem {
     val repr
       : Repr.Builder = R + "Repeat" + block.repr + "Until (" + condition + ")"
 //    val scalaRepr
 //      : Repr.Builder = R + "do" + block.scalaRepr + "while !(" + condition + ")"
   }
   object RepeatUntil {
-    def apply(): RepeatUntil = new RepeatUntil("", AST.Empty())
-    def apply(condition: String): RepeatUntil =
+    def apply(): RepeatUntil =
+      new RepeatUntil(AST.Parens('(', ')', ""), AST.Empty())
+    def apply(condition: AST.Parens): RepeatUntil =
       new RepeatUntil(condition, AST.Empty())
-    def apply(condition: String, block: AST.Elem): RepeatUntil =
+    def apply(condition: AST.Parens, block: AST.Elem): RepeatUntil =
       new RepeatUntil(condition, block)
   }
 

@@ -236,17 +236,20 @@ case class ParserDef() extends Parser[AST] {
     }
 
     def onPushingIf(cond: String): Unit = logger.trace {
-      val fun = AST.If(cond)
+      val paren = AST.Parens(parenOpen, parenClose, cond)
+      val fun   = AST.If(paren)
       result.pushElem(fun)
     }
 
     def onPushingFor(cond: String): Unit = logger.trace {
-      val fun = AST.For(cond)
+      val paren = AST.Parens(parenOpen, parenClose, cond)
+      val fun   = AST.For(paren)
       result.pushElem(fun)
     }
 
     def onPushingWhile(cond: String): Unit = logger.trace {
-      val fun = AST.While(cond)
+      val paren = AST.Parens(parenOpen, parenClose, cond)
+      val fun   = AST.While(paren)
       result.pushElem(fun)
     }
 
