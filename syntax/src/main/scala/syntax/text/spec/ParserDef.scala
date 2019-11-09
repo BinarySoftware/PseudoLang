@@ -259,7 +259,7 @@ case class ParserDef() extends Parser[AST] {
       result.pushElem(fun)
     }
 
-    val funcArgs: Pattern = parenOpen >> not(parenClose).many >> parenClose79
+    val funcArgs: Pattern = parenOpen >> not(parenClose).many >> parenClose
   }
 
   ROOT || Func.funcArgs || Func.onPushingArgs(currentMatch)
