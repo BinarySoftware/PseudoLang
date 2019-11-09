@@ -122,12 +122,24 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   case class Comment(str: String) extends Elem {
     val repr: Repr.Builder = R + Comment.marker + str
-//    val scalaRepr: Repr.Builder = R + Comment.marker + str
+    //    val scalaRepr: Repr.Builder = R + Comment.marker + str
   }
 
   object Comment {
     val marker: String              = "//"
     def apply(str: String): Comment = new Comment(str)
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+  //// Array ///////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  case class Array(name: AST.Elem, str: String) extends Elem {
+    val repr: Repr.Builder = R + name + "[" + str + "]"
+  }
+
+  object Array {
+    def apply(str: String): Array                 = new Array(AST.Empty(), str)
+    def apply(elem: AST.Elem, str: String): Array = new Array(elem, str)
   }
 
   //////////////////////////////////////////////////////////////////////////////

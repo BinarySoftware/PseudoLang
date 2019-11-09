@@ -38,3 +38,7 @@ for (i in 0..5)
 foo
   b
   c
+
+a <-- [1,2,3,4,5]
+b <-- a[0]
+i <-- length(a)

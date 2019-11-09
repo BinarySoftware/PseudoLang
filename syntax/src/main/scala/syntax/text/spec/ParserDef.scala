@@ -217,7 +217,7 @@ case class ParserDef() extends Parser[AST] {
       }
     }
 
-    private def unmatchedPush(in: String) = {
+    private def unmatchedPush(in: String): Unit = {
       result.push()
       Undefined.onPushing(in)
     }
@@ -259,10 +259,18 @@ case class ParserDef() extends Parser[AST] {
       result.pushElem(fun)
     }
 
+    def onPushingArray(str: String): Unit = logger.trace {
+      val elems = str.dropRight(1).substring(1)
+      val arr   = AST.Array(AST.Empty(), elems)
+      result.pushElem(arr)
+    }
+
     val funcArgs: Pattern = parenOpen >> not(parenClose).many >> parenClose
+    val array: Pattern    = bracketOpen >> not(bracketClose).many >> bracketClose
   }
 
   ROOT || Func.funcArgs || Func.onPushingArgs(currentMatch)
+  ROOT || Func.array    || Func.onPushingArray(currentMatch)
 
   //////////////////////////////////////////////////////////////////////////////
   //// Comments ////////////////////////////////////////////////////////////////
@@ -446,6 +454,8 @@ case class ParserDef() extends Parser[AST] {
               rest
             )
           ) :: Nil
+        case (v: AST.Var) :: (a: AST.Array) :: rest =>
+          AST.Array(v, a.str) :: connectBlocksToAppropriateMethods(rest)
         case v :: rest => v :: connectBlocksToAppropriateMethods(rest)
         case v :: Nil  => v :: Nil
         case Nil       => Nil
