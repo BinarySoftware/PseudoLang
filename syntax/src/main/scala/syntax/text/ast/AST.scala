@@ -196,22 +196,24 @@ object AST {
     def apply(condition: String): If                  = new If(condition, AST.Empty())
     def apply(condition: String, block: AST.Elem): If = new If(condition, block)
 
-    case class ElseCase(block: AST.Elem) extends Elem {
-      val repr: Repr.Builder = R + "Else " + block.repr
+    case class ElseCase(e: List[AST.Elem]) extends Elem {
+      val repr: Repr.Builder = R + "Else " + e.foreach(R + _.repr)
 //      val scalaRepr: Repr.Builder = R + "else " + block.scalaRepr
     }
     object ElseCase {
-      def apply(): ElseCase                = new ElseCase(AST.Empty())
-      def apply(block: AST.Elem): ElseCase = new ElseCase(block)
+      def apply(): ElseCase             = new ElseCase(Nil)
+      def apply(e: AST.Elem): ElseCase  = new ElseCase(e :: Nil)
+      def apply(e: AST.Elem*): ElseCase = new ElseCase(e.toList)
     }
 
-    case class ThenCase(block: AST.Elem) extends Elem {
-      val repr: Repr.Builder = R + "Then " + block.repr
+    case class ThenCase(e: List[AST.Elem]) extends Elem {
+      val repr: Repr.Builder = R + "Then " + e.foreach(R + _.repr)
 //      val scalaRepr: Repr.Builder = R + "then " + block.scalaRepr
     }
     object ThenCase {
-      def apply(): ThenCase                = new ThenCase(AST.Empty())
-      def apply(block: AST.Elem): ThenCase = new ThenCase(block)
+      def apply(): ThenCase             = new ThenCase(Nil)
+      def apply(e: AST.Elem): ThenCase  = new ThenCase(e :: Nil)
+      def apply(e: AST.Elem*): ThenCase = new ThenCase(e.toList)
     }
   }
 

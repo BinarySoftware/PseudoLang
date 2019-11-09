@@ -238,4 +238,38 @@ class ParserTests extends FlatSpec with Matchers {
       AST.Var("b")
     )
   )
+
+  """|Fu(a,b)
+     |  c <- a
+     |b""".stripMargin ?== AST(
+    AST.Func(
+      AST.Var("Fu"),
+      AST.Block(
+        2,
+        AST.Opr(AST.Opr.Assign, AST.Var("c"), AST.Var("a"))
+      ),
+      AST.Var("a"),
+      AST.Var("b")
+    ),
+    AST.Newline(),
+    AST.Var("b")
+  )
+
+  """|If(a<b)
+     |  then a
+     |  else b""".stripMargin ?== AST(
+    AST.If(
+      "a<b",
+      AST.Block(
+        2,
+        AST.If
+          .ThenCase(
+            AST.Spacing(),
+            AST.Var("a"),
+            AST.Newline(),
+            AST.If.ElseCase(AST.Spacing(), AST.Var("b"))
+          )
+      )
+    )
+  )
 }

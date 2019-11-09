@@ -1,12 +1,22 @@
+Func(a,b)
+    ienviefwnviejrwnv
+    wokevnekfjvnev
+
 if (a < b)
   then a * 2
   else b mod 4
 
 if (a < b)
-    then a
-    else if (a > b)
-      then b
-      else return Null
+    if(b<c)
+        dnsg
+    then
+        a
+    else
+      if (a > b)
+        then
+            b
+        else
+            return Null
 
 while (a < 5)
     b <- b + a

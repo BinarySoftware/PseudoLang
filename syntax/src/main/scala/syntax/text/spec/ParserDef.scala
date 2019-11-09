@@ -403,11 +403,19 @@ case class ParserDef() extends Parser[AST] {
     def connectBlocksToAppropriateMethods(s: List[AST.Elem]): List[AST.Elem] = {
       s match {
         case (f: AST.Func) :: (b: AST.Block) :: rest =>
-          AST.Func(
-            f.name,
-            AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems)),
-            f.args
-          ) :: connectBlocksToAppropriateMethods(rest)
+          val bl =
+            AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
+          AST.Func(f.name, bl, f.args) :: connectBlocksToAppropriateMethods(
+            rest
+          )
+        case (i: AST.If) :: (b: AST.Block) :: rest =>
+          val bl =
+            AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
+          AST.If(i.condition, bl) :: connectBlocksToAppropriateMethods(rest)
+        case (_: AST.If.ThenCase) :: rest =>
+          AST.If.ThenCase(connectBlocksToAppropriateMethods(rest)) :: Nil
+        case (_: AST.If.ElseCase) :: rest =>
+          AST.If.ElseCase(connectBlocksToAppropriateMethods(rest)) :: Nil
         case v :: rest => v :: connectBlocksToAppropriateMethods(rest)
         case Nil       => Nil
       }
