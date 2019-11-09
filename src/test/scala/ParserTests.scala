@@ -79,7 +79,7 @@ class ParserTests extends FlatSpec with Matchers {
     |  return a""".stripMargin ?== AST(
     AST.Func(
       AST.Var("Funkcja"),
-      AST.Block(2, AST.Func.Return(), AST.Spacing(), AST.Var("a"))
+      AST.Block(2, AST.Func.Return(AST.Spacing(), AST.Var("a")))
     )
   )
 

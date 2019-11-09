@@ -428,6 +428,12 @@ case class ParserDef() extends Parser[AST] {
           AST.While(w.condition, bl) :: connectBlocksToAppropriateMethods(
             rest
           )
+        case (_: AST.Func.Return) :: rest =>
+          AST.Func.Return(
+            connectBlocksToAppropriateMethods(
+              rest
+            )
+          ) :: Nil
         case v :: rest => v :: connectBlocksToAppropriateMethods(rest)
         case Nil       => Nil
       }

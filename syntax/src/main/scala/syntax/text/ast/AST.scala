@@ -174,13 +174,14 @@ object AST {
     def apply(name: Var, block: AST.Block, args: AST.Var*): Func =
       new Func(name, block, args.toList)
 
-    case class Return(value: AST.Elem) extends Elem {
+    case class Return(value: List[AST.Elem]) extends Elem {
       val repr: Repr.Builder = R + "Return " + value
 //      val scalaRepr: Repr.Builder = R + "return " + value
     }
     case object Return {
-      def apply(): Return                = new Return(AST.Empty())
-      def apply(value: AST.Elem): Return = new Return(value)
+      def apply(): Return                 = new Return(Nil)
+      def apply(value: AST.Elem): Return  = new Return(value :: Nil)
+      def apply(value: AST.Elem*): Return = new Return(value.toList)
     }
   }
 
