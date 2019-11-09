@@ -89,6 +89,7 @@ lazy val PseudoLang = (project in file("."))
     version := "0.1",
     testFrameworks += new TestFramework("org.scalameter.ScalaMeterFramework"),
     logBuffered := false,
+    javaOptions += "-Xmx1G",
     inConfig(Benchmark)(Defaults.testSettings),
     bench := (test in Benchmark).tag(Exclusive).value,
     parallelExecution in Benchmark := false,

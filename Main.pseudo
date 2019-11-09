@@ -34,3 +34,7 @@ until (a > 5)
 
 for (i in 0..5)
     b <- b + i
+
+foo
+  b
+  c

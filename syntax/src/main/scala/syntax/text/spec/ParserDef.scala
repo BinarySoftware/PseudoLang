@@ -447,6 +447,7 @@ case class ParserDef() extends Parser[AST] {
             )
           ) :: Nil
         case v :: rest => v :: connectBlocksToAppropriateMethods(rest)
+        case v :: Nil  => v :: Nil
         case Nil       => Nil
       }
     }
