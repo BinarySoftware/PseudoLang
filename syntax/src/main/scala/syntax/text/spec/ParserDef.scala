@@ -169,12 +169,12 @@ case class ParserDef() extends Parser[AST] {
   final object Var {
     def onPushing(in: String): Unit = logger.trace {
       in.toLowerCase match {
-        case "then"   => result.pushElem(AST.If.ThenCase())
-        case "else"   => result.pushElem(AST.If.ElseCase())
-        case "do"     => Func.onPushingDo()
-        case "repeat" => Func.onPushingRepeat()
-        case "return" => result.pushElem(AST.Func.Return())
-        case _        => result.pushElem(AST.Var(in))
+        case `_then_`   => result.pushElem(AST.If.ThenCase())
+        case `_else_`   => result.pushElem(AST.If.ElseCase())
+        case `_do_`     => Func.onPushingDo()
+        case `_repeat_` => Func.onPushingRepeat()
+        case `_return_` => result.pushElem(AST.Func.Return())
+        case _          => result.pushElem(AST.Var(in))
       }
     }
 
@@ -209,11 +209,11 @@ case class ParserDef() extends Parser[AST] {
 
     private def matchPreviousVar(args: String, v: Var): Unit = {
       v.name.toLowerCase match {
-        case "if"    => onPushingIf(args)
-        case "while" => onPushingWhile(args)
-        case "for"   => onPushingFor(args)
-        case "until" => onPushingWhile(args)
-        case _       => onPushingFunc(v, args)
+        case `_if_`    => onPushingIf(args)
+        case `_while_` => onPushingWhile(args)
+        case `_for_`   => onPushingFor(args)
+        case `_until_` => onPushingWhile(args)
+        case _         => onPushingFunc(v, args)
       }
     }
 
@@ -259,7 +259,7 @@ case class ParserDef() extends Parser[AST] {
       result.pushElem(fun)
     }
 
-    val funcArgs: Pattern = '(' >> not(')').many >> ')'
+    val funcArgs: Pattern = parenOpen >> not(parenClose).many >> parenClose79
   }
 
   ROOT || Func.funcArgs || Func.onPushingArgs(currentMatch)
