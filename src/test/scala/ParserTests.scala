@@ -374,4 +374,19 @@ class ParserTests extends FlatSpec with Matchers {
       )
     )
   )
+
+  """for (i in 0..9)
+    |  b <- b + i""".stripMargin ?== AST(
+    AST.For(
+      "i in 0..9",
+      AST.Block(
+        2,
+        AST.Opr(
+          AST.Opr.Assign,
+          AST.Var("b"),
+          AST.Opr(AST.Opr.Add, AST.Var("b"), AST.Var("i"))
+        )
+      )
+    )
+  )
 }
