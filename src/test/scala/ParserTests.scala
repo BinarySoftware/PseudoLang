@@ -351,4 +351,27 @@ class ParserTests extends FlatSpec with Matchers {
       )
     )
   )
+
+  """repeat
+    |  b <- b + a
+    |  a <- a + 1
+    |until (a > 5)""".stripMargin ?== AST(
+    AST.RepeatUntil(
+      "a > 5",
+      AST.Block(
+        2,
+        AST.Opr(
+          AST.Opr.Assign,
+          AST.Var("b"),
+          AST.Opr(AST.Opr.Add, AST.Var("b"), AST.Var("a"))
+        ),
+        AST.Newline(),
+        AST.Opr(
+          AST.Opr.Assign,
+          AST.Var("a"),
+          AST.Opr(AST.Opr.Add, AST.Var("a"), AST.Var("1"))
+        )
+      )
+    )
+  )
 }

@@ -422,6 +422,12 @@ case class ParserDef() extends Parser[AST] {
           AST.DoWhile(w.condition, bl) :: connectBlocksToAppropriateMethods(
             rest
           )
+        case (_: AST.RepeatUntil) :: (b: AST.Block) :: (w: AST.While) :: rest =>
+          val bl =
+            AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
+          AST.RepeatUntil(w.condition, bl) :: connectBlocksToAppropriateMethods(
+            rest
+          )
         case (w: AST.While) :: (b: AST.Block) :: rest =>
           val bl =
             AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
