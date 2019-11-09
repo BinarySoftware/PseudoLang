@@ -69,10 +69,10 @@ class ParserTests extends FlatSpec with Matchers {
   "Foo  //Com" ?= AST(AST.Var("Foo"), AST.Spacing(2), AST.Comment("Com"))
 
   /* Functions */
-  "Funkcja()"  ?= AST(AST.Func(AST.Var("Funkcja")))
-  "Funkcja(a)" ?= AST(AST.Func(AST.Var("Funkcja"), AST.Var("a")))
+  "Funkcja()"  ?= AST(AST.Func(AST.Var("Funkcja"), AST.Parens()))
+  "Funkcja(a)" ?= AST(AST.Func(AST.Var("Funkcja"), AST.Parens("a")))
   "Funkcja(a, b)" ?= AST(
-    AST.Func(AST.Var("Funkcja"), AST.Var("a"), AST.Var("b"))
+    AST.Func(AST.Var("Funkcja"), AST.Parens("a, b"))
   )
   "Funkcja ()" ?== AST(AST.Func(AST.Var("Funkcja")))
   """Funkcja ()
@@ -232,8 +232,7 @@ class ParserTests extends FlatSpec with Matchers {
         AST.Newline(),
         AST.Opr(AST.Opr.Assign, AST.Var("b"), AST.Var("c"))
       ),
-      AST.Var("a"),
-      AST.Var("b")
+      AST.Parens("a,b")
     )
   )
 
@@ -246,8 +245,7 @@ class ParserTests extends FlatSpec with Matchers {
         2,
         AST.Opr(AST.Opr.Assign, AST.Var("c"), AST.Var("a"))
       ),
-      AST.Var("a"),
-      AST.Var("b")
+      AST.Parens("a,b")
     ),
     AST.Newline(),
     AST.Var("b")

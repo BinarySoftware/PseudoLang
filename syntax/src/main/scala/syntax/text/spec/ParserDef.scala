@@ -223,15 +223,8 @@ case class ParserDef() extends Parser[AST] {
     }
 
     def onPushingFunc(name: AST.Var, args: String): Unit = logger.trace {
-      var argsList: List[AST.Var] = List()
-      if (args.nonEmpty) {
-        val al = args.split(',').toList
-        for (a <- al) {
-          val aNoSpaces = a.replaceAll(" ", "")
-          argsList +:= AST.Var(aNoSpaces)
-        }
-      }
-      val fun = AST.Func(name, AST.Empty(), argsList.reverse)
+      val paren = AST.Parens(parenOpen, parenClose, args)
+      val fun   = AST.Func(name, AST.Empty(), paren)
       result.pushElem(fun)
     }
 

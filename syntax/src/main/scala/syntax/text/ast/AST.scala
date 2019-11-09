@@ -149,24 +149,16 @@ object AST {
     val repr: Repr.Builder = R + open + str + close
   }
 
-  object Parens {}
+  object Parens {
+    def apply(): Parens            = new Parens('(', ')', "")
+    def apply(str: String): Parens = new Parens('(', ')', str)
+  }
 
   //////////////////////////////////////////////////////////////////////////////
   //// Function ////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
-  case class Func(name: Var, block: AST.Elem, args: List[Var]) extends Elem {
-    val repr: Repr.Builder = {
-      val nameRepr = R + name + '('
-      val argsRepr = {
-        if (args.nonEmpty) {
-          R + args.head + args.tail.map(R + ", " + _)
-        } else {
-          R
-        }
-      }
-      val close = ')'
-      R + nameRepr + argsRepr + close + block
-    }
+  case class Func(name: Var, block: AST.Elem, args: AST.Parens) extends Elem {
+    val repr: Repr.Builder = R + name + args + block
 
 //    val scalaRepr: Repr.Builder = {
 //      val nameRepr = R + "def " + name.scalaRepr + "[T]("
@@ -184,16 +176,14 @@ object AST {
 //    }
   }
   object Func {
-    def apply(name: Var): Func = new Func(name, AST.Empty(), Nil)
-    def apply(name: Var, arg: AST.Var): Func =
-      new Func(name, AST.Empty(), arg :: Nil)
-    def apply(name: Var, args: AST.Var*): Func =
-      new Func(name, AST.Empty(), args.toList)
-    def apply(name: Var, block: AST.Block): Func = new Func(name, block, Nil)
-    def apply(name: Var, block: AST.Block, arg: AST.Var): Func =
-      new Func(name, block, arg :: Nil)
-    def apply(name: Var, block: AST.Block, args: AST.Var*): Func =
-      new Func(name, block, args.toList)
+    def apply(name: Var): Func =
+      new Func(name, AST.Empty(), AST.Parens('(', ')', ""))
+    def apply(name: Var, block: AST.Block): Func =
+      new Func(name, block, AST.Parens('(', ')', ""))
+    def apply(name: Var, par: AST.Parens): Func =
+      new Func(name, AST.Empty(), par)
+    def apply(name: Var, block: AST.Block, par: AST.Parens): Func =
+      new Func(name, block, par)
 
     case class Return(value: List[AST.Elem]) extends Elem {
       val repr: Repr.Builder = R + "Return " + value
