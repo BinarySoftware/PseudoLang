@@ -26,10 +26,10 @@ uczelnianego pseudokodu, oraz stworzenie transpilera owego kodu do Scali/Pythona
 2. Następuje odpalenie parsera z podanym pseudokodem 
    `Wprowadzono szkielet uruchomieniowy dla parsera`
 3. Parser traversuje pseudokod, tokenizując go zgodnie z zapisanymi regułami, 
-   tworząc AST `Trwa praca nad Parserem, 70% gotowe`
+   tworząc AST `Praca nad Parserem została ukończona`
 4. Po zakończeniu pracy parsera, z powstałego AST generowany jest kod 
    Scali/Pythona, który później zostaje poddany kompilacji narzędziami 
-   scalowskimi/pythonowskimi. `Up Next`
+   scalowskimi/pythonowskimi. `Trwa praca nad transpilerem`
 5. `W przyszłości: Zmiana Transpilera na Interpreter napisany od 
     podstaw - GraalVM + Truffle`
 
@@ -70,6 +70,8 @@ parser będzie należał do jednego z najszybszych na rynku - celem jest uzyskan
 | AST.Opr       | Operatory arytmetyczne, logiczne, przypisywania, typowania |
 | AST.Undefined | Cała reszra elementów, które nie mogły zostać sparsowane na poprawne elementy AST |
 | AST.Return    | Element zwracający wartość z funkcji |
+| AST.Array     | Element trzymający tablice/listę |
+| AST.Parens    | Element trzymający nawiasy `(`, - argumenty i warunki, `[` - elementy tablicy |
 | AST.If        | Sprawdzanie warunkowe "Jeżeli", dozwolone jest zagnieżdzanie |
 | AST.If.ThenCond | Element przechowujący blok, wykonywany jeśli Prawda |
 | AST.If.ElseCond | Element przechowujący blok, wykonywany jeśli Fałsz |

@@ -1,44 +1,8 @@
-Func(a,b)
-    ienviefwnviejrwnv
-    wokevnekfjvnev
+Gcd(a,b)
+    // Why do I need line here?
+    if(a=0)
+        then return b
+    r <-- b mod a
+    return Gcd(r, a)
 
-if (a < b)
-  then a * 2
-  else b mod 4
-
-if (a < b)
-    if(b<c)
-        dnsg
-    then
-        a
-    else
-      if (a > b)
-        then
-            b
-        else
-            return Null
-
-while (a < 5)
-    b <- b + a
-    a <- a + 1
-
-do
-    b <- b + a
-    a <- a + 1
-while (a < 5)
-
-repeat
-    b <- b + a
-    a <- a + 1
-until (a > 5)
-
-for (i in 0..5)
-    b <- b + i
-
-foo
-  b
-  c
-
-a <-- [1,2,3,4,5]
-b <-- a[0]
-i <-- length(a)
+// This fails, idk why
