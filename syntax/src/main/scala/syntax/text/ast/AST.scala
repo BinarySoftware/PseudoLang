@@ -197,7 +197,7 @@ object AST {
     def apply(condition: String, block: AST.Elem): If = new If(condition, block)
 
     case class ElseCase(e: List[AST.Elem]) extends Elem {
-      val repr: Repr.Builder = R + "Else " + e.foreach(R + _.repr)
+      val repr: Repr.Builder = R + "Else " + e
 //      val scalaRepr: Repr.Builder = R + "else " + block.scalaRepr
     }
     object ElseCase {
@@ -207,7 +207,7 @@ object AST {
     }
 
     case class ThenCase(e: List[AST.Elem]) extends Elem {
-      val repr: Repr.Builder = R + "Then " + e.foreach(R + _.repr)
+      val repr: Repr.Builder = R + "Then " + e
 //      val scalaRepr: Repr.Builder = R + "then " + block.scalaRepr
     }
     object ThenCase {

@@ -416,6 +416,18 @@ case class ParserDef() extends Parser[AST] {
           AST.If.ThenCase(connectBlocksToAppropriateMethods(rest)) :: Nil
         case (_: AST.If.ElseCase) :: rest =>
           AST.If.ElseCase(connectBlocksToAppropriateMethods(rest)) :: Nil
+        case (_: AST.DoWhile) :: (b: AST.Block) :: (w: AST.While) :: rest =>
+          val bl =
+            AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
+          AST.DoWhile(w.condition, bl) :: connectBlocksToAppropriateMethods(
+            rest
+          )
+        case (w: AST.While) :: (b: AST.Block) :: rest =>
+          val bl =
+            AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
+          AST.While(w.condition, bl) :: connectBlocksToAppropriateMethods(
+            rest
+          )
         case v :: rest => v :: connectBlocksToAppropriateMethods(rest)
         case Nil       => Nil
       }
