@@ -403,7 +403,11 @@ case class ParserDef() extends Parser[AST] {
     def connectBlocksToAppropriateMethods(s: List[AST.Elem]): List[AST.Elem] = {
       s match {
         case (f: AST.Func) :: (b: AST.Block) :: rest =>
-          AST.Func(f.name, b, f.args) :: rest
+          AST.Func(
+            f.name,
+            AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems)),
+            f.args
+          ) :: connectBlocksToAppropriateMethods(rest)
         case v :: rest => v :: connectBlocksToAppropriateMethods(rest)
         case Nil       => Nil
       }
