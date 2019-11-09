@@ -83,10 +83,6 @@ class ParserTests extends FlatSpec with Matchers {
     )
   )
 
-  /* Control Flow tests */
-
-  /* Loops tests */
-
   /* Operator tests */
   "Bar<-Foo+Bo*Fo/Mo" ?== AST(
     AST.Opr(
@@ -257,6 +253,7 @@ class ParserTests extends FlatSpec with Matchers {
     AST.Var("b")
   )
 
+  /* Control Flow tests */
   """|If(a<b)
      |  then a
      |  else b""".stripMargin ?== AST(
@@ -275,6 +272,41 @@ class ParserTests extends FlatSpec with Matchers {
     )
   )
 
+  """|If(a<b)
+     |  then a
+     |  else If(a=b)
+     |    then 2
+     |    else b""".stripMargin ?== AST(
+    AST.If(
+      "a<b",
+      AST.Block(
+        2,
+        AST.If
+          .ThenCase(
+            AST.Spacing(),
+            AST.Var("a"),
+            AST.Newline(),
+            AST.If.ElseCase(
+              AST.If(
+                "a=b",
+                AST.Block(
+                  4,
+                  AST.If
+                    .ThenCase(
+                      AST.Spacing(),
+                      AST.Var("2"),
+                      AST.Newline(),
+                      AST.If.ElseCase(AST.Spacing(), AST.Var("b"))
+                    )
+                )
+              )
+            )
+          )
+      )
+    )
+  )
+
+  /* Loops tests */
   """do
     |  b <- b + a
     |  a <- a + 1
