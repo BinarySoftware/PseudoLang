@@ -6,3 +6,8 @@ Gcd(a,b)
     return Gcd(r, a)
 
 // This fails, idk why
+
+fun(a)
+    fun(b)
+        sdfiknsdoif
+    return sdfsdf
