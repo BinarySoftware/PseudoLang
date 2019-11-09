@@ -75,8 +75,10 @@ class ParserTests extends FlatSpec with Matchers {
   "Funkcja ()" ?== AST(AST.Func(AST.Var("Funkcja")))
   """Funkcja ()
     |  return a""".stripMargin ?== AST(
-    AST.Func(AST.Var("Funkcja")),
-    AST.Block(2, AST.Func.Return(), AST.Spacing(), AST.Var("a"))
+    AST.Func(
+      AST.Var("Funkcja"),
+      AST.Block(2, AST.Func.Return(), AST.Spacing(), AST.Var("a"))
+    )
   )
 
   /* Control Flow tests */
@@ -222,14 +224,18 @@ class ParserTests extends FlatSpec with Matchers {
     |  c <- a
     |  a <- b
     |  b <- c""".stripMargin ?== AST(
-    AST.Func(AST.Var("Swap"), AST.Var("a"), AST.Var("b")),
-    AST.Block(
-      2,
-      AST.Opr(AST.Opr.Assign, AST.Var("c"), AST.Var("a")),
-      AST.Newline(),
-      AST.Opr(AST.Opr.Assign, AST.Var("a"), AST.Var("b")),
-      AST.Newline(),
-      AST.Opr(AST.Opr.Assign, AST.Var("b"), AST.Var("c"))
+    AST.Func(
+      AST.Var("Swap"),
+      AST.Block(
+        2,
+        AST.Opr(AST.Opr.Assign, AST.Var("c"), AST.Var("a")),
+        AST.Newline(),
+        AST.Opr(AST.Opr.Assign, AST.Var("a"), AST.Var("b")),
+        AST.Newline(),
+        AST.Opr(AST.Opr.Assign, AST.Var("b"), AST.Var("c"))
+      ),
+      AST.Var("a"),
+      AST.Var("b")
     )
   )
 }

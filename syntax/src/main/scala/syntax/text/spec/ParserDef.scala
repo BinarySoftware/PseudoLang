@@ -231,7 +231,7 @@ case class ParserDef() extends Parser[AST] {
           argsList +:= AST.Var(aNoSpaces)
         }
       }
-      val fun = AST.Func(name, argsList.reverse)
+      val fun = AST.Func(name, AST.Empty(), argsList.reverse)
       result.pushElem(fun)
     }
 
@@ -267,7 +267,6 @@ case class ParserDef() extends Parser[AST] {
   //////////////////////////////////////////////////////////////////////////////
   //// Comments ////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
-
   final object Comment {
     def onPushing(in: String): Unit = logger.trace {
       val com = AST.Comment(in.substring(2))
@@ -401,10 +400,20 @@ case class ParserDef() extends Parser[AST] {
       }
     }
 
+    def connectBlocksToAppropriateMethods(s: List[AST.Elem]): List[AST.Elem] = {
+      s match {
+        case (f: AST.Func) :: (b: AST.Block) :: rest =>
+          AST.Func(f.name, b, f.args) :: rest
+        case v :: rest => v :: connectBlocksToAppropriateMethods(rest)
+        case Nil       => Nil
+      }
+    }
+
     def onEOF(): Unit = logger.trace {
       Opr.onTraversingLineForOprs()
       fillBlocksBeforeEOF()
-      result.ast = Some(AST(result.stack.reverse))
+      val stack = connectBlocksToAppropriateMethods(result.stack.reverse)
+      result.ast = Some(AST(stack))
     }
   }
 
