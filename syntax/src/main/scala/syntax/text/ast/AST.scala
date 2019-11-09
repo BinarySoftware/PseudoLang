@@ -121,9 +121,13 @@ object AST {
   //// Comment /////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
   case class Comment(str: String) extends Elem {
-    val marker: String          = "//"
-    val repr: Repr.Builder      = R + marker + str
-    val scalaRepr: Repr.Builder = R + marker + str
+    val repr: Repr.Builder      = R + Comment.marker + str
+    val scalaRepr: Repr.Builder = R + Comment.marker + str
+  }
+
+  object Comment {
+    val marker: String              = "//"
+    def apply(str: String): Comment = new Comment(str)
   }
 
   //////////////////////////////////////////////////////////////////////////////

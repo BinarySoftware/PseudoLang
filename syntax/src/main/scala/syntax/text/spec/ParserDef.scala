@@ -55,6 +55,22 @@ case class ParserDef() extends Parser[AST] {
   val spaces: Pattern = ' '.many1
   val newline: Char   = '\n'
 
+  /* Keywords */
+  val _then_   = "then"
+  val _else_   = "else"
+  val _do_     = "do"
+  val _repeat_ = "repeat"
+  val _return_ = "return"
+  val _if_     = "if"
+  val _while_  = "while"
+  val _for_    = "for"
+  val _until_  = "until"
+
+  val parenOpen    = '('
+  val parenClose   = ')'
+  val bracketOpen  = '['
+  val bracketClose = ']'
+
   //////////////////////////////////////////////////////////////////////////////
   //// Operators ///////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
@@ -258,7 +274,7 @@ case class ParserDef() extends Parser[AST] {
       result.pushElem(com)
     }
 
-    val pattern: Pattern = "//" >> not(newline).many
+    val pattern: Pattern = AST.Comment.marker >> not(newline).many
   }
 
   ROOT || Comment.pattern || Comment.onPushing(currentMatch)
