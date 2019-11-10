@@ -259,13 +259,12 @@ class ParserTests extends FlatSpec with Matchers {
       AST.Parens('(', ')', "a<b"),
       AST.Block(
         2,
-        AST.If
-          .ThenCase(
-            AST.Spacing(),
-            AST.Var("a"),
-            AST.Newline(),
-            AST.If.ElseCase(AST.Spacing(), AST.Var("b"))
-          )
+        AST.If.ThenCase(
+          AST.Spacing(),
+          AST.Var("a")
+        ),
+        AST.Newline(),
+        AST.If.ElseCase(AST.Spacing(), AST.Var("b"))
       )
     )
   )
@@ -282,24 +281,24 @@ class ParserTests extends FlatSpec with Matchers {
         AST.If
           .ThenCase(
             AST.Spacing(),
-            AST.Var("a"),
-            AST.Newline(),
-            AST.If.ElseCase(
-              AST.If(
-                AST.Parens('(', ')', "a=b"),
-                AST.Block(
-                  4,
-                  AST.If
-                    .ThenCase(
-                      AST.Spacing(),
-                      AST.Var("2"),
-                      AST.Newline(),
-                      AST.If.ElseCase(AST.Spacing(), AST.Var("b"))
-                    )
-                )
-              )
+            AST.Var("a")
+          ),
+        AST.Newline(),
+        AST.If.ElseCase(
+          AST.If(
+            AST.Parens('(', ')', "a=b"),
+            AST.Block(
+              4,
+              AST.If
+                .ThenCase(
+                  AST.Spacing(),
+                  AST.Var("2")
+                ),
+              AST.Newline(),
+              AST.If.ElseCase(AST.Spacing(), AST.Var("b"))
             )
           )
+        )
       )
     )
   )

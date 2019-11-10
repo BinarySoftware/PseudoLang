@@ -405,6 +405,7 @@ case class ParserDef() extends Parser[AST] {
       }
     }
 
+    // TODO: Refactor this mess!
     def connectBlocksToAppropriateMethods(s: List[AST.Elem]): List[AST.Elem] = {
       s match {
         case (f: AST.Func) :: (b: AST.Block) :: rest =>
@@ -418,7 +419,15 @@ case class ParserDef() extends Parser[AST] {
             AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
           AST.If(i.condition, bl) :: connectBlocksToAppropriateMethods(rest)
         case (_: AST.If.ThenCase) :: rest =>
-          AST.If.ThenCase(connectBlocksToAppropriateMethods(rest)) :: Nil
+          if (rest.contains(AST.If.ElseCase())) {
+            val inThen = rest.take(rest.indexOf(AST.If.ElseCase()) - 1)
+            AST.If.ThenCase(connectBlocksToAppropriateMethods(inThen)) :: AST
+              .Newline() :: connectBlocksToAppropriateMethods(
+              rest.drop(rest.indexOf(AST.If.ElseCase()))
+            )
+          } else {
+            AST.If.ThenCase(connectBlocksToAppropriateMethods(rest)) :: Nil
+          }
         case (_: AST.If.ElseCase) :: rest =>
           AST.If.ElseCase(connectBlocksToAppropriateMethods(rest)) :: Nil
         case (_: AST.DoWhile) :: (b: AST.Block) :: (w: AST.While) :: rest =>
