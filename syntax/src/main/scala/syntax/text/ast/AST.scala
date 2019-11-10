@@ -156,7 +156,7 @@ object AST {
   //// Control Flow ////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
   case class If(condition: AST.Parens, block: AST.Elem) extends Elem {
-    val repr: Repr.Builder = R + "If" + "(" + condition + ")" + block.repr
+    val repr: Repr.Builder = R + "If" + condition + block.repr
   }
   object If {
     def apply(condition: AST.Parens): If = new If(condition, AST.Empty())
@@ -186,7 +186,7 @@ object AST {
   //// Loops ///////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
   case class While(condition: AST.Parens, block: AST.Elem) extends Elem {
-    val repr: Repr.Builder = R + "While" + "(" + condition + ")" + block.repr
+    val repr: Repr.Builder = R + "While" + condition + block.repr
   }
   object While {
     def apply(condition: AST.Parens): While = new While(condition, AST.Empty())
@@ -195,7 +195,7 @@ object AST {
   }
 
   case class DoWhile(condition: AST.Parens, block: AST.Elem) extends Elem {
-    val repr: Repr.Builder = R + "Do" + block.repr + "While (" + condition + ")"
+    val repr: Repr.Builder = R + "Do" + block.repr + "While " + condition
   }
   object DoWhile {
     def apply(): DoWhile = new DoWhile(AST.Parens('(', ')', ""), AST.Empty())
@@ -206,7 +206,7 @@ object AST {
   }
 
   case class For(condition: AST.Parens, block: AST.Elem) extends Elem {
-    val repr: Repr.Builder = R + "For" + "(" + condition + ")" + block.repr
+    val repr: Repr.Builder = R + "For" + condition + block.repr
   }
   object For {
     def apply(condition: AST.Parens): For = new For(condition, AST.Empty())
@@ -215,8 +215,7 @@ object AST {
   }
 
   case class RepeatUntil(condition: AST.Parens, block: AST.Elem) extends Elem {
-    val repr
-      : Repr.Builder = R + "Repeat" + block.repr + "Until (" + condition + ")"
+    val repr: Repr.Builder = R + "Repeat" + block.repr + "Until " + condition
   }
   object RepeatUntil {
     def apply(): RepeatUntil =

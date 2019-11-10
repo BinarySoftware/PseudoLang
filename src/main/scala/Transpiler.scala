@@ -13,8 +13,18 @@ object Transpiler {
 
   def traverse(stack: List[AST.Elem]): Repr.Builder = {
     stack match {
-      case elem :: rest => R + elem.repr + traverse(rest)
-      case Nil          => R
+      case (f: AST.Func) :: rest =>
+        f.block match {
+          case b: AST.Block =>
+            val fDecl = R + "def " + f.name + f.args + ":"
+            R + fDecl + AST.Newline() + b.indent + traverse(b.elems) + traverse(
+              rest
+            )
+          case _ => R + f.name + f.args + traverse(rest)
+        }
+      case (c: AST.Comment) :: rest => R + traverse(rest)
+      case undefined :: rest        => R + undefined.repr + traverse(rest)
+      case Nil                      => R
     }
   }
 }
