@@ -1,10 +1,13 @@
 package org.PseudoLang
 
 import org.PseudoLang.syntax.text.ast.AST
+import org.enso.syntax.text.ast.Repr
+import org.enso.syntax.text.ast.Repr._
 
 ////////////////////////////////////////////////////////////////////////////////
 //// Transpiler ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 object Transpiler {
-  def transpile(ast: AST): String = "TBI"
+  def run(ast: AST):       String       = transpile(ast).build()
+  def transpile(ast: AST): Repr.Builder = R + " TBI"
 }

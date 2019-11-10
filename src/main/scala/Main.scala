@@ -9,19 +9,20 @@ import org.enso.debug._
 
 object Main extends App {
   //////////////////////////////////////////////////////////////////////////////
-  //// PseudoLang interactive testing environmnet //////////////////////////////
+  //// PseudoLang interactive running environmnet //////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
 
   println("======================= PSEUDO LANG ========================")
   val code   = FileManager.readFileWithPseudo("", "Main")
   val parsed = new Parser().runMatched(code)
-//  pprint.pprintln(parsed)
-  println(Debug.pretty(parsed.toString))
+  println("========================== AST =============================")
+//  println(Debug.pretty(parsed.toString))
+  pprint.pprintln(parsed, 80, 2000)
   println("========================== CODE ============================")
   println(parsed.show())
-//  println("======================= SCALA CODE =========================")
-//  val scalaCode = parsed.generateScala()
-//  println(scalaCode)
-//  FileManager.saveCodeToFile("", "Generated", scalaCode, "scala")
-//  println("============================================================")
+  println("======================= TRANSPILER =========================")
+  val transpiled = Transpiler.run(parsed)
+  println(transpiled)
+//  FileManager.saveCodeToFile("", "Generated", transpiled, "scala")
+  println("============================================================")
 }

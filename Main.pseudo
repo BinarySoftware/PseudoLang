@@ -1,13 +1,8 @@
 Gcd(a,b)
-    // Why do I need line here?
+    // 1
     if(a=0)
         then return b
     r <-- b mod a
     return Gcd(r, a)
 
-// This fails, idk why
-
-fun(a)
-    fun(b)
-        return b*2
-    return fun(b) + a
+// FIXME 1 -  there's need to put line in between nested functions declaration
