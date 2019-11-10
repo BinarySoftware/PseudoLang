@@ -3,9 +3,9 @@ package org.PseudoLang
 import org.PseudoLang.syntax.text.Parser
 import org.enso.debug._
 
-//////////////
-//// Main ////
-//////////////
+////////////////////////////////////////////////////////////////////////////////
+//// Main //////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 object Main extends App {
   //////////////////////////////////////////////////////////////////////////////
@@ -22,6 +22,6 @@ object Main extends App {
 //  println("======================= SCALA CODE =========================")
 //  val scalaCode = parsed.generateScala()
 //  println(scalaCode)
-//  FileManager.saveScalaCodeToFile("", "Generated", scalaCode)
+//  FileManager.saveCodeToFile("", "Generated", scalaCode, "scala")
 //  println("============================================================")
 }
