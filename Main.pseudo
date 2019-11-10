@@ -9,5 +9,5 @@ Gcd(a,b)
 
 fun(a)
     fun(b)
-        sdfiknsdoif
-    return sdfsdf
+        return b*2
+    return fun(b) + a
