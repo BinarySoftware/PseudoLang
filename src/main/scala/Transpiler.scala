@@ -9,5 +9,12 @@ import org.enso.syntax.text.ast.Repr._
 ////////////////////////////////////////////////////////////////////////////////
 object Transpiler {
   def run(ast: AST):       String       = transpile(ast).build()
-  def transpile(ast: AST): Repr.Builder = R + " TBI"
+  def transpile(ast: AST): Repr.Builder = traverse(ast.elems)
+
+  def traverse(stack: List[AST.Elem]): Repr.Builder = {
+    stack match {
+      case elem :: rest => R + elem.repr + traverse(rest)
+      case Nil          => R
+    }
+  }
 }
