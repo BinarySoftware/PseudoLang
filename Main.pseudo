@@ -1,7 +1,8 @@
 Gcd(a,b)
     // 1
     if(a=0)
-        then return b
+        then c = b * 2 / 2
+        return c
     r <-- b mod a
     return Gcd(r, a)
 
