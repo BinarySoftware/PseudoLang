@@ -37,8 +37,25 @@ object Transpiler {
           case _ => R + "if" + i.condition + traverse(indent, rest)
         }
       case (t: AST.If.ThenCase) :: rest =>
-        R + traverse(indent, t.e.tail) + traverse(indent, rest)
-      case (c: AST.Comment) :: rest => R + traverse(indent, rest)
+        t.e.head match {
+          case _: AST.Spacing =>
+            R + traverse(indent, t.e.tail) + traverse(indent, rest)
+          case _ =>
+            R + traverse(indent, t.e) + traverse(indent, rest)
+        }
+      case (e: AST.If.ElseCase) :: rest =>
+        e.e.head match {
+          case i: AST.If =>
+            R + "elif " + i.condition + ":" + traverse(
+              indent,
+              i.block.asInstanceOf[AST.Block].elems
+            ) + traverse(indent, e.e.tail) + traverse(indent, rest)
+          case _: AST.Spacing =>
+            R + "else: " + traverse(indent, e.e.tail) + traverse(indent, rest)
+          case _ =>
+            R + "else: " + traverse(indent, e.e) + traverse(indent, rest)
+        }
+      case (_: AST.Comment) :: rest => R + traverse(indent, rest)
       case undefined :: rest        => R + undefined.repr + traverse(indent, rest)
       case Nil                      => R
     }
