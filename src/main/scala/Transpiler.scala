@@ -18,22 +18,15 @@ object Transpiler {
         f.block match {
           case b: AST.Block =>
             val fDecl = R + "def " + f.name + f.args + ":"
-            R + fDecl + AST
-              .Newline() + b.indent + traverse(b.indent, b.elems) + traverse(
-              indent,
-              rest
-            )
+            R + fDecl + traverseBlock(b) + traverse(indent, rest)
           case _ => R + f.name + f.args + traverse(indent, rest)
         }
       case (n: AST.Newline) :: rest => R + n + indent + traverse(indent, rest)
       case (i: AST.If) :: rest =>
         i.block match {
           case b: AST.Block =>
-            R + "if" + i.condition + ":" + AST
-              .Newline() + b.indent + traverse(b.indent, b.elems) + traverse(
-              indent,
-              rest
-            )
+            val ifRepr = R + "if" + i.condition + ":" + traverseBlock(b)
+            R + ifRepr + traverse(indent, rest)
           case _ => R + "if" + i.condition + traverse(indent, rest)
         }
       case (t: AST.If.ThenCase) :: rest =>
@@ -46,10 +39,9 @@ object Transpiler {
       case (e: AST.If.ElseCase) :: rest =>
         e.e.head match {
           case i: AST.If =>
-            R + "elif " + i.condition + ":" + traverse(
-              indent,
-              i.block.asInstanceOf[AST.Block].elems
-            ) + traverse(indent, e.e.tail) + traverse(indent, rest)
+            val b      = i.block.asInstanceOf[AST.Block]
+            val elRepr = R + "elif " + i.condition + ":" + traverseBlock(b)
+            R + elRepr + traverse(indent, e.e.tail) + traverse(indent, rest)
           case _: AST.Spacing =>
             R + "else: " + traverse(indent, e.e.tail) + traverse(indent, rest)
           case _ =>
@@ -59,5 +51,9 @@ object Transpiler {
       case undefined :: rest        => R + undefined.repr + traverse(indent, rest)
       case Nil                      => R
     }
+  }
+
+  def traverseBlock(b: AST.Block): Repr.Builder = {
+    R + AST.Newline() + b.indent + traverse(b.indent, b.elems)
   }
 }
