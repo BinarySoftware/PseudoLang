@@ -1,7 +1,6 @@
 package org.PseudoLang
 
 import org.PseudoLang.syntax.text.ast.AST
-import org.enso.flexer.Parser.Result.Failure
 import org.enso.syntax.text.ast.Repr
 import org.enso.syntax.text.ast.Repr._
 
@@ -23,35 +22,37 @@ object Transpiler {
         }
       case (n: AST.Newline) :: rest => R + n + indent + traverse(indent, rest)
       case (i: AST.If) :: rest =>
-        i.block match {
-          case b: AST.Block =>
-            val ifRepr = R + "if" + i.condition + ":" + traverseBlock(b)
-            R + ifRepr + traverse(indent, rest)
-          case _ => R + "if" + i.condition + traverse(indent, rest)
+        val ifRepr = R + "if" + i.condition + ":"
+        val bRepr = i.block match {
+          case b: AST.Block => R + traverseBlock(b)
+          case oth          => R + oth
         }
+        R + ifRepr + bRepr + traverse(indent, rest)
       case (t: AST.If.ThenCase) :: rest =>
-        t.e.head match {
-          case _: AST.Spacing =>
-            R + traverse(indent, t.e.tail) + traverse(indent, rest)
-          case _ =>
-            R + traverse(indent, t.e) + traverse(indent, rest)
+        val headRepr = t.e.head match {
+          case _: AST.Spacing => R + traverse(indent, t.e.tail)
+          case _              => R + traverse(indent, t.e)
         }
+        R + headRepr + traverse(indent, rest)
       case (e: AST.If.ElseCase) :: rest =>
-        e.e.head match {
+        val iRepr = e.e.head match {
           case i: AST.If =>
-            i.block match {
-              case b: AST.Block =>
-                val elRepr = R + "elif " + i.condition + ":" + traverseBlock(b)
-                R + elRepr + traverse(indent, e.e.tail) + traverse(indent, rest)
-              case oth =>
-                val elRepr = R + "elif " + i.condition + ":" + oth.repr
-                R + elRepr + traverse(indent, e.e.tail) + traverse(indent, rest)
+            val elRepr = R + "elif " + i.condition + ":"
+            val bRepr = i.block match {
+              case b: AST.Block => traverseBlock(b)
+              case oth          => oth.repr
             }
-          case _: AST.Spacing =>
-            R + "else: " + traverse(indent, e.e.tail) + traverse(indent, rest)
-          case _ =>
-            R + "else: " + traverse(indent, e.e) + traverse(indent, rest)
+            R + elRepr + bRepr + traverse(indent, e.e.tail)
+          case _: AST.Spacing => R + "else: " + traverse(indent, e.e.tail)
+          case _              => R + "else: " + traverse(indent, e.e)
         }
+        R + iRepr + traverse(indent, rest)
+      case (l: AST.While) :: rest =>
+        val bRepr = l.block match {
+          case b: AST.Block => R + traverseBlock(b)
+          case oth          => R + oth
+        }
+        R + "while " + l.condition + ":" + bRepr + traverse(indent, rest)
       case (_: AST.Comment) :: rest => R + traverse(indent, rest)
       case undefined :: rest        => R + undefined.repr + traverse(indent, rest)
       case Nil                      => R

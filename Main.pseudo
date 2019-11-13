@@ -8,11 +8,6 @@ Gcd(a,b)
 
 // FIXME 1 -  there's need to put line in between nested functions declaration
 
-if(a<b)
-    then c=a-2
-         sdfnosfsif
-    else if(a<b)
-         then c=a-2
-              sdfinaf
-         else c=b+2
+while (i<10)
+    i <- i + 1
 
