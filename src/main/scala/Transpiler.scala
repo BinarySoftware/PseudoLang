@@ -39,9 +39,14 @@ object Transpiler {
       case (e: AST.If.ElseCase) :: rest =>
         e.e.head match {
           case i: AST.If =>
-            val b      = i.block.asInstanceOf[AST.Block]
-            val elRepr = R + "elif " + i.condition + ":" + traverseBlock(b)
-            R + elRepr + traverse(indent, e.e.tail) + traverse(indent, rest)
+            i.block match {
+              case b: AST.Block =>
+                val elRepr = R + "elif " + i.condition + ":" + traverseBlock(b)
+                R + elRepr + traverse(indent, e.e.tail) + traverse(indent, rest)
+              case oth =>
+                val elRepr = R + "elif " + i.condition + ":" + oth.repr
+                R + elRepr + traverse(indent, e.e.tail) + traverse(indent, rest)
+            }
           case _: AST.Spacing =>
             R + "else: " + traverse(indent, e.e.tail) + traverse(indent, rest)
           case _ =>
