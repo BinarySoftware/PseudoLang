@@ -148,20 +148,19 @@ case class ParserDef() extends Parser[AST] {
     }
   }
 
-  ROOT || AST.Opr.Add.m          || Opr.onPushing(AST.Opr.Add)
-  ROOT || AST.Opr.Sub.m          || Opr.onPushing(AST.Opr.Sub)
-  ROOT || AST.Opr.Mul.m          || Opr.onPushing(AST.Opr.Mul)
-  ROOT || AST.Opr.Div.m          || Opr.onPushing(AST.Opr.Div)
-  ROOT || AST.Opr.Mod.m          || Opr.onPushing(AST.Opr.Mod)
-  ROOT || AST.Opr.Pow.m          || Opr.onPushing(AST.Opr.Pow)
-  ROOT || AST.Opr.DefAndAssign.m || Opr.onPushing(AST.Opr.DefAndAssign)
-  ROOT || AST.Opr.Assign.m       || Opr.onPushing(AST.Opr.Assign)
-  ROOT || AST.Opr.TpAnn.m        || Opr.onPushing(AST.Opr.TpAnn)
-  ROOT || AST.Opr.isEq.m         || Opr.onPushing(AST.Opr.isEq)
-  ROOT || AST.Opr.isGr.m         || Opr.onPushing(AST.Opr.isGr)
-  ROOT || AST.Opr.isLe.m         || Opr.onPushing(AST.Opr.isLe)
-  ROOT || AST.Opr.isGrOrEq.m     || Opr.onPushing(AST.Opr.isGrOrEq)
-  ROOT || AST.Opr.isLeOrEq.m     || Opr.onPushing(AST.Opr.isLeOrEq)
+  ROOT || AST.Opr.Add.m      || Opr.onPushing(AST.Opr.Add)
+  ROOT || AST.Opr.Sub.m      || Opr.onPushing(AST.Opr.Sub)
+  ROOT || AST.Opr.Mul.m      || Opr.onPushing(AST.Opr.Mul)
+  ROOT || AST.Opr.Div.m      || Opr.onPushing(AST.Opr.Div)
+  ROOT || AST.Opr.Mod.m      || Opr.onPushing(AST.Opr.Mod)
+  ROOT || AST.Opr.Pow.m      || Opr.onPushing(AST.Opr.Pow)
+  ROOT || AST.Opr.Assign.m   || Opr.onPushing(AST.Opr.Assign)
+  ROOT || AST.Opr.TpAnn.m    || Opr.onPushing(AST.Opr.TpAnn)
+  ROOT || AST.Opr.isEq.m     || Opr.onPushing(AST.Opr.isEq)
+  ROOT || AST.Opr.isGr.m     || Opr.onPushing(AST.Opr.isGr)
+  ROOT || AST.Opr.isLe.m     || Opr.onPushing(AST.Opr.isLe)
+  ROOT || AST.Opr.isGrOrEq.m || Opr.onPushing(AST.Opr.isGrOrEq)
+  ROOT || AST.Opr.isLeOrEq.m || Opr.onPushing(AST.Opr.isLeOrEq)
 
   //////////////////////////////////////////////////////////////////////////////
   //// Variables ///////////////////////////////////////////////////////////////

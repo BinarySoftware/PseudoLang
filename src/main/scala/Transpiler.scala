@@ -73,6 +73,8 @@ object Transpiler {
         }
         R + "do :" + bRepr + traverse(indent, rest) + AST
           .Newline() + "while !" + l.condition // [1]
+      case (o: AST.Opr) :: rest =>
+        R + traverseOpr(o, indent) + traverse(indent, rest)
       case (_: AST.Comment) :: rest => R + traverse(indent, rest)
       case undefined :: rest        => R + undefined.repr + traverse(indent, rest)
       case Nil                      => R
@@ -81,6 +83,17 @@ object Transpiler {
 
   def traverseBlock(b: AST.Block): Repr.Builder = {
     R + AST.Newline() + b.indent + traverse(b.indent, b.elems)
+  }
+
+  def traverseOpr(o: AST.Opr, indent: Int): Repr.Builder = {
+    val lef = traverse(indent, o.Le :: Nil)
+    val rig = traverse(indent, o.Re :: Nil)
+    o.marker match {
+      case AST.Opr.isEq   => R + lef + 1 + "==" + 1 + rig
+      case AST.Opr.Assign => R + lef + 1 + "=" + 1 + rig
+      case AST.Opr.Mod    => R + lef + 1 + "%" + 1 + rig
+      case oth            => R + lef + 1 + oth + 1 + rig
+    }
   }
 }
 /*

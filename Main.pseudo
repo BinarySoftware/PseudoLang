@@ -1,9 +1,10 @@
 Gcd(a,b)
     // 1
     if(a=0)
-        then c = b * 2 / 2
+        then c <- b * 2 / 2
         return c
-    r <-- b mod a
+    r <- b mod a
     return Gcd(r, a)
 
 // FIXME 1 -  there's need to put line in between nested functions declaration
+// FIXME 2 -  parse condition of if, while, do, repeat, for
