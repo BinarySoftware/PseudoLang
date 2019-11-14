@@ -72,7 +72,7 @@ object Transpiler {
           case oth          => R + oth
         }
         R + "do :" + bRepr + traverse(indent, rest) + AST
-          .Newline() + "while !" + l.condition
+          .Newline() + "while !" + l.condition // [1]
       case (_: AST.Comment) :: rest => R + traverse(indent, rest)
       case undefined :: rest        => R + undefined.repr + traverse(indent, rest)
       case Nil                      => R
@@ -83,3 +83,9 @@ object Transpiler {
     R + AST.Newline() + b.indent + traverse(b.indent, b.elems)
   }
 }
+/*
+ * Note [1]
+ *
+ * There is no implementation of repeat until loop in Py
+ * But it can be easily replaced with do..while loop with negated condition
+ */
