@@ -1,13 +1,10 @@
 Gcd(a,b)
-    // Why do I need line here?
+    // 1
     if(a=0)
-        then return b
-    r <-- b mod a
+        then c <- b * 2 / 2
+        return c
+    r <- b mod a
     return Gcd(r, a)
 
-// This fails, idk why
-
-fun(a)
-    fun(b)
-        sdfiknsdoif
-    return sdfsdf
+// FIXME 1 -  there's need to put line in between nested functions declaration
+// FIXME 2 -  parse condition of if, while, do, repeat, for

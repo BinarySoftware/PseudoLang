@@ -148,21 +148,23 @@ case class ParserDef() extends Parser[AST] {
     }
   }
 
-  ROOT || AST.Opr.Add.m          || Opr.onPushing(AST.Opr.Add)
-  ROOT || AST.Opr.Sub.m          || Opr.onPushing(AST.Opr.Sub)
-  ROOT || AST.Opr.Mul.m          || Opr.onPushing(AST.Opr.Mul)
-  ROOT || AST.Opr.Div.m          || Opr.onPushing(AST.Opr.Div)
-  ROOT || AST.Opr.Mod.m          || Opr.onPushing(AST.Opr.Mod)
-  ROOT || AST.Opr.Pow.m          || Opr.onPushing(AST.Opr.Pow)
-  ROOT || AST.Opr.DefAndAssign.m || Opr.onPushing(AST.Opr.DefAndAssign)
-  ROOT || AST.Opr.Assign.m       || Opr.onPushing(AST.Opr.Assign)
-  ROOT || AST.Opr.TpAnn.m        || Opr.onPushing(AST.Opr.TpAnn)
-  ROOT || AST.Opr.isEq.m         || Opr.onPushing(AST.Opr.isEq)
-  ROOT || AST.Opr.isGr.m         || Opr.onPushing(AST.Opr.isGr)
-  ROOT || AST.Opr.isLe.m         || Opr.onPushing(AST.Opr.isLe)
-  ROOT || AST.Opr.isGrOrEq.m     || Opr.onPushing(AST.Opr.isGrOrEq)
-  ROOT || AST.Opr.isLeOrEq.m     || Opr.onPushing(AST.Opr.isLeOrEq)
-
+  ROOT || AST.Opr.Add.m      || Opr.onPushing(AST.Opr.Add)
+  ROOT || AST.Opr.Sub.m      || Opr.onPushing(AST.Opr.Sub)
+  ROOT || AST.Opr.Mul.m      || Opr.onPushing(AST.Opr.Mul)
+  ROOT || AST.Opr.Div.m      || Opr.onPushing(AST.Opr.Div)
+  ROOT || AST.Opr.Mod.m      || Opr.onPushing(AST.Opr.Mod)
+  ROOT || AST.Opr.Pow.m      || Opr.onPushing(AST.Opr.Pow)
+  ROOT || AST.Opr.Assign.m   || Opr.onPushing(AST.Opr.Assign)
+  ROOT || AST.Opr.isEq.m     || Opr.onPushing(AST.Opr.isEq)
+  ROOT || AST.Opr.isGr.m     || Opr.onPushing(AST.Opr.isGr)
+  ROOT || AST.Opr.isLe.m     || Opr.onPushing(AST.Opr.isLe)
+  ROOT || AST.Opr.isGrOrEq.m || Opr.onPushing(AST.Opr.isGrOrEq)
+  ROOT || AST.Opr.isLeOrEq.m || Opr.onPushing(AST.Opr.isLeOrEq)
+  ROOT || AST.Opr.isNotEq.m  || Opr.onPushing(AST.Opr.isNotEq)
+  ROOT || AST.Opr.And.m      || Opr.onPushing(AST.Opr.And)
+  ROOT || AST.Opr.Or.m       || Opr.onPushing(AST.Opr.Or)
+  ROOT || AST.Opr.Not.m      || Opr.onPushing(AST.Opr.Not)
+  ROOT || AST.Opr.Assign.m   || Opr.onPushing(AST.Opr.Assign)
   //////////////////////////////////////////////////////////////////////////////
   //// Variables ///////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
@@ -405,6 +407,7 @@ case class ParserDef() extends Parser[AST] {
       }
     }
 
+    // TODO: Refactor this mess!
     def connectBlocksToAppropriateMethods(s: List[AST.Elem]): List[AST.Elem] = {
       s match {
         case (f: AST.Func) :: (b: AST.Block) :: rest =>
@@ -418,7 +421,15 @@ case class ParserDef() extends Parser[AST] {
             AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
           AST.If(i.condition, bl) :: connectBlocksToAppropriateMethods(rest)
         case (_: AST.If.ThenCase) :: rest =>
-          AST.If.ThenCase(connectBlocksToAppropriateMethods(rest)) :: Nil
+          if (rest.contains(AST.If.ElseCase())) {
+            val inThen = rest.take(rest.indexOf(AST.If.ElseCase()) - 1)
+            AST.If.ThenCase(connectBlocksToAppropriateMethods(inThen)) :: AST
+              .Newline() :: connectBlocksToAppropriateMethods(
+              rest.drop(rest.indexOf(AST.If.ElseCase()))
+            )
+          } else {
+            AST.If.ThenCase(connectBlocksToAppropriateMethods(rest)) :: Nil
+          }
         case (_: AST.If.ElseCase) :: rest =>
           AST.If.ElseCase(connectBlocksToAppropriateMethods(rest)) :: Nil
         case (_: AST.DoWhile) :: (b: AST.Block) :: (w: AST.While) :: rest =>
@@ -454,7 +465,6 @@ case class ParserDef() extends Parser[AST] {
         case (v: AST.Var) :: (a: AST.Array) :: rest =>
           AST.Array(v, a.str) :: connectBlocksToAppropriateMethods(rest)
         case v :: rest => v :: connectBlocksToAppropriateMethods(rest)
-        case v :: Nil  => v :: Nil
         case Nil       => Nil
       }
     }

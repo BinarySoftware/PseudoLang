@@ -1,13 +1,11 @@
 package org.PseudoLang.syntax.text.ast
 
+import org.enso.flexer.ADT
 import org.enso.syntax.text.ast.Repr
 import org.enso.syntax.text.ast.Repr._
 
 sealed trait Symbol extends Repr.Provider {
   def show(): String = repr.build()
-
-//  val scalaRepr: Repr.Builder
-//  def generateScala(): String = scalaRepr.build()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -16,14 +14,11 @@ sealed trait Symbol extends Repr.Provider {
 
 final case class AST(elems: List[AST.Elem]) extends Symbol {
   val repr: Repr.Builder = R + elems
-//  val scalaRepr: Repr.Builder = R + "object Main extends App {" + AST
-//      .Newline() + elems.map(_.scalaRepr) + AST
-//      .Newline() + "}"
 }
 
 object AST {
-  def apply(): AST                 = new AST(Nil)
-  def apply(elem: AST.Elem): AST   = new AST(elem :: Nil)
+  def apply():                 AST = new AST(Nil)
+  def apply(elem: AST.Elem):   AST = new AST(elem :: Nil)
   def apply(elems: AST.Elem*): AST = new AST(elems.toList)
 
   sealed trait Elem extends Symbol
@@ -33,16 +28,13 @@ object AST {
 
   case class Newline() extends Elem {
     val repr: Repr.Builder = R + "\n"
-//    val scalaRepr: Repr.Builder = R + "\n"
   }
 
   case class Undefined(str: String) extends Elem.Invalid {
     val repr: Repr.Builder = R + str
-//    val scalaRepr: Repr.Builder = R + str
   }
   case class Empty() extends Elem {
     val repr: Repr.Builder = R
-//    val scalaRepr: Repr.Builder = R
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -50,7 +42,6 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   case class Var(name: String) extends Elem {
     val repr: Repr.Builder = R + name
-//    val scalaRepr: Repr.Builder = R + name
   }
   object Var {
     def apply(name: String) = new Var(name)
@@ -61,22 +52,14 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   case class Opr(marker: Opr.Marker, Le: Elem, Re: Elem) extends Elem {
     val repr: Repr.Builder = R + Le + " " + marker + " " + Re
-//    val scalaRepr: Repr.Builder = {
-//      val beginning: Builder = marker match {
-//        case Opr.DefAndAssign => R + "var "
-//        case _                => R
-//      }
-//      R + beginning + Le.scalaRepr + " " + marker.scalaRepr + " " + Re.scalaRepr
-//    }
   }
   object Opr {
-    def apply(m: Opr.Marker)                          = new Opr(m, Empty(), Empty())
-    def apply(m: Opr.Marker, e: Elem)                 = new Opr(m, e, Empty())
+    def apply(m: Opr.Marker)          = new Opr(m, Empty(), Empty())
+    def apply(m: Opr.Marker, e: Elem) = new Opr(m, e, Empty())
     def apply(m: Opr.Marker, Le: Elem, Re: Elem): Opr = new Opr(m, Le, Re)
 
     abstract class Marker(val m: String) extends Elem {
       val repr: Repr.Builder = R + m
-//      val scalaRepr: Repr.Builder = R + m
     }
 
     /* Arithmetic operators */
@@ -84,25 +67,20 @@ object AST {
     case object Sub extends Marker("-")
     case object Mul extends Marker("*")
     case object Div extends Marker("/")
-    case object Mod extends Marker("mod") {
-//      override val scalaRepr: Builder = R + "%"
-    }
+    case object Mod extends Marker("mod")
     case object Pow extends Marker("^")
-
-    case object DefAndAssign extends Marker("<--") {
-//      override val scalaRepr: Builder = R + "="
-    }
-    case object Assign extends Marker("<-") {
-//      override val scalaRepr: Builder = R + "="
-    }
-    case object TpAnn extends Marker(":")
-    case object isEq extends Marker("=") {
-//      override val scalaRepr: Builder = R + "=="
-    }
+    /* Logical operators */
+    case object isEq     extends Marker("=")
     case object isGr     extends Marker(">")
     case object isLe     extends Marker("<")
     case object isGrOrEq extends Marker(">=")
     case object isLeOrEq extends Marker("<=")
+    case object isNotEq  extends Marker("<>")
+    case object And      extends Marker("&")
+    case object Or       extends Marker("|")
+    case object Not      extends Marker("!")
+    case object Assign   extends Marker("<-")
+    val markerConstructors = ADT.constructors[Marker]
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -110,10 +88,9 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   case class Spacing(len: Int) extends Elem {
     val repr: Repr.Builder = R + len
-//    val scalaRepr: Repr.Builder = R + len
   }
   object Spacing {
-    def apply(): Spacing         = new Spacing(1)
+    def apply():         Spacing = new Spacing(1)
     def apply(len: Int): Spacing = new Spacing(len)
   }
 
@@ -122,11 +99,10 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   case class Comment(str: String) extends Elem {
     val repr: Repr.Builder = R + Comment.marker + str
-    //    val scalaRepr: Repr.Builder = R + Comment.marker + str
   }
 
   object Comment {
-    val marker: String              = "//"
+    val marker: String = "//"
     def apply(str: String): Comment = new Comment(str)
   }
 
@@ -138,7 +114,7 @@ object AST {
   }
 
   object Array {
-    def apply(par: AST.Parens): Array                 = new Array(AST.Empty(), par)
+    def apply(par: AST.Parens):                 Array = new Array(AST.Empty(), par)
     def apply(elem: AST.Elem, par: AST.Parens): Array = new Array(elem, par)
   }
 
@@ -150,7 +126,7 @@ object AST {
   }
 
   object Parens {
-    def apply(): Parens            = new Parens('(', ')', "")
+    def apply():            Parens = new Parens('(', ')', "")
     def apply(str: String): Parens = new Parens('(', ')', str)
   }
 
@@ -159,21 +135,6 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   case class Func(name: Var, block: AST.Elem, args: AST.Parens) extends Elem {
     val repr: Repr.Builder = R + name + args + block
-
-//    val scalaRepr: Repr.Builder = {
-//      val nameRepr = R + "def " + name.scalaRepr + "[T]("
-//      val argsRepr = {
-//        if (args.nonEmpty) {
-//          R + args.head.scalaRepr + ": T" + args.tail.map(
-//            R + ", " + _.scalaRepr + ": T"
-//          )
-//        } else {
-//          R
-//        }
-//      }
-//      val close = "): Unit = "
-//      R + nameRepr + argsRepr + close
-//    }
   }
   object Func {
     def apply(name: Var): Func =
@@ -187,11 +148,10 @@ object AST {
 
     case class Return(value: List[AST.Elem]) extends Elem {
       val repr: Repr.Builder = R + "Return " + value
-//      val scalaRepr: Repr.Builder = R + "return " + value
     }
     case object Return {
-      def apply(): Return                 = new Return(Nil)
-      def apply(value: AST.Elem): Return  = new Return(value :: Nil)
+      def apply():                 Return = new Return(Nil)
+      def apply(value: AST.Elem):  Return = new Return(value :: Nil)
       def apply(value: AST.Elem*): Return = new Return(value.toList)
     }
   }
@@ -200,9 +160,7 @@ object AST {
   //// Control Flow ////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
   case class If(condition: AST.Parens, block: AST.Elem) extends Elem {
-    val repr: Repr.Builder = R + "If" + "(" + condition + ")" + block.repr
-//    val scalaRepr
-//      : Repr.Builder = R + "if" + "(" + condition + ")" + block.scalaRepr
+    val repr: Repr.Builder = R + "If" + condition + block.repr
   }
   object If {
     def apply(condition: AST.Parens): If = new If(condition, AST.Empty())
@@ -211,21 +169,19 @@ object AST {
 
     case class ElseCase(e: List[AST.Elem]) extends Elem {
       val repr: Repr.Builder = R + "Else " + e
-//      val scalaRepr: Repr.Builder = R + "else " + block.scalaRepr
     }
     object ElseCase {
-      def apply(): ElseCase             = new ElseCase(Nil)
-      def apply(e: AST.Elem): ElseCase  = new ElseCase(e :: Nil)
+      def apply():             ElseCase = new ElseCase(Nil)
+      def apply(e: AST.Elem):  ElseCase = new ElseCase(e :: Nil)
       def apply(e: AST.Elem*): ElseCase = new ElseCase(e.toList)
     }
 
     case class ThenCase(e: List[AST.Elem]) extends Elem {
       val repr: Repr.Builder = R + "Then " + e
-//      val scalaRepr: Repr.Builder = R + "then " + block.scalaRepr
     }
     object ThenCase {
-      def apply(): ThenCase             = new ThenCase(Nil)
-      def apply(e: AST.Elem): ThenCase  = new ThenCase(e :: Nil)
+      def apply():             ThenCase = new ThenCase(Nil)
+      def apply(e: AST.Elem):  ThenCase = new ThenCase(e :: Nil)
       def apply(e: AST.Elem*): ThenCase = new ThenCase(e.toList)
     }
   }
@@ -234,9 +190,7 @@ object AST {
   //// Loops ///////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
   case class While(condition: AST.Parens, block: AST.Elem) extends Elem {
-    val repr: Repr.Builder = R + "While" + "(" + condition + ")" + block.repr
-//    val scalaRepr
-//      : Repr.Builder = R + "while" + "(" + condition + ")" + block.scalaRepr
+    val repr: Repr.Builder = R + "While" + condition + block.repr
   }
   object While {
     def apply(condition: AST.Parens): While = new While(condition, AST.Empty())
@@ -245,9 +199,7 @@ object AST {
   }
 
   case class DoWhile(condition: AST.Parens, block: AST.Elem) extends Elem {
-    val repr: Repr.Builder = R + "Do" + block.repr + "While (" + condition + ")"
-//    val scalaRepr
-//      : Repr.Builder = R + "do" + block.scalaRepr + "while (" + condition + ")"
+    val repr: Repr.Builder = R + "Do" + block.repr + "While " + condition
   }
   object DoWhile {
     def apply(): DoWhile = new DoWhile(AST.Parens('(', ')', ""), AST.Empty())
@@ -258,9 +210,7 @@ object AST {
   }
 
   case class For(condition: AST.Parens, block: AST.Elem) extends Elem {
-    val repr: Repr.Builder = R + "For" + "(" + condition + ")" + block.repr
-//    val scalaRepr
-//      : Repr.Builder = R + "for" + "(" + condition + ")" + block.scalaRepr
+    val repr: Repr.Builder = R + "For" + condition + block.repr
   }
   object For {
     def apply(condition: AST.Parens): For = new For(condition, AST.Empty())
@@ -269,10 +219,7 @@ object AST {
   }
 
   case class RepeatUntil(condition: AST.Parens, block: AST.Elem) extends Elem {
-    val repr
-      : Repr.Builder = R + "Repeat" + block.repr + "Until (" + condition + ")"
-//    val scalaRepr
-//      : Repr.Builder = R + "do" + block.scalaRepr + "while !(" + condition + ")"
+    val repr: Repr.Builder = R + "Repeat" + block.repr + "Until " + condition
   }
   object RepeatUntil {
     def apply(): RepeatUntil =
@@ -292,18 +239,12 @@ object AST {
         case b: AST.Block  => R + b + indent
         case elem          => R + elem
       } + Newline()
-
-//    val scalaRepr: Repr.Builder = R + "{" + Newline() + indent + elems.map {
-//        case n: Newline   => R + n + indent
-//        case b: AST.Block => R + b.scalaRepr + indent
-//        case elem         => R + elem.scalaRepr
-//      } + Newline() + (indent - 2) + "}"
   }
   object Block {
-    def apply(): Block                 = new Block(0, Nil)
-    def apply(elem: AST.Elem): Block   = new Block(0, elem :: Nil)
+    def apply():                 Block = new Block(0, Nil)
+    def apply(elem: AST.Elem):   Block = new Block(0, elem :: Nil)
     def apply(elems: AST.Elem*): Block = new Block(0, elems.toList)
-    def apply(indent: Int): Block      = new Block(indent, Nil)
+    def apply(indent: Int):      Block = new Block(indent, Nil)
     def apply(indent: Int, elem: AST.Elem): Block =
       new Block(indent, elem :: Nil)
     def apply(indent: Int, elems: AST.Elem*): Block =

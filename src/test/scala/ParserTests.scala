@@ -259,13 +259,12 @@ class ParserTests extends FlatSpec with Matchers {
       AST.Parens('(', ')', "a<b"),
       AST.Block(
         2,
-        AST.If
-          .ThenCase(
-            AST.Spacing(),
-            AST.Var("a"),
-            AST.Newline(),
-            AST.If.ElseCase(AST.Spacing(), AST.Var("b"))
-          )
+        AST.If.ThenCase(
+          AST.Spacing(),
+          AST.Var("a")
+        ),
+        AST.Newline(),
+        AST.If.ElseCase(AST.Spacing(), AST.Var("b"))
       )
     )
   )
@@ -282,24 +281,24 @@ class ParserTests extends FlatSpec with Matchers {
         AST.If
           .ThenCase(
             AST.Spacing(),
-            AST.Var("a"),
-            AST.Newline(),
-            AST.If.ElseCase(
-              AST.If(
-                AST.Parens('(', ')', "a=b"),
-                AST.Block(
-                  4,
-                  AST.If
-                    .ThenCase(
-                      AST.Spacing(),
-                      AST.Var("2"),
-                      AST.Newline(),
-                      AST.If.ElseCase(AST.Spacing(), AST.Var("b"))
-                    )
-                )
-              )
+            AST.Var("a")
+          ),
+        AST.Newline(),
+        AST.If.ElseCase(
+          AST.If(
+            AST.Parens('(', ')', "a=b"),
+            AST.Block(
+              4,
+              AST.If
+                .ThenCase(
+                  AST.Spacing(),
+                  AST.Var("2")
+                ),
+              AST.Newline(),
+              AST.If.ElseCase(AST.Spacing(), AST.Var("b"))
             )
           )
+        )
       )
     )
   )
@@ -386,6 +385,32 @@ class ParserTests extends FlatSpec with Matchers {
         )
       )
     )
+  )
+
+  val allPossibleMarkers: List[AST.Opr.Marker] = List(
+    AST.Opr.Add,
+    AST.Opr.Sub,
+    AST.Opr.Mul,
+    AST.Opr.Div,
+    AST.Opr.Mod,
+    AST.Opr.Pow,
+    AST.Opr.isEq,
+    AST.Opr.isGr,
+    AST.Opr.isLe,
+    AST.Opr.isGrOrEq,
+    AST.Opr.isLeOrEq,
+    AST.Opr.isNotEq,
+    AST.Opr.And,
+    AST.Opr.Or,
+    AST.Opr.Not,
+    AST.Opr.Assign
+  )
+
+  allPossibleMarkers.foreach(
+    t =>
+      s"a ${t.m} b" ?= AST(
+        AST.Opr(t, AST.Var("a"), AST.Var("b"))
+      )
   )
 
   """a[1,2,3,4,5]
