@@ -465,7 +465,6 @@ case class ParserDef() extends Parser[AST] {
         case (v: AST.Var) :: (a: AST.Array) :: rest =>
           AST.Array(v, a.str) :: connectBlocksToAppropriateMethods(rest)
         case v :: rest => v :: connectBlocksToAppropriateMethods(rest)
-        case v :: Nil  => v :: Nil
         case Nil       => Nil
       }
     }
