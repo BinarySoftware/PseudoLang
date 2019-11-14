@@ -1,5 +1,6 @@
 package org.PseudoLang.syntax.text.ast
 
+import org.enso.flexer.ADT
 import org.enso.syntax.text.ast.Repr
 import org.enso.syntax.text.ast.Repr._
 
@@ -79,6 +80,7 @@ object AST {
     case object Or       extends Marker("|")
     case object Not      extends Marker("!")
     case object Assign   extends Marker("<-")
+    val markerConstructors = ADT.constructors[Marker]
   }
 
   //////////////////////////////////////////////////////////////////////////////
