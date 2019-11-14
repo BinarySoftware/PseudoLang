@@ -62,19 +62,23 @@ object AST {
     }
 
     /* Arithmetic operators */
-    case object Add      extends Marker("+")
-    case object Sub      extends Marker("-")
-    case object Mul      extends Marker("*")
-    case object Div      extends Marker("/")
-    case object Mod      extends Marker("mod")
-    case object Pow      extends Marker("^")
-    case object Assign   extends Marker("<-")
-    case object TpAnn    extends Marker(":")
+    case object Add extends Marker("+")
+    case object Sub extends Marker("-")
+    case object Mul extends Marker("*")
+    case object Div extends Marker("/")
+    case object Mod extends Marker("mod")
+    case object Pow extends Marker("^")
+    /* Logical operators */
     case object isEq     extends Marker("=")
     case object isGr     extends Marker(">")
     case object isLe     extends Marker("<")
     case object isGrOrEq extends Marker(">=")
     case object isLeOrEq extends Marker("<=")
+    case object isNotEq  extends Marker("<>")
+    case object And      extends Marker("&")
+    case object Or       extends Marker("|")
+    case object Not      extends Marker("!")
+    case object Assign   extends Marker("<-")
   }
 
   //////////////////////////////////////////////////////////////////////////////

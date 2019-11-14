@@ -155,13 +155,16 @@ case class ParserDef() extends Parser[AST] {
   ROOT || AST.Opr.Mod.m      || Opr.onPushing(AST.Opr.Mod)
   ROOT || AST.Opr.Pow.m      || Opr.onPushing(AST.Opr.Pow)
   ROOT || AST.Opr.Assign.m   || Opr.onPushing(AST.Opr.Assign)
-  ROOT || AST.Opr.TpAnn.m    || Opr.onPushing(AST.Opr.TpAnn)
   ROOT || AST.Opr.isEq.m     || Opr.onPushing(AST.Opr.isEq)
   ROOT || AST.Opr.isGr.m     || Opr.onPushing(AST.Opr.isGr)
   ROOT || AST.Opr.isLe.m     || Opr.onPushing(AST.Opr.isLe)
   ROOT || AST.Opr.isGrOrEq.m || Opr.onPushing(AST.Opr.isGrOrEq)
   ROOT || AST.Opr.isLeOrEq.m || Opr.onPushing(AST.Opr.isLeOrEq)
-
+  ROOT || AST.Opr.isNotEq.m  || Opr.onPushing(AST.Opr.isNotEq)
+  ROOT || AST.Opr.And.m      || Opr.onPushing(AST.Opr.And)
+  ROOT || AST.Opr.Or.m       || Opr.onPushing(AST.Opr.Or)
+  ROOT || AST.Opr.Not.m      || Opr.onPushing(AST.Opr.Not)
+  ROOT || AST.Opr.Assign.m   || Opr.onPushing(AST.Opr.Assign)
   //////////////////////////////////////////////////////////////////////////////
   //// Variables ///////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
