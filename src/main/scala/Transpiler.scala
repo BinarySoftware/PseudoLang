@@ -53,6 +53,26 @@ object Transpiler {
           case oth          => R + oth
         }
         R + "while " + l.condition + ":" + bRepr + traverse(indent, rest)
+      case (l: AST.DoWhile) :: rest =>
+        val bRepr = l.block match {
+          case b: AST.Block => R + traverseBlock(b)
+          case oth          => R + oth
+        }
+        R + "do :" + bRepr + traverse(indent, rest) + AST
+          .Newline() + "while " + l.condition
+      case (l: AST.For) :: rest =>
+        val bRepr = l.block match {
+          case b: AST.Block => R + traverseBlock(b)
+          case oth          => R + oth
+        }
+        R + "for " + l.condition + ":" + bRepr + traverse(indent, rest)
+      case (l: AST.RepeatUntil) :: rest =>
+        val bRepr = l.block match {
+          case b: AST.Block => R + traverseBlock(b)
+          case oth          => R + oth
+        }
+        R + "do :" + bRepr + traverse(indent, rest) + AST
+          .Newline() + "while !" + l.condition
       case (_: AST.Comment) :: rest => R + traverse(indent, rest)
       case undefined :: rest        => R + undefined.repr + traverse(indent, rest)
       case Nil                      => R

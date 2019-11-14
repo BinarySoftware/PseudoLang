@@ -7,7 +7,3 @@ Gcd(a,b)
     return Gcd(r, a)
 
 // FIXME 1 -  there's need to put line in between nested functions declaration
-
-while (i<10)
-    i <- i + 1
-
