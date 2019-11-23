@@ -76,6 +76,7 @@ object Transpiler {
       case (o: AST.Opr) :: rest =>
         R + traverseOpr(o, indent) + traverse(indent, rest)
       case (_: AST.Comment) :: rest => R + traverse(indent, rest)
+      case (r: AST.Func.Return):: rest => R + "return " + traverse(0,r.value) + traverse(indent, rest)
       case undefined :: rest        => R + undefined.repr + traverse(indent, rest)
       case Nil                      => R
     }
