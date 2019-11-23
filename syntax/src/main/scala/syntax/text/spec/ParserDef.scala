@@ -261,6 +261,7 @@ case class ParserDef() extends Parser[AST] {
     }
 
     def onPushingClosingParen(): Unit = logger.trace {
+      Opr.onTraversingLineForOprs()
       var stack: List[AST.Elem] = Nil
       while (!result.stack.head.isInstanceOf[AST.Parens]) {
         result.pop()
