@@ -97,6 +97,11 @@ object Transpiler {
 
       case (r: AST.Func.Return) :: rest =>
         R + "return " + traverse(0, r.value) + traverse(indent, rest)
+      case (a: AST.Array) :: rest =>
+        R + a.name + traverseParens(a.elems) + traverse(
+          indent,
+          rest
+        )
       case undefined :: rest => R + undefined.repr + traverse(indent, rest)
       case Nil               => R
     }
@@ -114,10 +119,11 @@ object Transpiler {
     val lef = traverse(indent, o.Le :: Nil)
     val rig = traverse(indent, o.Re :: Nil)
     o.marker match {
-      case AST.Opr.isEq   => R + lef + 1 + "==" + 1 + rig
-      case AST.Opr.Assign => R + lef + 1 + "=" + 1 + rig
-      case AST.Opr.Mod    => R + lef + 1 + "%" + 1 + rig
-      case oth            => R + lef + 1 + oth + 1 + rig
+      case AST.Opr.isEq     => R + lef + 1 + "==" + 1 + rig
+      case AST.Opr.Assign   => R + lef + 1 + "=" + 1 + rig
+      case AST.Opr.Mod      => R + lef + 1 + "%" + 1 + rig
+      case AST.Opr.FloorDiv => R + lef + 1 + "//" + 1 + rig
+      case oth              => R + lef + 1 + oth + 1 + rig
     }
   }
 }

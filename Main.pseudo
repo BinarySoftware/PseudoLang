@@ -5,4 +5,22 @@ Gcd(a,b)
     r <- b mod a
     return Gcd(r, a)
 
-// FIXME 1 -  there's need to put line in between nested functions declaration
+// FIXME -  there's need to put line in between nested functions declaration
+
+rozNWD(j,k)
+    //foo
+    if (j<0 or j>k)
+        then return None
+    //bar
+    if (j = 0)
+        then return (k, 0, 1) //info dla G
+    r <- k mod j
+    (d, xp, yp) <- rozNWD(r, j)
+    x <- yp - k /f j * xp
+    y <- xp
+    return d, x, y
+
+
+last(a)
+    n <- len(a) - 1
+    return a[n]

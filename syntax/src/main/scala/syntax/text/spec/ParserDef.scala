@@ -165,6 +165,7 @@ case class ParserDef() extends Parser[AST] {
   ROOT || AST.Opr.Or.m       || Opr.onPushing(AST.Opr.Or)
   ROOT || AST.Opr.Not.m      || Opr.onPushing(AST.Opr.Not)
   ROOT || AST.Opr.Assign.m   || Opr.onPushing(AST.Opr.Assign)
+  ROOT || AST.Opr.FloorDiv.m || Opr.onPushing(AST.Opr.FloorDiv)
   //////////////////////////////////////////////////////////////////////////////
   //// Variables ///////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
@@ -202,9 +203,13 @@ case class ParserDef() extends Parser[AST] {
             case Some(v: AST.Var) =>
               result.pop()
               matchPreviousVar(args, v)
-            case _ => result.pushElem(args)
+            case _ =>
+              result.push()
+              result.pushElem(args)
           }
-        case _ => result.pushElem(args)
+        case _ =>
+          result.push()
+          result.pushElem(args)
       }
     }
 
@@ -473,7 +478,7 @@ case class ParserDef() extends Parser[AST] {
             )
           ) :: Nil
         case (v: AST.Var) :: (a: AST.Array) :: rest =>
-          AST.Array(v, a.str) :: connectBlocksToAppropriateMethods(rest)
+          AST.Array(v, a.elems) :: connectBlocksToAppropriateMethods(rest)
         case v :: rest => v :: connectBlocksToAppropriateMethods(rest)
         case Nil       => Nil
       }

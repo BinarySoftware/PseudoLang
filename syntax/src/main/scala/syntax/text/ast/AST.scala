@@ -62,12 +62,13 @@ object AST {
     }
 
     /* Arithmetic operators */
-    case object Add extends Marker("+")
-    case object Sub extends Marker("-")
-    case object Mul extends Marker("*")
-    case object Div extends Marker("/")
-    case object Mod extends Marker("mod")
-    case object Pow extends Marker("^")
+    case object Add      extends Marker("+")
+    case object Sub      extends Marker("-")
+    case object Mul      extends Marker("*")
+    case object Div      extends Marker("/")
+    case object Mod      extends Marker("mod")
+    case object Pow      extends Marker("^")
+    case object FloorDiv extends Marker("/f")
     /* Logical operators */
     case object isEq     extends Marker("=")
     case object isGr     extends Marker(">")
@@ -107,8 +108,8 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   //// Array ///////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
-  case class Array(name: AST.Elem, str: AST.Parens) extends Elem {
-    val repr: Repr.Builder = R + name + "[" + str + "]"
+  case class Array(name: AST.Elem, elems: AST.Parens) extends Elem {
+    val repr: Repr.Builder = R + name + "[" + elems + "]"
   }
 
   object Array {
