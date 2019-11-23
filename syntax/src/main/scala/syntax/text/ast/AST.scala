@@ -1,6 +1,5 @@
 package org.PseudoLang.syntax.text.ast
 
-import org.enso.flexer.ADT
 import org.enso.syntax.text.ast.Repr
 import org.enso.syntax.text.ast.Repr._
 
@@ -17,8 +16,8 @@ final case class AST(elems: List[AST.Elem]) extends Symbol {
 }
 
 object AST {
-  def apply():                 AST = new AST(Nil)
-  def apply(elem: AST.Elem):   AST = new AST(elem :: Nil)
+  def apply(): AST                 = new AST(Nil)
+  def apply(elem: AST.Elem): AST   = new AST(elem :: Nil)
   def apply(elems: AST.Elem*): AST = new AST(elems.toList)
 
   sealed trait Elem extends Symbol
@@ -54,8 +53,8 @@ object AST {
     val repr: Repr.Builder = R + Le + " " + marker + " " + Re
   }
   object Opr {
-    def apply(m: Opr.Marker)          = new Opr(m, Empty(), Empty())
-    def apply(m: Opr.Marker, e: Elem) = new Opr(m, e, Empty())
+    def apply(m: Opr.Marker)                          = new Opr(m, Empty(), Empty())
+    def apply(m: Opr.Marker, e: Elem)                 = new Opr(m, e, Empty())
     def apply(m: Opr.Marker, Le: Elem, Re: Elem): Opr = new Opr(m, Le, Re)
 
     abstract class Marker(val m: String) extends Elem {
@@ -63,12 +62,13 @@ object AST {
     }
 
     /* Arithmetic operators */
-    case object Add extends Marker("+")
-    case object Sub extends Marker("-")
-    case object Mul extends Marker("*")
-    case object Div extends Marker("/")
-    case object Mod extends Marker("mod")
-    case object Pow extends Marker("^")
+    case object Add      extends Marker("+")
+    case object Sub      extends Marker("-")
+    case object Mul      extends Marker("*")
+    case object Div      extends Marker("/")
+    case object Mod      extends Marker("mod")
+    case object Pow      extends Marker("^")
+    case object FloorDiv extends Marker("/f")
     /* Logical operators */
     case object isEq     extends Marker("=")
     case object isGr     extends Marker(">")
@@ -80,7 +80,6 @@ object AST {
     case object Or       extends Marker("|")
     case object Not      extends Marker("!")
     case object Assign   extends Marker("<-")
-    val markerConstructors = ADT.constructors[Marker]
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -90,7 +89,7 @@ object AST {
     val repr: Repr.Builder = R + len
   }
   object Spacing {
-    def apply():         Spacing = new Spacing(1)
+    def apply(): Spacing         = new Spacing(1)
     def apply(len: Int): Spacing = new Spacing(len)
   }
 
@@ -102,32 +101,34 @@ object AST {
   }
 
   object Comment {
-    val marker: String = "//"
+    val marker: String              = "//"
     def apply(str: String): Comment = new Comment(str)
   }
 
   //////////////////////////////////////////////////////////////////////////////
   //// Array ///////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
-  case class Array(name: AST.Elem, str: AST.Parens) extends Elem {
-    val repr: Repr.Builder = R + name + "[" + str + "]"
+  case class Array(name: AST.Elem, elems: AST.Parens) extends Elem {
+    val repr: Repr.Builder = R + name + "[" + elems + "]"
   }
 
   object Array {
-    def apply(par: AST.Parens):                 Array = new Array(AST.Empty(), par)
+    def apply(par: AST.Parens): Array                 = new Array(AST.Empty(), par)
     def apply(elem: AST.Elem, par: AST.Parens): Array = new Array(elem, par)
   }
 
   //////////////////////////////////////////////////////////////////////////////
   //// Parentheses /////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
-  case class Parens(open: Char, close: Char, str: String) extends Elem {
-    val repr: Repr.Builder = R + open + str + close
+  case class Parens(open: Char, close: Char, elems: List[AST.Elem])
+      extends Elem {
+    val repr: Repr.Builder = R + open + elems.map(_.repr) + close
   }
 
   object Parens {
-    def apply():            Parens = new Parens('(', ')', "")
-    def apply(str: String): Parens = new Parens('(', ')', str)
+    def apply(): Parens                 = new Parens('(', ')', List())
+    def apply(elem: AST.Elem): Parens   = new Parens('(', ')', elem :: Nil)
+    def apply(elems: AST.Elem*): Parens = new Parens('(', ')', elems.toList)
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -138,9 +139,9 @@ object AST {
   }
   object Func {
     def apply(name: Var): Func =
-      new Func(name, AST.Empty(), AST.Parens('(', ')', ""))
+      new Func(name, AST.Empty(), AST.Parens())
     def apply(name: Var, block: AST.Block): Func =
-      new Func(name, block, AST.Parens('(', ')', ""))
+      new Func(name, block, AST.Parens())
     def apply(name: Var, par: AST.Parens): Func =
       new Func(name, AST.Empty(), par)
     def apply(name: Var, block: AST.Block, par: AST.Parens): Func =
@@ -150,8 +151,8 @@ object AST {
       val repr: Repr.Builder = R + "Return " + value
     }
     case object Return {
-      def apply():                 Return = new Return(Nil)
-      def apply(value: AST.Elem):  Return = new Return(value :: Nil)
+      def apply(): Return                 = new Return(Nil)
+      def apply(value: AST.Elem): Return  = new Return(value :: Nil)
       def apply(value: AST.Elem*): Return = new Return(value.toList)
     }
   }
@@ -171,8 +172,8 @@ object AST {
       val repr: Repr.Builder = R + "Else " + e
     }
     object ElseCase {
-      def apply():             ElseCase = new ElseCase(Nil)
-      def apply(e: AST.Elem):  ElseCase = new ElseCase(e :: Nil)
+      def apply(): ElseCase             = new ElseCase(Nil)
+      def apply(e: AST.Elem): ElseCase  = new ElseCase(e :: Nil)
       def apply(e: AST.Elem*): ElseCase = new ElseCase(e.toList)
     }
 
@@ -180,8 +181,8 @@ object AST {
       val repr: Repr.Builder = R + "Then " + e
     }
     object ThenCase {
-      def apply():             ThenCase = new ThenCase(Nil)
-      def apply(e: AST.Elem):  ThenCase = new ThenCase(e :: Nil)
+      def apply(): ThenCase             = new ThenCase(Nil)
+      def apply(e: AST.Elem): ThenCase  = new ThenCase(e :: Nil)
       def apply(e: AST.Elem*): ThenCase = new ThenCase(e.toList)
     }
   }
@@ -202,7 +203,7 @@ object AST {
     val repr: Repr.Builder = R + "Do" + block.repr + "While " + condition
   }
   object DoWhile {
-    def apply(): DoWhile = new DoWhile(AST.Parens('(', ')', ""), AST.Empty())
+    def apply(): DoWhile = new DoWhile(AST.Parens(), AST.Empty())
     def apply(condition: AST.Parens): DoWhile =
       new DoWhile(condition, AST.Empty())
     def apply(condition: AST.Parens, block: AST.Elem): DoWhile =
@@ -223,7 +224,7 @@ object AST {
   }
   object RepeatUntil {
     def apply(): RepeatUntil =
-      new RepeatUntil(AST.Parens('(', ')', ""), AST.Empty())
+      new RepeatUntil(AST.Parens(), AST.Empty())
     def apply(condition: AST.Parens): RepeatUntil =
       new RepeatUntil(condition, AST.Empty())
     def apply(condition: AST.Parens, block: AST.Elem): RepeatUntil =
@@ -241,10 +242,10 @@ object AST {
       } + Newline()
   }
   object Block {
-    def apply():                 Block = new Block(0, Nil)
-    def apply(elem: AST.Elem):   Block = new Block(0, elem :: Nil)
+    def apply(): Block                 = new Block(0, Nil)
+    def apply(elem: AST.Elem): Block   = new Block(0, elem :: Nil)
     def apply(elems: AST.Elem*): Block = new Block(0, elems.toList)
-    def apply(indent: Int):      Block = new Block(indent, Nil)
+    def apply(indent: Int): Block      = new Block(indent, Nil)
     def apply(indent: Int, elem: AST.Elem): Block =
       new Block(indent, elem :: Nil)
     def apply(indent: Int, elems: AST.Elem*): Block =

@@ -22,6 +22,6 @@ object Main extends App {
   println("======================= TRANSPILER =========================")
   val transpiled = Transpiler.run(parsed)
   println(transpiled)
-//  FileManager.saveCodeToFile("", "Generated", transpiled, "scala")
+  FileManager.saveCodeToFile("", "Generated", transpiled, "py")
   println("============================================================")
 }

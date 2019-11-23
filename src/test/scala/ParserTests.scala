@@ -70,9 +70,12 @@ class ParserTests extends FlatSpec with Matchers {
 
   /* Functions */
   "Funkcja()"  ?= AST(AST.Func(AST.Var("Funkcja"), AST.Parens()))
-  "Funkcja(a)" ?= AST(AST.Func(AST.Var("Funkcja"), AST.Parens("a")))
-  "Funkcja(a, b)" ?= AST(
-    AST.Func(AST.Var("Funkcja"), AST.Parens("a, b"))
+  "Funkcja(a)" ?= AST(AST.Func(AST.Var("Funkcja"), AST.Parens(AST.Var("a"))))
+  "Funkcja(a,b)" ?= AST(
+    AST.Func(
+      AST.Var("Funkcja"),
+      AST.Parens(AST.Var("a"), AST.Undefined(","), AST.Var("b"))
+    )
   )
   "Funkcja ()" ?== AST(AST.Func(AST.Var("Funkcja")))
   """Funkcja ()
@@ -232,7 +235,7 @@ class ParserTests extends FlatSpec with Matchers {
         AST.Newline(),
         AST.Opr(AST.Opr.Assign, AST.Var("b"), AST.Var("c"))
       ),
-      AST.Parens("a,b")
+      AST.Parens(AST.Var("a"), AST.Undefined(","), AST.Var("b"))
     )
   )
 
@@ -245,7 +248,7 @@ class ParserTests extends FlatSpec with Matchers {
         2,
         AST.Opr(AST.Opr.Assign, AST.Var("c"), AST.Var("a"))
       ),
-      AST.Parens("a,b")
+      AST.Parens(AST.Var("a"), AST.Undefined(","), AST.Var("b"))
     ),
     AST.Newline(),
     AST.Var("b")
@@ -256,7 +259,7 @@ class ParserTests extends FlatSpec with Matchers {
      |  then a
      |  else b""".stripMargin ?== AST(
     AST.If(
-      AST.Parens('(', ')', "a<b"),
+      AST.Parens(AST.Opr(AST.Opr.isLe, AST.Var("a"), AST.Var("b"))),
       AST.Block(
         2,
         AST.If.ThenCase(
@@ -275,7 +278,7 @@ class ParserTests extends FlatSpec with Matchers {
      |    then 2
      |    else b""".stripMargin ?== AST(
     AST.If(
-      AST.Parens('(', ')', "a<b"),
+      AST.Parens(AST.Opr(AST.Opr.isLe, AST.Var("a"), AST.Var("b"))),
       AST.Block(
         2,
         AST.If
@@ -286,7 +289,7 @@ class ParserTests extends FlatSpec with Matchers {
         AST.Newline(),
         AST.If.ElseCase(
           AST.If(
-            AST.Parens('(', ')', "a=b"),
+            AST.Parens(AST.Opr(AST.Opr.isEq, AST.Var("a"), AST.Var("b"))),
             AST.Block(
               4,
               AST.If
@@ -309,7 +312,7 @@ class ParserTests extends FlatSpec with Matchers {
     |  a <- a + 1
     |while (a < 5)""".stripMargin ?== AST(
     AST.DoWhile(
-      AST.Parens('(', ')', "a < 5"),
+      AST.Parens(AST.Opr(AST.Opr.isLe, AST.Var("a"), AST.Var("5"))),
       AST.Block(
         2,
         AST.Opr(
@@ -331,7 +334,7 @@ class ParserTests extends FlatSpec with Matchers {
     |  b <- b + a
     |  a <- a + 1""".stripMargin ?== AST(
     AST.While(
-      AST.Parens('(', ')', "a < 5"),
+      AST.Parens(AST.Opr(AST.Opr.isLe, AST.Var("a"), AST.Var("5"))),
       AST.Block(
         2,
         AST.Opr(
@@ -354,7 +357,7 @@ class ParserTests extends FlatSpec with Matchers {
     |  a <- a + 1
     |until (a > 5)""".stripMargin ?== AST(
     AST.RepeatUntil(
-      AST.Parens('(', ')', "a > 5"),
+      AST.Parens(AST.Opr(AST.Opr.isGr, AST.Var("a"), AST.Var("5"))),
       AST.Block(
         2,
         AST.Opr(
@@ -372,10 +375,16 @@ class ParserTests extends FlatSpec with Matchers {
     )
   )
 
-  """for (i in 0..9)
+  """for (i in a)
     |  b <- b + i""".stripMargin ?== AST(
     AST.For(
-      AST.Parens('(', ')', "i in 0..9"),
+      AST.Parens(
+        AST.Var("i"),
+        AST.Spacing(),
+        AST.Var("in"),
+        AST.Spacing(),
+        AST.Var("a")
+      ),
       AST.Block(
         2,
         AST.Opr(
@@ -415,8 +424,8 @@ class ParserTests extends FlatSpec with Matchers {
 
   """a[1,2,3,4,5]
     |a[1]""".stripMargin ?== AST(
-    AST.Array(AST.Var("a"), AST.Parens('[', ']', "1,2,3,4,5")),
+    AST.Array(AST.Var("a"), AST.Parens('[', ']', AST.Var("1,2,3,4,5") :: Nil)),
     AST.Newline(),
-    AST.Array(AST.Var("a"), AST.Parens('[', ']', "1"))
+    AST.Array(AST.Var("a"), AST.Parens('[', ']', AST.Var("1") :: Nil))
   )
 }

@@ -165,6 +165,7 @@ case class ParserDef() extends Parser[AST] {
   ROOT || AST.Opr.Or.m       || Opr.onPushing(AST.Opr.Or)
   ROOT || AST.Opr.Not.m      || Opr.onPushing(AST.Opr.Not)
   ROOT || AST.Opr.Assign.m   || Opr.onPushing(AST.Opr.Assign)
+  ROOT || AST.Opr.FloorDiv.m || Opr.onPushing(AST.Opr.FloorDiv)
   //////////////////////////////////////////////////////////////////////////////
   //// Variables ///////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
@@ -190,8 +191,7 @@ case class ParserDef() extends Parser[AST] {
   //// Functions ///////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
   final object Func {
-    def onPushingArgs(in: String): Unit = logger.trace {
-      val args = in.dropRight(1).substring(1)
+    def onPushingArgs(args: AST.Parens): Unit = logger.trace {
       result.pop()
       result.current match {
         case Some(v: AST.Var) =>
@@ -203,13 +203,17 @@ case class ParserDef() extends Parser[AST] {
             case Some(v: AST.Var) =>
               result.pop()
               matchPreviousVar(args, v)
-            case _ => unmatchedPush(in)
+            case _ =>
+              result.push()
+              result.pushElem(args)
           }
-        case _ => unmatchedPush(in)
+        case _ =>
+          result.push()
+          result.pushElem(args)
       }
     }
 
-    private def matchPreviousVar(args: String, v: Var): Unit = {
+    private def matchPreviousVar(args: AST.Parens, v: Var): Unit = {
       v.name.toLowerCase match {
         case `_if_`    => onPushingIf(args)
         case `_while_` => onPushingWhile(args)
@@ -219,32 +223,23 @@ case class ParserDef() extends Parser[AST] {
       }
     }
 
-    private def unmatchedPush(in: String): Unit = {
-      result.push()
-      Undefined.onPushing(in)
-    }
-
-    def onPushingFunc(name: AST.Var, args: String): Unit = logger.trace {
-      val paren = AST.Parens(parenOpen, parenClose, args)
-      val fun   = AST.Func(name, AST.Empty(), paren)
+    def onPushingFunc(name: AST.Var, args: AST.Parens): Unit = logger.trace {
+      val fun = AST.Func(name, AST.Empty(), args)
       result.pushElem(fun)
     }
 
-    def onPushingIf(cond: String): Unit = logger.trace {
-      val paren = AST.Parens(parenOpen, parenClose, cond)
-      val fun   = AST.If(paren)
+    def onPushingIf(cond: AST.Parens): Unit = logger.trace {
+      val fun = AST.If(cond)
       result.pushElem(fun)
     }
 
-    def onPushingFor(cond: String): Unit = logger.trace {
-      val paren = AST.Parens(parenOpen, parenClose, cond)
-      val fun   = AST.For(paren)
+    def onPushingFor(cond: AST.Parens): Unit = logger.trace {
+      val fun = AST.For(cond)
       result.pushElem(fun)
     }
 
-    def onPushingWhile(cond: String): Unit = logger.trace {
-      val paren = AST.Parens(parenOpen, parenClose, cond)
-      val fun   = AST.While(paren)
+    def onPushingWhile(cond: AST.Parens): Unit = logger.trace {
+      val fun = AST.While(cond)
       result.pushElem(fun)
     }
 
@@ -258,18 +253,38 @@ case class ParserDef() extends Parser[AST] {
     }
 
     def onPushingArray(str: String): Unit = logger.trace {
-      val elems = str.dropRight(1).substring(1)
-      val paren = AST.Parens(bracketOpen, bracketClose, elems)
-      val arr   = AST.Array(AST.Empty(), paren)
+      val elems  = str.dropRight(1).substring(1)
+      val varEls = AST.Var(elems) :: Nil
+      val paren  = AST.Parens(bracketOpen, bracketClose, varEls)
+      val arr    = AST.Array(AST.Empty(), paren)
       result.pushElem(arr)
+    }
+
+    def onPushingEmptyParen(): Unit = logger.trace {
+      val elem = AST.Parens()
+      result.pushElem(elem)
+    }
+
+    def onPushingClosingParen(): Unit = logger.trace {
+      Opr.onTraversingLineForOprs()
+      var stack: List[AST.Elem] = Nil
+      while (!result.stack.head.isInstanceOf[AST.Parens]) {
+        result.pop()
+        stack +:= result.current.get
+      }
+      result.pop()
+      val elem = AST.Parens('(', ')', stack)
+      onPushingArgs(elem)
     }
 
     val funcArgs: Pattern = parenOpen >> not(parenClose).many >> parenClose
     val array: Pattern    = bracketOpen >> not(bracketClose).many >> bracketClose
   }
 
-  ROOT || Func.funcArgs || Func.onPushingArgs(currentMatch)
-  ROOT || Func.array    || Func.onPushingArray(currentMatch)
+  ROOT || parenOpen  || Func.onPushingEmptyParen()
+  ROOT || parenClose || Func.onPushingClosingParen()
+  ROOT || Func.array || Func.onPushingArray(currentMatch)
+  //  ROOT || Func.funcArgs || Func.onPushingArgs(currentMatch)
 
   //////////////////////////////////////////////////////////////////////////////
   //// Comments ////////////////////////////////////////////////////////////////
@@ -463,7 +478,7 @@ case class ParserDef() extends Parser[AST] {
             )
           ) :: Nil
         case (v: AST.Var) :: (a: AST.Array) :: rest =>
-          AST.Array(v, a.str) :: connectBlocksToAppropriateMethods(rest)
+          AST.Array(v, a.elems) :: connectBlocksToAppropriateMethods(rest)
         case v :: rest => v :: connectBlocksToAppropriateMethods(rest)
         case Nil       => Nil
       }
