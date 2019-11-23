@@ -18,7 +18,12 @@ object Transpiler {
           case b: AST.Block =>
             val fDecl = R + "def " + f.name + traverseParens(f.args) + ":"
             R + fDecl + traverseBlock(b) + traverse(indent, rest)
-          case _ => R + f.name + f.args + traverse(indent, rest)
+          case _ =>
+            if (f.name.name == "length") {
+              R + "len" + f.args + traverse(indent, rest)
+            } else {
+              R + f.name + f.args + traverse(indent, rest)
+            }
         }
       case (n: AST.Newline) :: rest => R + n + indent + traverse(indent, rest)
       case (i: AST.If) :: rest =>

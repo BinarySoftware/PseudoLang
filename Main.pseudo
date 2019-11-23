@@ -22,5 +22,5 @@ rozNWD(j,k)
 
 
 last(a)
-    n <- len(a) - 1
+    n <- length(a) - 1
     return a[n]
