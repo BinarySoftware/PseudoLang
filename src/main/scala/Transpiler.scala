@@ -61,8 +61,13 @@ object Transpiler {
           case b: AST.Block => R + traverseBlock(b)
           case oth          => R + oth
         }
-        R + "do :" + bRepr + AST
-          .Newline() + "while " + traverseParens(l.condition) + AST
+        R + "while True:" + bRepr + AST
+          .Newline() + l.block
+          .asInstanceOf[AST.Block]
+          .indent + "if " + traverseParens(l.condition) + AST
+          .Newline() + l.block
+          .asInstanceOf[AST.Block]
+          .indent + 4 + "break" + AST
           .Newline() + traverse(indent, rest)
       case (l: AST.For) :: rest =>
         val bRepr = l.block match {
@@ -78,8 +83,13 @@ object Transpiler {
           case b: AST.Block => R + traverseBlock(b)
           case oth          => R + oth
         }
-        R + "do :" + bRepr + AST
-          .Newline() + "while !" + traverseParens(l.condition) + AST
+        R + "while True:" + bRepr + AST
+          .Newline() + l.block
+          .asInstanceOf[AST.Block]
+          .indent + "if !" + traverseParens(l.condition) + AST
+          .Newline() + l.block
+          .asInstanceOf[AST.Block]
+          .indent + 4 + "break" + AST
           .Newline() + traverse(indent, rest) // [1]
       case (o: AST.Opr) :: rest =>
         R + traverseOpr(o, indent) + traverse(indent, rest)
@@ -116,4 +126,8 @@ object Transpiler {
  *
  * There is no implementation of repeat until loop in Py
  * But it can be easily replaced with do..while loop with negated condition
+ *
+ * Note [2]
+ *
+ * This is uuugly. But it works. If it works then it isn't ugly anymore
  */

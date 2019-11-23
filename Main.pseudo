@@ -6,4 +6,3 @@ Gcd(a,b)
     return Gcd(r, a)
 
 // FIXME 1 -  there's need to put line in between nested functions declaration
-// FIXME 2 -  parse condition of if, while, do, repeat, for
