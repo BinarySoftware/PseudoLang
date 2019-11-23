@@ -24,3 +24,12 @@ rozNWD(j,k)
 last(a)
     n <- length(a) - 1
     return a[n]
+
+a <- [1,2,3]
+l <- last(a)
+
+print(l)
+
+a <- rozNWD(2,499)
+
+print(a)

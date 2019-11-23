@@ -3,6 +3,7 @@ package org.PseudoLang
 import org.PseudoLang.syntax.text.ast.AST
 import org.enso.syntax.text.ast.Repr
 import org.enso.syntax.text.ast.Repr._
+import sys.process._
 
 ////////////////////////////////////////////////////////////////////////////////
 //// Transpiler ////////////////////////////////////////////////////////////////
@@ -10,6 +11,16 @@ import org.enso.syntax.text.ast.Repr._
 object Transpiler {
   def run(ast: AST): String             = transpile(ast).build()
   def transpile(ast: AST): Repr.Builder = traverse(0, ast.elems)
+
+  def callPython(name: String): Unit = {
+    val result = s"python3 $name.py" ! ProcessLogger(
+        stdout append _,
+        stderr append _
+      )
+    println(result.toString.dropRight(1))
+    println("stdout: " + stdout)
+    println("stderr: " + stderr)
+  }
 
   def traverse(indent: Int, stack: List[AST.Elem]): Repr.Builder = {
     stack match {
@@ -99,7 +110,6 @@ object Transpiler {
       case (o: AST.Opr) :: rest =>
         R + traverseOpr(o, indent) + traverse(indent, rest)
       case (_: AST.Comment) :: rest => R + traverse(indent, rest)
-
       case (r: AST.Func.Return) :: rest =>
         R + "return " + traverse(0, r.value) + traverse(indent, rest)
       case (a: AST.Array) :: rest =>
