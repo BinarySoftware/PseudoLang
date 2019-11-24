@@ -1,9 +1,7 @@
-package org.enso.syntax.text.ast
+package org.PseudoLang.syntax.text.ast
 
 import java.nio.charset.StandardCharsets
 
-import org.enso.data.List1
-import org.enso.data.Shifted
 import cats.Monoid
 import cats.implicits._
 
@@ -21,7 +19,7 @@ object Repr {
   //// Smart Constructors ////
 
   def apply[T: Repr](t: T): Builder = implicitly[Repr[T]].repr(t)
-  val R = Repr.Builder.Empty()
+  val R                             = Repr.Builder.Empty()
 
   //// Operations ////
 
@@ -48,12 +46,6 @@ object Repr {
     _.repr
   implicit def reprForList[T: Repr]: Repr[List[T]] =
     _.map(_.repr).fold(R: Builder)(Repr.Builder.Seq(_, _))
-  implicit def reprForList1[T: Repr]: Repr[List1[T]] =
-    t => R + t.head + t.tail
-  implicit def reprForShifted[T: Repr]: Repr[Shifted[T]] =
-    t => R + t.off + t.el
-  implicit def reprForShiftedList1[T: Repr]: Repr[Shifted.List1[T]] =
-    t => R + t.head + t.tail
   implicit def reprForOption[T: Repr]: Repr[Option[T]] =
     _.map(_.repr).getOrElse(R)
   implicit def reprForNone: Repr[None.type] =
@@ -124,8 +116,8 @@ object Repr {
 
     //// Instances ////
 
-    implicit def fromString(a: String):        Builder = Repr(a)
-    implicit def fromChar(a: Char):            Builder = Repr(a)
+    implicit def fromString(a: String): Builder        = Repr(a)
+    implicit def fromChar(a: Char): Builder            = Repr(a)
     implicit def reprForBuilder[T <: Builder]: Repr[T] = identity(_)
     implicit val monoidForBuilder: Monoid[Builder] = new Monoid[Builder] {
       def empty: Builder = R

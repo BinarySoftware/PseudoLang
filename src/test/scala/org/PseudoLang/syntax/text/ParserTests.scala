@@ -1,12 +1,13 @@
 package org.PseudoLang.syntax.text
 
-import org.enso.debug._
+import org.PseudoLang.Debug
+import org.PseudoLang._
 import org.PseudoLang.syntax.text.ast.AST
 import org.enso.Logger
 import org.enso.flexer.Parser.Result
+import org.scalatest.Assertion
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers
-import org.scalatest.Assertion
 
 class ParserTests extends FlatSpec with Matchers {
   val logger = new Logger()

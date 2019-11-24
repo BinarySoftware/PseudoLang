@@ -1,10 +1,9 @@
-package org.PseudoLang.syntax.text
+package org.PseudoLang
 
-import org.enso.flexer
-import org.enso.flexer.Reader
-import flexer.Parser.{Result => res}
 import org.PseudoLang.syntax.text.ast.AST
 import org.PseudoLang.syntax.text.spec.ParserDef
+import org.enso.flexer.Parser.{Result => res}
+import org.enso.flexer.Reader
 
 ////////////////////////////////////////////////////////////////////////////////
 //// PseudoLang Parser /////////////////////////////////////////////////////////

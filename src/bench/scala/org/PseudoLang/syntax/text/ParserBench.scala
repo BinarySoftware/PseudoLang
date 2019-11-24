@@ -1,12 +1,11 @@
-package org.PseudoLang.syntax
+package org.PseudoLang.syntax.text
 
-import org.PseudoLang.syntax.text.Parser
+import org.PseudoLang.Parser
 import org.PseudoLang.syntax.text.ast.AST
-import org.enso.flexer
-import flexer.Parser.Result
-import org.scalameter.api._
+import org.enso.flexer.Parser.Result
+import org.scalameter.api.Bench
+import org.scalameter.api.Gen
 import org.scalameter.execution.LocalExecutor
-import org.scalameter.picklers.Implicits._
 
 import scala.math.pow
 

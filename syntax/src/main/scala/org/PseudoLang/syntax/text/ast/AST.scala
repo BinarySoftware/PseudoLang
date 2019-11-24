@@ -1,7 +1,6 @@
 package org.PseudoLang.syntax.text.ast
 
-import org.enso.syntax.text.ast.Repr
-import org.enso.syntax.text.ast.Repr._
+import Repr.R
 
 /**
   * This is the symbol trait

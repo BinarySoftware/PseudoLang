@@ -1,16 +1,15 @@
 package org.PseudoLang
 
-import org.PseudoLang.syntax.text.ast.AST
 import org.PseudoLang.syntax.text.ast.AST.Func
 import org.PseudoLang.syntax.text.ast.AST.If
-import org.enso.syntax.text.ast.Repr
-import org.enso.syntax.text.ast.Repr._
-
+import org.PseudoLang.syntax.text.ast.Repr.R
+import org.PseudoLang.syntax.text.ast.AST
+import org.PseudoLang.syntax.text.ast.Repr
 import sys.process._
+import scala.sys.process.ProcessLogger
+import scala.sys.process.stderr
+import scala.sys.process.stdout
 
-////////////////////////////////////////////////////////////////////////////////
-//// Transpiler ////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 /**
   * This is the Transpiler.
   * It is used to change parsed text to Python code, by tail-recursively traversing
@@ -232,12 +231,3 @@ object Transpiler {
     }
   }
 }
-/*
- * Note [1]
- * There is no implementation of repeat..until loop in Py.
- * But it can be easily replaced with while loop with negated condition
- *
- * Note [2]
- * There is also no implementation of do..while loop in Py.
- * But it can be easily replaced with while loop with breaking statement
- */

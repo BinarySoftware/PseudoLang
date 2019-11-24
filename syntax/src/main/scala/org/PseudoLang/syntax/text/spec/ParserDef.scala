@@ -3,8 +3,8 @@ package org.PseudoLang.syntax.text.spec
 import org.enso.flexer._
 import org.enso.flexer.automata.Pattern
 import org.enso.flexer.automata.Pattern._
-import org.PseudoLang.syntax.text.ast.AST._
 import org.PseudoLang.syntax.text.ast.AST
+import org.PseudoLang.syntax.text.ast.AST._
 
 /**
   * This is the parser definition class. It is built upon [[org.enso.flexer]] library
