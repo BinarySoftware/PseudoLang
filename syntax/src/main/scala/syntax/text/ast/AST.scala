@@ -3,6 +3,12 @@ package org.PseudoLang.syntax.text.ast
 import org.enso.syntax.text.ast.Repr
 import org.enso.syntax.text.ast.Repr._
 
+/**
+  * This is the symbol trait
+  * It is the most primitive element, on top of which AST is built. It is used to
+  * extend [[Repr.Provider]], a better implementation of StringBuilder for the
+  * needs of Parser.
+  */
 sealed trait Symbol extends Repr.Provider {
   def show(): String = repr.build()
 }
@@ -10,7 +16,11 @@ sealed trait Symbol extends Repr.Provider {
 ////////////////////////////////////////////////////////////////////////////////
 //// AST ///////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-
+/**
+  * This is the [[AST]] class.
+  * It is created to output ready AST, contains the parsed stack.
+  * @param elems - elements in AST
+  */
 final case class AST(elems: List[AST.Elem]) extends Symbol {
   val repr: Repr.Builder = R + elems
 }
@@ -20,18 +30,34 @@ object AST {
   def apply(elem: AST.Elem): AST   = new AST(elem :: Nil)
   def apply(elems: AST.Elem*): AST = new AST(elems.toList)
 
+  /**
+    * This is the [[AST.Elem]].
+    * It is the simplest element, extends Symbol, used as a in-AST implementation
+    * of Symbol.
+    */
   sealed trait Elem extends Symbol
-  object Elem {
-    sealed trait Invalid extends Elem
-  }
 
+  /**
+    * This is the [[AST.Newline]].
+    * It is used to store new line symbol
+    */
   case class Newline() extends Elem {
     val repr: Repr.Builder = R + "\n"
   }
 
-  case class Undefined(str: String) extends Elem.Invalid {
+  /**
+    * This is the [[AST.Undefined]].
+    * It is used to store elements, which couldn't be matched by parser
+    * @param str - undefined element
+    */
+  case class Undefined(str: String) extends Elem {
     val repr: Repr.Builder = R + str
   }
+
+  /**
+    * This is the [[AST.Empty]].
+    * It doesn't do anything, just is being used to avoid use of [[Option]]
+    */
   case class Empty() extends Elem {
     val repr: Repr.Builder = R
   }
@@ -39,6 +65,11 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   //// Variable ////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
+  /**
+    * This is the [[AST.Var]].
+    * It is used to store simple variables.
+    * @param name - specifies name of variable
+    */
   case class Var(name: String) extends Elem {
     val repr: Repr.Builder = R + name
   }
@@ -49,6 +80,11 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   //// Operator ////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
+  /**
+    * This is the [[AST.Opr]].
+    * It is used to store expressions with operators
+    * @param marker - specifies operator marker from [[AST.Opr.Marker]]
+    */
   case class Opr(marker: Opr.Marker, Le: Elem, Re: Elem) extends Elem {
     val repr: Repr.Builder = R + Le + " " + marker + " " + Re
   }
@@ -57,6 +93,11 @@ object AST {
     def apply(m: Opr.Marker, e: Elem)                 = new Opr(m, e, Empty())
     def apply(m: Opr.Marker, Le: Elem, Re: Elem): Opr = new Opr(m, Le, Re)
 
+    /**
+      * This is the [[AST.Opr.Marker]].
+      * It is used to store operator's marker
+      * @param m - specifies markers textual representation
+      */
     abstract class Marker(val m: String) extends Elem {
       val repr: Repr.Builder = R + m
     }
@@ -85,6 +126,11 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   //// Spacing /////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
+  /**
+    * This is the [[AST.Spacing]].
+    * It provides support for spacing between elements in AST
+    * @param len - specifies number of spaces
+    */
   case class Spacing(len: Int) extends Elem {
     val repr: Repr.Builder = R + len
   }
