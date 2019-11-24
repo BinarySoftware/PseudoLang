@@ -2,30 +2,50 @@ package org.PseudoLang
 
 import org.PseudoLang.syntax.text.Parser
 import org.enso.debug._
-import sys.process._
 
 ////////////////////////////////////////////////////////////////////////////////
 //// Main //////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+  * This is the Main object of PseudoLang. This is essentially the starting point
+  * from which the parser and transpiler is being called. It contains 2 methods
+  * for different running modes - with or without debugging
+  */
 object Main extends App {
   //////////////////////////////////////////////////////////////////////////////
-  //// PseudoLang interactive running environmnet //////////////////////////////
+  //// PseudoLang running environment //////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
 
-  println("======================= PSEUDO LANG ========================")
-  val code   = FileManager.readFileWithPseudo("", "Main")
-  val parsed = new Parser().runMatched(code)
-  println("========================== AST =============================")
-  println(Debug.pretty(parsed.toString))
-  println("========================== CODE ============================")
-  println(parsed.show())
-  println("======================= TRANSPILED =========================")
+  val code       = FileManager.readFileWithPseudo("", "Main")
+  val parsed     = new Parser().runMatched(code)
   val transpiled = Transpiler.run(parsed)
-  println(transpiled)
-  val name = "Generated"
+  val name       = "Generated"
   FileManager.saveCodeToFile("", name, transpiled, "py")
-  println("========================= OUTPUT ===========================")
-  Transpiler.callPython(name)
-  println("============================================================")
+
+  def runWithDebugging(): Unit = {
+    println("======================= PSEUDO LANG ========================")
+    println("========================= INPUT ============================")
+    println(code)
+    println("========================== AST =============================")
+    println(Debug.pretty(parsed.toString))
+    println("========================== CODE ============================")
+    println(parsed.show())
+    println("======================= TRANSPILED =========================")
+    println(transpiled)
+    println("========================= OUTPUT ===========================")
+    Transpiler.callPython(name)
+    println("============================================================")
+  }
+
+  def runWithoutDebugging(): Unit = {
+    println("======================= PSEUDO LANG ========================")
+    println("========================= INPUT ============================")
+    println(code)
+    println("========================= OUTPUT ===========================")
+    Transpiler.callPython(name)
+    println("============================================================")
+  }
+
+  runWithoutDebugging()
 }

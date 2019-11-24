@@ -10,10 +10,17 @@ import org.PseudoLang.syntax.text.spec.ParserDef
 //// PseudoLang Parser /////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
+/**
+  * This is the main PseudoLang Parser class.
+  *
+  * This is where running pseudocode starts. The parser engine is initialized
+  * here. Then it is passed input string, which is then analyzed/parsed, and if
+  * everything ends successfully, it outputs AST, if not - Exception is thrown.
+  */
 class Parser {
   import Parser._
   private val engine = newEngine()
-  private val errMsg = "Internal PseudoLang Parser Error has occured"
+  private val errMsg = "Internal PseudoLang Parser Error has occurred"
 
   def runMatched(input: String): AST = run(input) match {
     case res(_, res.Success(v)) => v

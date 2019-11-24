@@ -17,7 +17,9 @@ object Transpiler {
         stdout append _,
         stderr append _
       )
-    println(result.toString.dropRight(1))
+    val a = result.toString.dropRight(1)
+    println(a)
+    println()
     println("stdout: " + stdout)
     println("stderr: " + stderr)
   }
