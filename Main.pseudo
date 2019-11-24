@@ -5,8 +5,6 @@ Gcd(a,b)
     r <- b mod a
     return Gcd(r, a)
 
-// FIXME -  there's need to put line in between nested functions declaration
-
 rozNWD(j,k)
     //foo
     if (j<0 or j>k)

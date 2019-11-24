@@ -61,7 +61,6 @@ class ParserTests extends FlatSpec with Matchers {
   /* Variables */
   "Foo"   ?= AST(AST.Var("Foo"))
   "Foo  " ?= AST(AST.Var("Foo"), AST.Spacing(2))
-//  "Foo: Int" ?= AST(AST.Opr(AST.Opr.TpAnn, AST.Var("Foo"), AST.Var("Int")))
 
   /* Comments */
   "//Com"      ?= AST(AST.Comment("Com"))

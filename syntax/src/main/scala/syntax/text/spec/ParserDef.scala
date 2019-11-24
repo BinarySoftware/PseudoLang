@@ -6,14 +6,22 @@ import org.enso.flexer.automata.Pattern._
 import org.PseudoLang.syntax.text.ast.AST._
 import org.PseudoLang.syntax.text.ast.AST
 
+/**
+  * This is the parser definition class. It is built upon [[org.enso.flexer]] library
+  */
 case class ParserDef() extends Parser[AST] {
 
+  /**
+    * This is the Result object.
+    * It is used to store parsed data on stack with LIFO method, applied
+    * by push and pop methods.
+    */
   //////////////////////////////////////////////////////////////////////////////
   //// Result //////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
-  override def getResult(): Option[AST] = result.ast
+  override def getResult(): Option[AST] = Result.ast
 
-  final object result {
+  final object Result {
     var current: Option[Elem] = None
     var ast: Option[AST]      = None
     var stack: List[Elem]     = Nil
@@ -71,40 +79,45 @@ case class ParserDef() extends Parser[AST] {
   val bracketOpen  = '['
   val bracketClose = ']'
 
+  /**
+    * This is the Opr object.
+    * It is used to parse operators in text, and append appropriate AST Elements
+    * to those operators by traversing stack and looking for matching patterns.
+    */
   //////////////////////////////////////////////////////////////////////////////
   //// Operators ///////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
   final object Opr {
     def onPushing(opr: AST.Opr.Marker): Unit = logger.trace {
       var op = AST.Opr(opr)
-      result.pop()
-      result.current match {
+      Result.pop()
+      Result.current match {
         case Some(v) =>
           v match {
             case e: Var => op = AST.Opr(opr, e)
             case _: Spacing =>
-              result.stack.head match {
+              Result.stack.head match {
                 case e: Var =>
-                  result.pop()
+                  Result.pop()
                   op = AST.Opr(opr, e)
                 case e: Func =>
-                  result.pop()
+                  Result.pop()
                   op = AST.Opr(opr, e)
-                case _ => result.push()
+                case _ => Result.push()
               }
             case e: Func => op = AST.Opr(opr, e)
-            case _       => result.push()
+            case _       => Result.push()
           }
         case None =>
       }
-      result.pushElem(op)
+      Result.pushElem(op)
     }
 
     def traverseLineWithOpr(stack: List[AST.Elem]): List[AST.Elem] =
       logger.trace {
         stack match {
           case elem1 :: rest =>
-            result.pop()
+            Result.pop()
             onFirstElementWhileTraversingThroughLine(elem1, rest)
           case Nil => Nil
         }
@@ -143,8 +156,8 @@ case class ParserDef() extends Parser[AST] {
     }
 
     def onTraversingLineForOprs(): Unit = logger.trace {
-      val traversed: List[Elem] = traverseLineWithOpr(result.stack)
-      result.stack = traversed
+      val traversed: List[Elem] = traverseLineWithOpr(Result.stack)
+      Result.stack = traversed
     }
   }
 
@@ -166,18 +179,24 @@ case class ParserDef() extends Parser[AST] {
   ROOT || AST.Opr.Not.m      || Opr.onPushing(AST.Opr.Not)
   ROOT || AST.Opr.Assign.m   || Opr.onPushing(AST.Opr.Assign)
   ROOT || AST.Opr.FloorDiv.m || Opr.onPushing(AST.Opr.FloorDiv)
+
+  /**
+    * This is the Var object.
+    * It is used to create primitive variables, as well as to match on names to
+    * create control flow AST, functions, and loops.
+    */
   //////////////////////////////////////////////////////////////////////////////
   //// Variables ///////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
   final object Var {
     def onPushing(in: String): Unit = logger.trace {
       in.toLowerCase match {
-        case `_then_`   => result.pushElem(AST.If.ThenCase())
-        case `_else_`   => result.pushElem(AST.If.ElseCase())
+        case `_then_`   => Result.pushElem(AST.If.ThenCase())
+        case `_else_`   => Result.pushElem(AST.If.ElseCase())
         case `_do_`     => Func.onPushingDo()
         case `_repeat_` => Func.onPushingRepeat()
-        case `_return_` => result.pushElem(AST.Func.Return())
-        case _          => result.pushElem(AST.Var(in))
+        case `_return_` => Result.pushElem(AST.Func.Return())
+        case _          => Result.pushElem(AST.Var(in))
       }
     }
 
@@ -187,29 +206,35 @@ case class ParserDef() extends Parser[AST] {
 
   ROOT || Var.varName || Var.onPushing(currentMatch)
 
+  /**
+    * This is the Func object.
+    * It does much more than simply creating function. It is also responsible for
+    * creation of loops, control flow statement, arrays - all the things which
+    * use [[AST.Parens]] expressions
+    */
   //////////////////////////////////////////////////////////////////////////////
   //// Functions ///////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
   final object Func {
     def onPushingArgs(args: AST.Parens): Unit = logger.trace {
-      result.pop()
-      result.current match {
+      Result.pop()
+      Result.current match {
         case Some(v: AST.Var) =>
-          result.pop()
+          Result.pop()
           matchPreviousVar(args, v)
         case Some(_: AST.Spacing) =>
-          result.pop()
-          result.current match {
+          Result.pop()
+          Result.current match {
             case Some(v: AST.Var) =>
-              result.pop()
+              Result.pop()
               matchPreviousVar(args, v)
             case _ =>
-              result.push()
-              result.pushElem(args)
+              Result.push()
+              Result.pushElem(args)
           }
         case _ =>
-          result.push()
-          result.pushElem(args)
+          Result.push()
+          Result.pushElem(args)
       }
     }
 
@@ -225,31 +250,31 @@ case class ParserDef() extends Parser[AST] {
 
     def onPushingFunc(name: AST.Var, args: AST.Parens): Unit = logger.trace {
       val fun = AST.Func(name, AST.Empty(), args)
-      result.pushElem(fun)
+      Result.pushElem(fun)
     }
 
     def onPushingIf(cond: AST.Parens): Unit = logger.trace {
       val fun = AST.If(cond)
-      result.pushElem(fun)
+      Result.pushElem(fun)
     }
 
     def onPushingFor(cond: AST.Parens): Unit = logger.trace {
       val fun = AST.For(cond)
-      result.pushElem(fun)
+      Result.pushElem(fun)
     }
 
     def onPushingWhile(cond: AST.Parens): Unit = logger.trace {
       val fun = AST.While(cond)
-      result.pushElem(fun)
+      Result.pushElem(fun)
     }
 
     def onPushingDo(): Unit = logger.trace {
       val fun = AST.DoWhile()
-      result.pushElem(fun)
+      Result.pushElem(fun)
     }
     def onPushingRepeat(): Unit = logger.trace {
       val fun = AST.RepeatUntil()
-      result.pushElem(fun)
+      Result.pushElem(fun)
     }
 
     def onPushingArray(str: String): Unit = logger.trace {
@@ -257,22 +282,22 @@ case class ParserDef() extends Parser[AST] {
       val varEls = AST.Var(elems) :: Nil
       val paren  = AST.Parens(bracketOpen, bracketClose, varEls)
       val arr    = AST.Array(AST.Empty(), paren)
-      result.pushElem(arr)
+      Result.pushElem(arr)
     }
 
     def onPushingEmptyParen(): Unit = logger.trace {
       val elem = AST.Parens()
-      result.pushElem(elem)
+      Result.pushElem(elem)
     }
 
     def onPushingClosingParen(): Unit = logger.trace {
       Opr.onTraversingLineForOprs()
       var stack: List[AST.Elem] = Nil
-      while (!result.stack.head.isInstanceOf[AST.Parens]) {
-        result.pop()
-        stack +:= result.current.get
+      while (!Result.stack.head.isInstanceOf[AST.Parens]) {
+        Result.pop()
+        stack +:= Result.current.get
       }
-      result.pop()
+      Result.pop()
       val elem = AST.Parens('(', ')', stack)
       onPushingArgs(elem)
     }
@@ -284,15 +309,18 @@ case class ParserDef() extends Parser[AST] {
   ROOT || parenOpen  || Func.onPushingEmptyParen()
   ROOT || parenClose || Func.onPushingClosingParen()
   ROOT || Func.array || Func.onPushingArray(currentMatch)
-  //  ROOT || Func.funcArgs || Func.onPushingArgs(currentMatch)
 
+  /**
+    * This is the Comment object.
+    * Nothing exciting, only pushing simple string as comment.
+    */
   //////////////////////////////////////////////////////////////////////////////
   //// Comments ////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
   final object Comment {
     def onPushing(in: String): Unit = logger.trace {
       val com = AST.Comment(in.substring(2))
-      result.pushElem(com)
+      Result.pushElem(com)
     }
 
     val pattern: Pattern = AST.Comment.marker >> not(newline).many
@@ -300,6 +328,12 @@ case class ParserDef() extends Parser[AST] {
 
   ROOT || Comment.pattern || Comment.onPushing(currentMatch)
 
+  /**
+    * This is the Indentation manager.
+    * It is a pretty robust element of PseudoLang Parser, as thanks to it, the
+    * language doesn't need any semicolons, curly braces etc. It is used to create
+    * indented [[AST.Block]] for use in functions, control flow and loops.
+    */
   //////////////////////////////////////////////////////////////////////////////
   //// Indentation Manager /////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
@@ -320,16 +354,16 @@ case class ParserDef() extends Parser[AST] {
     }
 
     private def pushFilledBlock(): Unit = logger.trace {
-      result.pop()
+      Result.pop()
       checkIfThereIsBlockInStack()
       onPushingNewLine()
     }
 
     private def pushNewEmptyBlock(): Unit = logger.trace {
       stack +:= current
-      result.pop()
+      Result.pop()
       val b = AST.Block(current)
-      result.pushElem(b)
+      Result.pushElem(b)
     }
 
     def checkIfThereIsBlockInStack(): Unit = logger.trace {
@@ -341,21 +375,21 @@ case class ParserDef() extends Parser[AST] {
 
     private def onPushingBlock(): Unit = logger.trace {
       val elems: List[Elem] = onFillingBlocks()
-      result.current match {
+      Result.current match {
         case Some(b: Block) =>
           val block = AST.Block(b.indent, elems)
-          result.pushElem(block)
+          Result.pushElem(block)
         case _ =>
           val block = AST.Block(current, elems)
-          result.pushElem(block)
+          Result.pushElem(block)
       }
     }
 
     def onFillingBlocks(): List[Elem] = logger.trace {
       var elems: List[Elem] = Nil
-      while (result.stack.nonEmpty) {
-        result.pop()
-        result.current match {
+      while (Result.stack.nonEmpty) {
+        Result.pop()
+        Result.current match {
           case Some(b: AST.Block) =>
             if (b.elems.isEmpty) {
               return elems
@@ -375,7 +409,7 @@ case class ParserDef() extends Parser[AST] {
 
     def onIndentPattern(): Unit = logger.trace {
       state.end()
-      if (result.stack.nonEmpty) {
+      if (Result.stack.nonEmpty) {
         Indent.onPushingNewLine()
       }
       Indent.onIndent()
@@ -390,13 +424,13 @@ case class ParserDef() extends Parser[AST] {
     def onSpacing(str: String): Unit = logger.trace {
       val len = str.length
       val sp  = AST.Spacing(len)
-      result.pushElem(sp)
+      Result.pushElem(sp)
     }
 
     def onPushingNewLine(): Unit = logger.trace {
       Opr.onTraversingLineForOprs()
       val nl = AST.Newline()
-      result.pushElem(nl)
+      Result.pushElem(nl)
     }
 
     val emptyLine: Pattern     = spaces.opt >> newline
@@ -411,6 +445,14 @@ case class ParserDef() extends Parser[AST] {
   NEWLINE || Indent.EOFPattern    || Indent.onEOFPattern()
   NEWLINE || Indent.indentPattern || Indent.onIndentPattern()
 
+  /**
+    * This is the End Of File object.
+    * It is used to fill block after the end od analyzing code operation.
+    * It also does a really important operation, as it connects all blocks found
+    * in stack to appropriate methods.
+    * After all processes end their job in EOF, stack is ready to create output
+    * [[AST]]
+    */
   //////////////////////////////////////////////////////////////////////////////
   //// End Of File /////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
@@ -487,20 +529,25 @@ case class ParserDef() extends Parser[AST] {
     def onEOF(): Unit = logger.trace {
       Opr.onTraversingLineForOprs()
       fillBlocksBeforeEOF()
-      val stack = connectBlocksToAppropriateMethods(result.stack.reverse)
-      result.ast = Some(AST(stack))
+      val stack = connectBlocksToAppropriateMethods(Result.stack.reverse)
+      Result.ast = Some(AST(stack))
     }
   }
 
   ROOT || eof || EOF.onEOF()
 
+  /**
+    * This is the undefined object.
+    * If parser cannot match on a char, it wont fail, but will push
+    * [[AST.Undefined]], which is known to be invalid AST.
+    */
   //////////////////////////////////////////////////////////////////////////////
   //// Undefined ///////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
   final object Undefined {
     def onPushing(in: String): Unit = logger.trace {
       val und = AST.Undefined(in)
-      result.pushElem(und)
+      Result.pushElem(und)
     }
   }
 
