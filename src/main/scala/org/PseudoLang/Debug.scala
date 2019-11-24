@@ -1,4 +1,4 @@
-package org.enso.debug
+package org.PseudoLang
 
 import scala.annotation.tailrec
 

@@ -1,12 +1,13 @@
 package org.PseudoLang.syntax.text
 
-import org.enso.debug._
+import org.PseudoLang.Debug
+import org.PseudoLang._
 import org.PseudoLang.syntax.text.ast.AST
 import org.enso.Logger
 import org.enso.flexer.Parser.Result
+import org.scalatest.Assertion
 import org.scalatest.FlatSpec
 import org.scalatest.Matchers
-import org.scalatest.Assertion
 
 class ParserTests extends FlatSpec with Matchers {
   val logger = new Logger()
@@ -61,7 +62,6 @@ class ParserTests extends FlatSpec with Matchers {
   /* Variables */
   "Foo"   ?= AST(AST.Var("Foo"))
   "Foo  " ?= AST(AST.Var("Foo"), AST.Spacing(2))
-//  "Foo: Int" ?= AST(AST.Opr(AST.Opr.TpAnn, AST.Var("Foo"), AST.Var("Int")))
 
   /* Comments */
   "//Com"      ?= AST(AST.Comment("Com"))

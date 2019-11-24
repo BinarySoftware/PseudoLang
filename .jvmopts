@@ -1,0 +1,3 @@
+-Xss16M
+-Xmx4G
+-XX:+UseCompressedOops

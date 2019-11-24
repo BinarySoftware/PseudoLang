@@ -1,9 +1,8 @@
-package org.PseudoLang.syntax
+package org.PseudoLang.syntax.text
 
-import org.PseudoLang.syntax.text.Parser
+import org.PseudoLang.Parser
 import org.PseudoLang.syntax.text.ast.AST
-import org.enso.flexer
-import flexer.Parser.Result
+import org.enso.flexer.Parser.Result
 import org.scalameter.api._
 import org.scalameter.execution.LocalExecutor
 import org.scalameter.picklers.Implicits._
@@ -22,10 +21,11 @@ object ParserBench extends Bench.OfflineRegressionReport {
     for { i <- range } yield f(i)
 
   val tests = List(
-    "variables" -> gen(exp(18), i => "aaaaaaaaaa\n" * i),
-    "functions" -> gen(exp(18), i => "function()\n" * i),
-    "operators" -> gen(exp(18), i => "a<-b+c*d/e\n" * i),
-    "blocks"    -> gen(exp(18), i => "fo\n  b\n c\n" * i)
+    "variables" -> gen(exp(12), i => "aaaaaaaaaa\n" * i),
+    "functions" -> gen(exp(12), i => "function()\n" * i),
+    "operators" -> gen(exp(12), i => "a<-b+c*d/e\n" * i),
+    "blocks"    -> gen(exp(12), i => "of\n  b\n c\n" * i),
+    "arrays"    -> gen(exp(12), i => "f0o[1,3,4]\n" * i)
   )
 
   def run(str: String): Result[AST] = Parser.run(str)

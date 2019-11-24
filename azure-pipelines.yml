@@ -38,10 +38,10 @@ jobs:
       sbt -no-colors test
     displayName: sbt test
     continueOnError: true
-#  - script: |
-#      sbt -no-colors bench
-#    displayName: sbt bench
-#    continueOnError: true
+  - script: |
+      sbt -no-colors bench
+    displayName: sbt bench
+    continueOnError: true
   - script: |
       sbt -no-colors run
     displayName: sbt run

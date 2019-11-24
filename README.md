@@ -18,7 +18,7 @@ poprawności jego rozwiązania.
 
 ## Rozwiązanie
 Postanowiłem pomóc takim delikwentom poprzez napisanie parsera dla naszego 
-uczelnianego pseudokodu, oraz stworzenie transpilera owego kodu do Scali/Pythona.
+uczelnianego pseudokodu, oraz stworzenie transpilera owego kodu do Pythona.
 
 ### Schemat działania + postęp prac :
 1. Użytkownik wprowadza swój pseudokod 
@@ -28,17 +28,18 @@ uczelnianego pseudokodu, oraz stworzenie transpilera owego kodu do Scali/Pythona
 3. Parser traversuje pseudokod, tokenizując go zgodnie z zapisanymi regułami, 
    tworząc AST `Praca nad Parserem została ukończona`
 4. Po zakończeniu pracy parsera, z powstałego AST generowany jest kod 
-   Scali/Pythona, który później zostaje poddany kompilacji narzędziami 
-   scalowskimi/pythonowskimi. `Trwa praca nad transpilerem`
+   Pythona, który później zostaje poddany kompilacji narzędziami 
+   pythonowskimi. `Praca nad Transpilerem została ukończona`
 5. `W przyszłości: Zmiana Transpilera na Interpreter napisany od 
     podstaw - GraalVM + Truffle`
 
-W ten sposób użytkownik, nie znając syntaxu scali/py tworzy kod zrozumiały dla 
-kompilatora scali/py i z nim operuje.
+W ten sposób użytkownik, nie znając syntaxu Pythona tworzy kod zrozumiały dla 
+kompilatora Pythona i z nim operuje, co więcej, ma dostęp do wszystkich bibliotek,
+a zatem funkcji napisanych dla Pythona
 Powyższy schemat dla osób które mają rozeznanie w programowaniu może stawiać 
 wiele pytań, między innymi, 
 czy aby podwójne parsowanie kodu nie jest bardzo niewydajne? 
-Otóż fakt, nie będzie to tak wydajne jak naturalny kod Scalowski/Pythonowski, 
+Otóż fakt, nie będzie to tak wydajne jak naturalny kod Pythonowski, 
 ale równie dobrze można powiedzieć, że najlepiej pisać kod bezpośrednio w 
 assemblerze. 
 **Good luck, have fun.**

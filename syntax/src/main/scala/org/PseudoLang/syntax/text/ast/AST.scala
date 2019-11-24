@@ -1,8 +1,13 @@
 package org.PseudoLang.syntax.text.ast
 
-import org.enso.syntax.text.ast.Repr
-import org.enso.syntax.text.ast.Repr._
+import Repr.R
 
+/**
+  * This is the symbol trait
+  * It is the most primitive element, on top of which AST is built. It is used to
+  * extend [[Repr.Provider]], a better implementation of StringBuilder for the
+  * needs of Parser.
+  */
 sealed trait Symbol extends Repr.Provider {
   def show(): String = repr.build()
 }
@@ -10,7 +15,11 @@ sealed trait Symbol extends Repr.Provider {
 ////////////////////////////////////////////////////////////////////////////////
 //// AST ///////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-
+/**
+  * This is the [[AST]] class.
+  * It is created to output ready AST, contains the parsed stack.
+  * @param elems - elements in AST
+  */
 final case class AST(elems: List[AST.Elem]) extends Symbol {
   val repr: Repr.Builder = R + elems
 }
@@ -20,18 +29,34 @@ object AST {
   def apply(elem: AST.Elem): AST   = new AST(elem :: Nil)
   def apply(elems: AST.Elem*): AST = new AST(elems.toList)
 
+  /**
+    * This is the [[AST.Elem]].
+    * It is the simplest element, extends Symbol, used as a in-AST implementation
+    * of Symbol.
+    */
   sealed trait Elem extends Symbol
-  object Elem {
-    sealed trait Invalid extends Elem
-  }
 
+  /**
+    * This is the [[AST.Newline]].
+    * It is used to store new line symbol
+    */
   case class Newline() extends Elem {
     val repr: Repr.Builder = R + "\n"
   }
 
-  case class Undefined(str: String) extends Elem.Invalid {
+  /**
+    * This is the [[AST.Undefined]].
+    * It is used to store elements, which couldn't be matched by parser
+    * @param str - undefined element
+    */
+  case class Undefined(str: String) extends Elem {
     val repr: Repr.Builder = R + str
   }
+
+  /**
+    * This is the [[AST.Empty]].
+    * It doesn't do anything, just is being used to avoid use of [[Option]]
+    */
   case class Empty() extends Elem {
     val repr: Repr.Builder = R
   }
@@ -39,6 +64,11 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   //// Variable ////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
+  /**
+    * This is the [[AST.Var]].
+    * It is used to store simple variables.
+    * @param name - specifies name of variable
+    */
   case class Var(name: String) extends Elem {
     val repr: Repr.Builder = R + name
   }
@@ -49,6 +79,11 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   //// Operator ////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
+  /**
+    * This is the [[AST.Opr]].
+    * It is used to store expressions with operators
+    * @param marker - specifies operator marker from [[AST.Opr.Marker]]
+    */
   case class Opr(marker: Opr.Marker, Le: Elem, Re: Elem) extends Elem {
     val repr: Repr.Builder = R + Le + " " + marker + " " + Re
   }
@@ -57,6 +92,11 @@ object AST {
     def apply(m: Opr.Marker, e: Elem)                 = new Opr(m, e, Empty())
     def apply(m: Opr.Marker, Le: Elem, Re: Elem): Opr = new Opr(m, Le, Re)
 
+    /**
+      * This is the [[AST.Opr.Marker]].
+      * It is used to store operator's marker
+      * @param m - specifies markers textual representation
+      */
     abstract class Marker(val m: String) extends Elem {
       val repr: Repr.Builder = R + m
     }
@@ -85,6 +125,11 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   //// Spacing /////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
+  /**
+    * This is the [[AST.Spacing]].
+    * It provides support for spacing between elements in AST
+    * @param len - specifies number of spaces
+    */
   case class Spacing(len: Int) extends Elem {
     val repr: Repr.Builder = R + len
   }
@@ -96,6 +141,11 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   //// Comment /////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
+  /**
+    * This is the [[AST.Comment]].
+    * It is used to store commented-out text
+    * @param str - commented out data
+    */
   case class Comment(str: String) extends Elem {
     val repr: Repr.Builder = R + Comment.marker + str
   }
@@ -108,6 +158,12 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   //// Array ///////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
+  /**
+    * This is the [[AST.Array]].
+    * It is used to store arrays
+    * @param name - Array's name
+    * @param elems - Elements inside array, as [[AST.Parens]]'ed expression
+    */
   case class Array(name: AST.Elem, elems: AST.Parens) extends Elem {
     val repr: Repr.Builder = R + name + "[" + elems + "]"
   }
@@ -120,6 +176,13 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   //// Parentheses /////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
+  /**
+    * This is the [[AST.Parens]].
+    * It is used to store expressions inside parentheses.
+    * @param open - opening paren char
+    * @param close - closing paren char
+    * @param elems - elements inside parentheses
+    */
   case class Parens(open: Char, close: Char, elems: List[AST.Elem])
       extends Elem {
     val repr: Repr.Builder = R + open + elems.map(_.repr) + close
@@ -134,6 +197,13 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   //// Function ////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
+  /**
+    * This is the [[AST.Func]].
+    * It is used to store methods.
+    * @param name - method's name
+    * @param block - method's definition
+    * @param args - method's arguments
+    */
   case class Func(name: Var, block: AST.Elem, args: AST.Parens) extends Elem {
     val repr: Repr.Builder = R + name + args + block
   }
@@ -147,6 +217,11 @@ object AST {
     def apply(name: Var, block: AST.Block, par: AST.Parens): Func =
       new Func(name, block, par)
 
+    /**
+      * This is the [[AST.Func.Return]].
+      * It is used to store return value of method.
+      * @param value - returning value
+      */
     case class Return(value: List[AST.Elem]) extends Elem {
       val repr: Repr.Builder = R + "Return " + value
     }
@@ -160,6 +235,12 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   //// Control Flow ////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
+  /**
+    * This is the [[AST.If]].
+    * It is used to implement control flow.
+    * @param condition - conditions on which [[AST.If.ThenCase]] is performed
+    * @param block - method's definition
+    */
   case class If(condition: AST.Parens, block: AST.Elem) extends Elem {
     val repr: Repr.Builder = R + "If" + condition + block.repr
   }
@@ -168,15 +249,11 @@ object AST {
     def apply(condition: AST.Parens, block: AST.Elem): If =
       new If(condition, block)
 
-    case class ElseCase(e: List[AST.Elem]) extends Elem {
-      val repr: Repr.Builder = R + "Else " + e
-    }
-    object ElseCase {
-      def apply(): ElseCase             = new ElseCase(Nil)
-      def apply(e: AST.Elem): ElseCase  = new ElseCase(e :: Nil)
-      def apply(e: AST.Elem*): ElseCase = new ElseCase(e.toList)
-    }
-
+    /**
+      * This is the [[AST.If.ThenCase]].
+      * It is used to implement then case in control flow
+      * @param e - elements performed on then
+      */
     case class ThenCase(e: List[AST.Elem]) extends Elem {
       val repr: Repr.Builder = R + "Then " + e
     }
@@ -185,11 +262,31 @@ object AST {
       def apply(e: AST.Elem): ThenCase  = new ThenCase(e :: Nil)
       def apply(e: AST.Elem*): ThenCase = new ThenCase(e.toList)
     }
+
+    /**
+      * This is the [[AST.If.ElseCase]].
+      * It is used to implement else case in control flow
+      * @param e - elements performed on else
+      */
+    case class ElseCase(e: List[AST.Elem]) extends Elem {
+      val repr: Repr.Builder = R + "Else " + e
+    }
+    object ElseCase {
+      def apply(): ElseCase             = new ElseCase(Nil)
+      def apply(e: AST.Elem): ElseCase  = new ElseCase(e :: Nil)
+      def apply(e: AST.Elem*): ElseCase = new ElseCase(e.toList)
+    }
   }
 
   //////////////////////////////////////////////////////////////////////////////
   //// Loops ///////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
+  /**
+    * This is the [[AST.While]].
+    * It is used to implement while loop concept.
+    * @param condition - conditions until which loop is performed
+    * @param block - method's definition
+    */
   case class While(condition: AST.Parens, block: AST.Elem) extends Elem {
     val repr: Repr.Builder = R + "While" + condition + block.repr
   }
@@ -199,6 +296,12 @@ object AST {
       new While(condition, block)
   }
 
+  /**
+    * This is the [[AST.DoWhile]].
+    * It is used to implement do...while loop concept.
+    * @param condition - conditions until which loop is performed
+    * @param block - method's definition
+    */
   case class DoWhile(condition: AST.Parens, block: AST.Elem) extends Elem {
     val repr: Repr.Builder = R + "Do" + block.repr + "While " + condition
   }
@@ -210,6 +313,12 @@ object AST {
       new DoWhile(condition, block)
   }
 
+  /**
+    * This is the [[AST.For]].
+    * It is used to implement for loop concept.
+    * @param condition - conditions on which loop is performed
+    * @param block - method's definition
+    */
   case class For(condition: AST.Parens, block: AST.Elem) extends Elem {
     val repr: Repr.Builder = R + "For" + condition + block.repr
   }
@@ -219,6 +328,13 @@ object AST {
       new For(condition, block)
   }
 
+  /**
+    * This is the [[AST.RepeatUntil]].
+    * It is used to implement repeat..until loop concept, which is simply
+    * a do..while loop with negated condition.
+    * @param condition - conditions on which loop will stop performing
+    * @param block - method's definition
+    */
   case class RepeatUntil(condition: AST.Parens, block: AST.Elem) extends Elem {
     val repr: Repr.Builder = R + "Repeat" + block.repr + "Until " + condition
   }
@@ -234,6 +350,12 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   //// Block ///////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
+  /**
+    * This is the [[AST.Block]].
+    * It is used to implement indented text blocks for methods.
+    * @param indent - block's left indentation
+    * @param elems - indented elements
+    */
   case class Block(indent: Int, elems: List[Elem]) extends Elem {
     val repr: Repr.Builder = R + Newline() + indent + elems.map {
         case elem: Newline => R + elem + indent
