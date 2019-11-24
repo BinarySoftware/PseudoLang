@@ -142,6 +142,11 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   //// Comment /////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
+  /**
+    * This is the [[AST.Comment]].
+    * It is used to store commented-out text
+    * @param str - commented out data
+    */
   case class Comment(str: String) extends Elem {
     val repr: Repr.Builder = R + Comment.marker + str
   }
@@ -154,6 +159,12 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   //// Array ///////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
+  /**
+    * This is the [[AST.Array]].
+    * It is used to store arrays
+    * @param name - Array's name
+    * @param elems - Elements inside array, as [[AST.Parens]]'ed expression
+    */
   case class Array(name: AST.Elem, elems: AST.Parens) extends Elem {
     val repr: Repr.Builder = R + name + "[" + elems + "]"
   }
@@ -166,6 +177,13 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   //// Parentheses /////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
+  /**
+    * This is the [[AST.Parens]].
+    * It is used to store expressions inside parentheses.
+    * @param open - opening paren char
+    * @param close - closing paren char
+    * @param elems - elements inside parentheses
+    */
   case class Parens(open: Char, close: Char, elems: List[AST.Elem])
       extends Elem {
     val repr: Repr.Builder = R + open + elems.map(_.repr) + close
@@ -180,6 +198,13 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   //// Function ////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
+  /**
+    * This is the [[AST.Func]].
+    * It is used to store methods.
+    * @param name - method's name
+    * @param block - method's definition
+    * @param args - method's arguments
+    */
   case class Func(name: Var, block: AST.Elem, args: AST.Parens) extends Elem {
     val repr: Repr.Builder = R + name + args + block
   }
@@ -193,6 +218,11 @@ object AST {
     def apply(name: Var, block: AST.Block, par: AST.Parens): Func =
       new Func(name, block, par)
 
+    /**
+      * This is the [[AST.Func.Return]].
+      * It is used to store return value of method.
+      * @param value - returning value
+      */
     case class Return(value: List[AST.Elem]) extends Elem {
       val repr: Repr.Builder = R + "Return " + value
     }
@@ -206,6 +236,12 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   //// Control Flow ////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
+  /**
+    * This is the [[AST.If]].
+    * It is used to implement control flow.
+    * @param condition - conditions on which [[AST.If.ThenCase]] is performed
+    * @param block - method's definition
+    */
   case class If(condition: AST.Parens, block: AST.Elem) extends Elem {
     val repr: Repr.Builder = R + "If" + condition + block.repr
   }
@@ -214,15 +250,11 @@ object AST {
     def apply(condition: AST.Parens, block: AST.Elem): If =
       new If(condition, block)
 
-    case class ElseCase(e: List[AST.Elem]) extends Elem {
-      val repr: Repr.Builder = R + "Else " + e
-    }
-    object ElseCase {
-      def apply(): ElseCase             = new ElseCase(Nil)
-      def apply(e: AST.Elem): ElseCase  = new ElseCase(e :: Nil)
-      def apply(e: AST.Elem*): ElseCase = new ElseCase(e.toList)
-    }
-
+    /**
+      * This is the [[AST.If.ThenCase]].
+      * It is used to implement then case in control flow
+      * @param e - elements performed on then
+      */
     case class ThenCase(e: List[AST.Elem]) extends Elem {
       val repr: Repr.Builder = R + "Then " + e
     }
@@ -230,6 +262,20 @@ object AST {
       def apply(): ThenCase             = new ThenCase(Nil)
       def apply(e: AST.Elem): ThenCase  = new ThenCase(e :: Nil)
       def apply(e: AST.Elem*): ThenCase = new ThenCase(e.toList)
+    }
+
+    /**
+      * This is the [[AST.If.ElseCase]].
+      * It is used to implement else case in control flow
+      * @param e - elements performed on else
+      */
+    case class ElseCase(e: List[AST.Elem]) extends Elem {
+      val repr: Repr.Builder = R + "Else " + e
+    }
+    object ElseCase {
+      def apply(): ElseCase             = new ElseCase(Nil)
+      def apply(e: AST.Elem): ElseCase  = new ElseCase(e :: Nil)
+      def apply(e: AST.Elem*): ElseCase = new ElseCase(e.toList)
     }
   }
 
