@@ -11,10 +11,19 @@ import sys.process._
 ////////////////////////////////////////////////////////////////////////////////
 //// Transpiler ////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+/**
+  * This is the Transpiler.
+  * It is used to change parsed text to Python code, by tail-recursively traversing
+  * through AST
+  */
 object Transpiler {
   def run(ast: AST): String             = transpile(ast).build()
   def transpile(ast: AST): Repr.Builder = traverse(0, ast.elems)
 
+  /**
+    * this function calls python compiler with transpiled code
+    * @param name - name of file with generated code
+    */
   def callPython(name: String): Unit = {
     val result = s"python3 $name.py" ! ProcessLogger(
         stdout append _,
@@ -27,6 +36,10 @@ object Transpiler {
     println("stderr: " + stderr)
   }
 
+  /**
+    * This function traverses through AST to create Python code.
+    * all functions under are it's helpers
+    */
   private def traverse(indent: Int, stack: List[AST.Elem]): Repr.Builder = {
     stack match {
       case (f: AST.Func) :: rest        => transpileFunction(indent, f, rest)
