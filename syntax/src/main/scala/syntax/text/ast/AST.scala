@@ -282,6 +282,12 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   //// Loops ///////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
+  /**
+    * This is the [[AST.While]].
+    * It is used to implement while loop concept.
+    * @param condition - conditions until which loop is performed
+    * @param block - method's definition
+    */
   case class While(condition: AST.Parens, block: AST.Elem) extends Elem {
     val repr: Repr.Builder = R + "While" + condition + block.repr
   }
@@ -291,6 +297,12 @@ object AST {
       new While(condition, block)
   }
 
+  /**
+    * This is the [[AST.DoWhile]].
+    * It is used to implement do...while loop concept.
+    * @param condition - conditions until which loop is performed
+    * @param block - method's definition
+    */
   case class DoWhile(condition: AST.Parens, block: AST.Elem) extends Elem {
     val repr: Repr.Builder = R + "Do" + block.repr + "While " + condition
   }
@@ -302,6 +314,12 @@ object AST {
       new DoWhile(condition, block)
   }
 
+  /**
+    * This is the [[AST.For]].
+    * It is used to implement for loop concept.
+    * @param condition - conditions on which loop is performed
+    * @param block - method's definition
+    */
   case class For(condition: AST.Parens, block: AST.Elem) extends Elem {
     val repr: Repr.Builder = R + "For" + condition + block.repr
   }
@@ -311,6 +329,13 @@ object AST {
       new For(condition, block)
   }
 
+  /**
+    * This is the [[AST.RepeatUntil]].
+    * It is used to implement repeat..until loop concept, which is simply
+    * a do..while loop with negated condition.
+    * @param condition - conditions on which loop will stop performing
+    * @param block - method's definition
+    */
   case class RepeatUntil(condition: AST.Parens, block: AST.Elem) extends Elem {
     val repr: Repr.Builder = R + "Repeat" + block.repr + "Until " + condition
   }
@@ -326,6 +351,12 @@ object AST {
   //////////////////////////////////////////////////////////////////////////////
   //// Block ///////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
+  /**
+    * This is the [[AST.Block]].
+    * It is used to implement indented text blocks for methods.
+    * @param indent - block's left indentation
+    * @param elems - indented elements
+    */
   case class Block(indent: Int, elems: List[Elem]) extends Elem {
     val repr: Repr.Builder = R + Newline() + indent + elems.map {
         case elem: Newline => R + elem + indent
