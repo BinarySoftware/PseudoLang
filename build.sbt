@@ -79,14 +79,14 @@ lazy val buildNativeImage =
 ////////////////////////
 
 lazy val PseudoLang = (project in file("."))
-  .settings(version := "0.9")
+  .settings(version := "0.9.1")
   .settings(Global / concurrentRestrictions += Tags.exclusive(Exclusive))
   .dependsOn(logger, flexer, syntax_definition)
   .configs(Test)
   .configs(Benchmark)
   .settings(
     mainClass in (Compile, run) := Some("org.PseudoLang.Main"),
-    version := "0.9",
+    version := "0.9.1",
     testFrameworks += new TestFramework("org.scalameter.ScalaMeterFramework"),
     logBuffered := false,
     inConfig(Benchmark)(Defaults.testSettings),
