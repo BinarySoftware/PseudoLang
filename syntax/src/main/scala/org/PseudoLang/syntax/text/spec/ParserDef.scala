@@ -464,66 +464,130 @@ case class ParserDef() extends Parser[AST] {
       }
     }
 
-    // TODO: Refactor this mess!
     def connectBlocksToAppropriateMethods(s: List[AST.Elem]): List[AST.Elem] = {
       s match {
         case (f: AST.Func) :: (b: AST.Block) :: rest =>
-          val bl =
-            AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
-          AST.Func(f.name, bl, f.args) :: connectBlocksToAppropriateMethods(
-            rest
-          )
+          connectBlockToFunc(f, b, rest)
         case (i: AST.If) :: (b: AST.Block) :: rest =>
-          val bl =
-            AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
-          AST.If(i.condition, bl) :: connectBlocksToAppropriateMethods(rest)
-        case (_: AST.If.ThenCase) :: rest =>
-          if (rest.contains(AST.If.ElseCase())) {
-            val inThen = rest.take(rest.indexOf(AST.If.ElseCase()) - 1)
-            AST.If.ThenCase(connectBlocksToAppropriateMethods(inThen)) :: AST
-              .Newline() :: connectBlocksToAppropriateMethods(
-              rest.drop(rest.indexOf(AST.If.ElseCase()))
-            )
-          } else {
-            AST.If.ThenCase(connectBlocksToAppropriateMethods(rest)) :: Nil
-          }
-        case (_: AST.If.ElseCase) :: rest =>
-          AST.If.ElseCase(connectBlocksToAppropriateMethods(rest)) :: Nil
+          connectBlockToIf(i, b, rest)
+        case (_: AST.If.ThenCase) :: rest => connectBlockToThen(rest)
+        case (_: AST.If.ElseCase) :: rest => connectBlockToElse(rest)
         case (_: AST.DoWhile) :: (b: AST.Block) :: (w: AST.While) :: rest =>
-          val bl =
-            AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
-          AST.DoWhile(w.condition, bl) :: connectBlocksToAppropriateMethods(
-            rest
-          )
+          connectBlockToDoWhile(b, w, rest)
         case (_: AST.RepeatUntil) :: (b: AST.Block) :: (w: AST.While) :: rest =>
-          val bl =
-            AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
-          AST.RepeatUntil(w.condition, bl) :: connectBlocksToAppropriateMethods(
-            rest
-          )
+          connectBlockToRepeatUntil(b, w, rest)
         case (w: AST.While) :: (b: AST.Block) :: rest =>
-          val bl =
-            AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
-          AST.While(w.condition, bl) :: connectBlocksToAppropriateMethods(
-            rest
-          )
+          connectBlockToWhile(w, b, rest)
         case (f: AST.For) :: (b: AST.Block) :: rest =>
-          val bl =
-            AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
-          AST.For(f.condition, bl) :: connectBlocksToAppropriateMethods(
-            rest
-          )
-        case (_: AST.Func.Return) :: rest =>
-          AST.Func.Return(
-            connectBlocksToAppropriateMethods(
-              rest
-            )
-          ) :: Nil
+          connectBlockToFor(f, b, rest)
+        case (_: AST.Func.Return) :: rest => connectBlockToReturn(rest)
         case (v: AST.Var) :: (a: AST.Array) :: rest =>
-          AST.Array(v, a.elems) :: connectBlocksToAppropriateMethods(rest)
+          connectNameToArray(v, a, rest)
         case v :: rest => v :: connectBlocksToAppropriateMethods(rest)
         case Nil       => Nil
       }
+    }
+
+    private def connectNameToArray(
+      v: Var,
+      a: Array,
+      rest: List[Elem]
+    ): List[AST.Elem] = {
+      AST.Array(v, a.elems) :: connectBlocksToAppropriateMethods(rest)
+    }
+
+    private def connectBlockToReturn(rest: List[Elem]): List[AST.Elem] = {
+      AST.Func.Return(
+        connectBlocksToAppropriateMethods(
+          rest
+        )
+      ) :: Nil
+    }
+
+    private def connectBlockToFor(
+      f: For,
+      b: Block,
+      rest: List[Elem]
+    ): List[AST.Elem] = {
+      val bl =
+        AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
+      AST.For(f.condition, bl) :: connectBlocksToAppropriateMethods(
+        rest
+      )
+    }
+
+    private def connectBlockToWhile(
+      w: While,
+      b: Block,
+      rest: List[Elem]
+    ): List[AST.Elem] = {
+      val bl =
+        AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
+      AST.While(w.condition, bl) :: connectBlocksToAppropriateMethods(
+        rest
+      )
+    }
+
+    private def connectBlockToRepeatUntil(
+      b: Block,
+      w: While,
+      rest: List[Elem]
+    ): List[AST.Elem] = {
+      val bl =
+        AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
+      AST.RepeatUntil(w.condition, bl) :: connectBlocksToAppropriateMethods(
+        rest
+      )
+    }
+
+    private def connectBlockToDoWhile(
+      b: Block,
+      w: While,
+      rest: List[Elem]
+    ): List[AST.Elem] = {
+      val bl =
+        AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
+      AST.DoWhile(w.condition, bl) :: connectBlocksToAppropriateMethods(
+        rest
+      )
+    }
+
+    private def connectBlockToElse(rest: List[Elem]): List[AST.Elem] = {
+      AST.If.ElseCase(connectBlocksToAppropriateMethods(rest)) :: Nil
+    }
+
+    private def connectBlockToThen(rest: List[Elem]): List[AST.Elem] = {
+      if (rest.contains(AST.If.ElseCase())) {
+        val inThen = rest.take(rest.indexOf(AST.If.ElseCase()) - 1)
+        AST.If.ThenCase(connectBlocksToAppropriateMethods(inThen)) :: AST
+          .Newline() :: connectBlocksToAppropriateMethods(
+          rest.drop(rest.indexOf(AST.If.ElseCase()))
+        )
+      } else {
+        AST.If.ThenCase(connectBlocksToAppropriateMethods(rest)) :: Nil
+      }
+    }
+
+    private def connectBlockToIf(
+      i: If,
+      b: Block,
+      rest: List[Elem]
+    ): List[AST.Elem] = {
+      val bl =
+        AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
+      AST.If(i.condition, bl) :: connectBlocksToAppropriateMethods(rest)
+    }
+
+    private def connectBlockToFunc(
+      f: Func,
+      b: Block,
+      rest: List[Elem]
+    ): List[AST.Elem] = {
+      val bl =
+        AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
+      AST.Func(f.name, bl, f.args) :: connectBlocksToAppropriateMethods(
+        rest
+      )
     }
 
     def onEOF(): Unit = logger.trace {
