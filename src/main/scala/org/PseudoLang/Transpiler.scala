@@ -16,7 +16,7 @@ import scala.sys.process.stdout
   * through AST
   */
 object Transpiler {
-  def run(ast: AST): String             = transpile(ast).build()
+  def run(ast: AST):       String       = transpile(ast).build()
   def transpile(ast: AST): Repr.Builder = traverse(0, ast.elems)
 
   /**
@@ -72,10 +72,7 @@ object Transpiler {
     a: AST.Array,
     rest: List[AST.Elem]
   ): Repr.Builder = {
-    R + a.name + traverseParens(a.elems) + traverse(
-      indent,
-      rest
-    )
+    R + a.name + traverseParens(a.elems) + traverse(indent, rest)
   }
 
   private def transpileRepeatUntil(
@@ -87,7 +84,7 @@ object Transpiler {
       case b: AST.Block => R + traverseBlock(b)
       case oth          => R + oth
     }
-    R + "while True:" + bRepr + AST
+    R + AST.Newline() + indent + "while True:" + bRepr + AST
       .Newline() + l.block
       .asInstanceOf[AST.Block]
       .indent + "if not " + traverseParens(l.condition) + AST
@@ -103,7 +100,8 @@ object Transpiler {
     rest: List[AST.Elem]
   ): Repr.Builder = {
     val bRepr = matchBlock(l.block)
-    R + "for " + traverseParens(l.condition) + ":" + bRepr + traverse(
+    R + AST
+      .Newline() + indent + "for " + traverseParens(l.condition) + ":" + bRepr + traverse(
       indent,
       rest
     )
@@ -115,7 +113,7 @@ object Transpiler {
     rest: List[AST.Elem]
   ): Repr.Builder = {
     val bRepr = matchBlock(l.block)
-    R + "while True:" + bRepr + AST
+    R + AST.Newline() + indent + "while True:" + bRepr + AST
       .Newline() + l.block
       .asInstanceOf[AST.Block]
       .indent + "if " + traverseParens(l.condition) + AST
@@ -131,7 +129,8 @@ object Transpiler {
     rest: List[AST.Elem]
   ): Repr.Builder = {
     val bRepr = matchBlock(l.block)
-    R + "while " + traverseParens(l.condition) + ":" + bRepr + traverse(
+    R + AST
+      .Newline() + indent + "while " + traverseParens(l.condition) + ":" + bRepr + traverse(
       indent,
       rest
     )
@@ -175,7 +174,8 @@ object Transpiler {
   ): Repr.Builder = {
     val ifRepr = R + "if" + traverseParens(i.condition) + ":"
     val bRepr  = matchBlock(i.block)
-    R + ifRepr + bRepr + traverse(indent, rest)
+    R + AST.Newline() + indent + ifRepr + bRepr + traverse(indent, rest) + AST
+      .Newline() + indent
   }
 
   private def transpileFunction(
@@ -186,7 +186,10 @@ object Transpiler {
     f.block match {
       case b: AST.Block =>
         val fDecl = R + "def " + f.name + traverseParens(f.args) + ":"
-        R + fDecl + traverseBlock(b) + traverse(indent, rest)
+        R + AST.Newline() + indent + fDecl + traverseBlock(b) + traverse(
+          indent,
+          rest
+        )
       case _ =>
         if (f.name.name == "length") {
           R + "len" + f.args + traverse(indent, rest)

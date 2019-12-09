@@ -4,6 +4,8 @@ import org.enso.flexer._
 import org.enso.flexer.automata.Pattern
 import org.enso.flexer.automata.Pattern._
 import org.PseudoLang.syntax.text.ast.AST
+import org.PseudoLang.syntax.text.ast.AST.Func
+import org.PseudoLang.syntax.text.ast.AST.Opr
 import org.PseudoLang.syntax.text.ast.AST._
 
 /**
@@ -220,13 +222,13 @@ case class ParserDef() extends Parser[AST] {
       Result.pop()
       Result.current match {
         case Some(v: AST.Var) =>
-          Result.pop()
+          popAdditionalSpacing()
           matchPreviousVar(args, v)
         case Some(_: AST.Spacing) =>
           Result.pop()
           Result.current match {
             case Some(v: AST.Var) =>
-              Result.pop()
+              popAdditionalSpacing()
               matchPreviousVar(args, v)
             case _ =>
               Result.push()
@@ -235,6 +237,16 @@ case class ParserDef() extends Parser[AST] {
         case _ =>
           Result.push()
           Result.pushElem(args)
+      }
+    }
+
+    // FIXME WTF?
+    private def popAdditionalSpacing(): Unit = {
+      if (Result.stack.nonEmpty) {
+        Result.stack.head match {
+          case _: Block =>
+          case _        => Result.pop()
+        }
       }
     }
 
@@ -464,29 +476,30 @@ case class ParserDef() extends Parser[AST] {
       }
     }
 
-    def connectBlocksToAppropriateMethods(s: List[AST.Elem]): List[AST.Elem] = {
-      s match {
-        case (f: AST.Func) :: (b: AST.Block) :: rest =>
-          connectBlockToFunc(f, b, rest)
-        case (i: AST.If) :: (b: AST.Block) :: rest =>
-          connectBlockToIf(i, b, rest)
-        case (_: AST.If.ThenCase) :: rest => connectBlockToThen(rest)
-        case (_: AST.If.ElseCase) :: rest => connectBlockToElse(rest)
-        case (_: AST.DoWhile) :: (b: AST.Block) :: (w: AST.While) :: rest =>
-          connectBlockToDoWhile(b, w, rest)
-        case (_: AST.RepeatUntil) :: (b: AST.Block) :: (w: AST.While) :: rest =>
-          connectBlockToRepeatUntil(b, w, rest)
-        case (w: AST.While) :: (b: AST.Block) :: rest =>
-          connectBlockToWhile(w, b, rest)
-        case (f: AST.For) :: (b: AST.Block) :: rest =>
-          connectBlockToFor(f, b, rest)
-        case (_: AST.Func.Return) :: rest => connectBlockToReturn(rest)
-        case (v: AST.Var) :: (a: AST.Array) :: rest =>
-          connectNameToArray(v, a, rest)
-        case v :: rest => v :: connectBlocksToAppropriateMethods(rest)
-        case Nil       => Nil
+    def connectBlocksToAppropriateMethods(s: List[AST.Elem]): List[AST.Elem] =
+      logger.trace {
+        s match {
+          case (f: AST.Func) :: (b: AST.Block) :: rest =>
+            connectBlockToFunc(f, b, rest)
+          case (i: AST.If) :: (b: AST.Block) :: rest =>
+            connectBlockToIf(i, b, rest)
+          case (_: AST.If.ThenCase) :: rest => connectBlockToThen(rest)
+          case (_: AST.If.ElseCase) :: rest => connectBlockToElse(rest)
+          case (_: AST.DoWhile) :: (b: AST.Block) :: (w: AST.While) :: rest =>
+            connectBlockToDoWhile(b, w, rest)
+          case (_: AST.RepeatUntil) :: (b: AST.Block) :: (w: AST.While) :: rest =>
+            connectBlockToRepeatUntil(b, w, rest)
+          case (w: AST.While) :: (b: AST.Block) :: rest =>
+            connectBlockToWhile(w, b, rest)
+          case (f: AST.For) :: (b: AST.Block) :: rest =>
+            connectBlockToFor(f, b, rest)
+          case (_: AST.Func.Return) :: rest => connectBlockToReturn(rest)
+          case (v: AST.Var) :: (a: AST.Array) :: rest =>
+            connectNameToArray(v, a, rest)
+          case v :: rest => v :: connectBlocksToAppropriateMethods(rest)
+          case Nil       => Nil
+        }
       }
-    }
 
     private def connectNameToArray(
       v: Var,
@@ -497,11 +510,7 @@ case class ParserDef() extends Parser[AST] {
     }
 
     private def connectBlockToReturn(rest: List[Elem]): List[AST.Elem] = {
-      AST.Func.Return(
-        connectBlocksToAppropriateMethods(
-          rest
-        )
-      ) :: Nil
+      AST.Func.Return(connectBlocksToAppropriateMethods(rest)) :: Nil
     }
 
     private def connectBlockToFor(
@@ -509,11 +518,8 @@ case class ParserDef() extends Parser[AST] {
       b: Block,
       rest: List[Elem]
     ): List[AST.Elem] = {
-      val bl =
-        AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
-      AST.For(f.condition, bl) :: connectBlocksToAppropriateMethods(
-        rest
-      )
+      val bl = AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
+      AST.For(f.condition, bl) :: connectBlocksToAppropriateMethods(rest)
     }
 
     private def connectBlockToWhile(
@@ -521,11 +527,8 @@ case class ParserDef() extends Parser[AST] {
       b: Block,
       rest: List[Elem]
     ): List[AST.Elem] = {
-      val bl =
-        AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
-      AST.While(w.condition, bl) :: connectBlocksToAppropriateMethods(
-        rest
-      )
+      val bl = AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
+      AST.While(w.condition, bl) :: connectBlocksToAppropriateMethods(rest)
     }
 
     private def connectBlockToRepeatUntil(
@@ -533,8 +536,7 @@ case class ParserDef() extends Parser[AST] {
       w: While,
       rest: List[Elem]
     ): List[AST.Elem] = {
-      val bl =
-        AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
+      val bl = AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
       AST.RepeatUntil(w.condition, bl) :: connectBlocksToAppropriateMethods(
         rest
       )
@@ -545,11 +547,8 @@ case class ParserDef() extends Parser[AST] {
       w: While,
       rest: List[Elem]
     ): List[AST.Elem] = {
-      val bl =
-        AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
-      AST.DoWhile(w.condition, bl) :: connectBlocksToAppropriateMethods(
-        rest
-      )
+      val bl = AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
+      AST.DoWhile(w.condition, bl) :: connectBlocksToAppropriateMethods(rest)
     }
 
     private def connectBlockToElse(rest: List[Elem]): List[AST.Elem] = {
@@ -573,8 +572,7 @@ case class ParserDef() extends Parser[AST] {
       b: Block,
       rest: List[Elem]
     ): List[AST.Elem] = {
-      val bl =
-        AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
+      val bl = AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
       AST.If(i.condition, bl) :: connectBlocksToAppropriateMethods(rest)
     }
 
@@ -583,11 +581,8 @@ case class ParserDef() extends Parser[AST] {
       b: Block,
       rest: List[Elem]
     ): List[AST.Elem] = {
-      val bl =
-        AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
-      AST.Func(f.name, bl, f.args) :: connectBlocksToAppropriateMethods(
-        rest
-      )
+      val bl = AST.Block(b.indent, connectBlocksToAppropriateMethods(b.elems))
+      AST.Func(f.name, bl, f.args) :: connectBlocksToAppropriateMethods(rest)
     }
 
     def onEOF(): Unit = logger.trace {

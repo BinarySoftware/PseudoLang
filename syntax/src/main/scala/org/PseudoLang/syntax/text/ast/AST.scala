@@ -358,9 +358,17 @@ object AST {
     */
   case class Block(indent: Int, elems: List[Elem]) extends Elem {
     val repr: Repr.Builder = R + Newline() + indent + elems.map {
-        case elem: Newline => R + elem + indent
-        case b: AST.Block  => R + b + indent
-        case elem          => R + elem
+        case elem: Newline      => R + elem + indent
+        case b: AST.Block       => R + b + indent
+        case b: AST.If          => R + b + indent
+        case b: AST.While       => R + b + indent
+        case b: AST.For         => R + b + indent
+        case b: AST.DoWhile     => R + b + indent
+        case b: AST.RepeatUntil => R + b + indent
+        case b: AST.If.ThenCase => R + b + indent
+        case b: AST.If.ElseCase => R + b + indent
+        case b: AST.Func.Return => R + b + indent
+        case elem               => R + elem
       } + Newline()
   }
   object Block {

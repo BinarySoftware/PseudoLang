@@ -50,7 +50,7 @@ object Main extends App {
     println("============================================================")
   }
 
-//  runWithoutDebugging()
+  runWithoutDebugging()
 //  runWithDebugging()
-  runParserWD()
+//  runParserWD()
 }
