@@ -249,7 +249,7 @@ case class ParserDef() extends Parser[AST] {
     }
 
     def onPushingFunc(name: AST.Var, args: AST.Parens): Unit = logger.trace {
-      val fun = AST.Func(name, AST.Empty(), args)
+      val fun = AST.Func(name, args, AST.Empty())
       Result.pushElem(fun)
     }
 
