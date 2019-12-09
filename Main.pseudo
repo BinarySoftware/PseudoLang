@@ -1,17 +1,8 @@
-Gcd(a,b)
-    // still to fix
-    if(a=0)
-        then return b
-    r <- b mod a
-    return Gcd(r, a)
-
 rozNWD(j,k)
-    //foo
-    if (j<0 or j>k)
+    if (j<0 or j>=k)
         then return None
-    //bar
     if (j = 0)
-        then return (k, 0, 1) //info dla G
+        then return (k, 0, 1)
     r <- k mod j
     (d, xp, yp) <- rozNWD(r, j)
     x <- yp - k /f j * xp
