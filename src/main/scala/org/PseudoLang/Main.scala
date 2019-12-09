@@ -16,6 +16,16 @@ object Main extends App {
   val name       = "Generated"
   FileManager.saveCodeToFile("", name, transpiled, "py")
 
+  def runParserWD(): Unit = {
+    println("========================= INPUT ============================")
+    println(code)
+    println("========================== AST =============================")
+    println(Debug.pretty(parsed.toString))
+    println("========================== CODE ============================")
+    println(parsed.show())
+    println("============================================================")
+  }
+
   def runWithDebugging(): Unit = {
     println("======================= PSEUDO LANG ========================")
     println("========================= INPUT ============================")
@@ -40,5 +50,7 @@ object Main extends App {
     println("============================================================")
   }
 
-  runWithoutDebugging()
+//  runWithoutDebugging()
+//  runWithDebugging()
+  runParserWD()
 }
